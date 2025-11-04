@@ -29,7 +29,7 @@ export function SheetMenu({userInfo} : {userInfo: UserInfo}) {
           >
             <Link href='dashboard' className='flex items-center gap-2'>
               <FiLayout className='w-6 h-6 mr-1' />
-              <h1 className='font-bold text-lg'>Waltier</h1>
+              <h1 className='font-bold text-lg'>Domlii</h1>
             </Link>
           </Button>
         </SheetHeader>

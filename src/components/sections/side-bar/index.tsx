@@ -41,7 +41,7 @@ export function Sidebar({ activeRole }: { activeRole: Role; }) {
                   : 'translate-x-0 opacity-100'
               )}
             >
-              Waltier
+              Domlii
             </h1>
           </Link>
         </Button>
