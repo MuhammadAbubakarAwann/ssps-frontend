@@ -1,7 +1,6 @@
 import React from 'react';
 import AdminPanelLayout from '@/components/sections/admin-panel-layout';
-// import { authHelper } from '@/lib/utils';
-// import { ImpersonationBanner } from '@/components/ui/impersonation-banner';
+import { authHelper } from '@/lib/utils/auth-helpers';
 
 import '../globals.css';
 
@@ -10,13 +9,12 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const user = (await authHelper(['ADMIN']));
+  const user = (await authHelper(['ADMIN']));
   return (
     <div className="font-graphik">
       <main>
-        {/* <AdminPanelLayout activeRole={user.role}> */}
-        <AdminPanelLayout activeRole={"ADMIN"}>
-          {/* <ImpersonationBanner /> */}
+        <AdminPanelLayout activeRole={user.role}>
+        {/* <AdminPanelLayout activeRole={"ADMIN"}> */}
           {children}
         </AdminPanelLayout>
       </main>

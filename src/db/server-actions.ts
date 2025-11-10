@@ -1,12 +1,11 @@
 'use server';
-
 import bcrypt from 'bcryptjs';
 import { auth } from '@/auth';
 import prismaClientGenerator from '@/lib/prismaClient';
 import type { Role, User } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-const prisma = prismaClientGenerator;
+const prisma = prismaClientGenerator();
 
 export const register = async (values: {
   email: string
@@ -27,7 +26,6 @@ export const register = async (values: {
         error: 'Email already exists!'
       };
 
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await prisma.user.create({
@@ -35,7 +33,7 @@ export const register = async (values: {
         name,
         email,
         password: hashedPassword,
-        role: 'USER'
+        role: 'ADMIN'
       }
     });
 
@@ -73,7 +71,7 @@ export const registerUserByAdmin = async (values: {
     if (userFound)
       return { error: 'Email already exists!' };
 
-    const validRoles = ['USER', 'ADMIN', 'EDITOR', 'WRITER'];
+    const validRoles = ['USER', 'ADMIN', 'EDITOR', 'WRITER', 'ACCOUNTANT'];
     if (!validRoles.includes(role))
       return { error: 'Invalid role specified' };
 
@@ -107,6 +105,16 @@ export const getUsers = async () => {
 
   try {
     const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        image: true,
+        createdAt: true,
+        updatedAt: true,
+        emailVerified: true
+      },
       orderBy: {
         createdAt: 'desc'
       }
@@ -125,7 +133,20 @@ export const deleteUser = async (userId: string) => {
       error: 'Unauthorized access!'
     };
 
+
   try {
+    await prisma.likes.deleteMany({
+      where: {
+        userId
+      }
+    });
+
+    await prisma.comments.deleteMany({
+      where: {
+        userId
+      }
+    });
+
     await prisma.user.delete({
       where: {
         id: userId
@@ -223,7 +244,6 @@ export const getUserByEmail = async (email: string) => {
 
     if (!user)
       return { error: 'User not found!' };
-
 
     return {
       id: user.id.toString(),

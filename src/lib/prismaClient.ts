@@ -1,11 +1,23 @@
 import { PrismaClient } from '@prisma/client';
 
-// PrismaClient is attached to the `global` object in development to prevent
-// exhausting your database connection limit.
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+declare global {
+  // eslint-disable-next-line no-var
+  var prismaClient: PrismaClient | undefined;
+}
 
-export const prisma = globalForPrisma.prisma || new PrismaClient();
+const prismaClientGenerator = () => {
+  let prismaClient: PrismaClient | undefined;
+  return (): PrismaClient => {
+    if (prismaClient) return prismaClient;
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+    if (globalThis.prismaClient) prismaClient = globalThis.prismaClient;
+    else prismaClient = new PrismaClient();
 
-export default prisma;
+    if (process.env.NODE_ENV === 'development')
+      globalThis.prismaClient = prismaClient;
+    if (!prismaClient) throw new Error('Prisma Client not defined');
+    return prismaClient;
+  };
+};
+
+export default prismaClientGenerator();

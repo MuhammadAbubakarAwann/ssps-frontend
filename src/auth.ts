@@ -1,129 +1,190 @@
-import type { NextAuthConfig } from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
+import NextAuth, { CredentialsSignin } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/prismaClient';
+import prismaClientGenerator from './lib/prismaClient';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import NextAuth from 'next-auth';
+import type { Adapter } from 'next-auth/adapters';
 
-export const authConfig: NextAuthConfig = {
-  adapter: PrismaAdapter(prisma),
+const prisma = prismaClientGenerator();
+
+// Add this function to verify Turnstile token
+// async function verifyTurnstileToken(token: string): Promise<boolean> {
+//   if (!token) return false;
+  
+//   const secretKey = process.env.TURNSTILE_SECRET_KEY;
+  
+//   if (!secretKey) {
+//     console.error('Missing TURNSTILE_SECRET_KEY environment variable');
+//     return false;
+//   }
+
+//   try {
+//     const formData = new URLSearchParams();
+//     formData.append('secret', secretKey);
+//     formData.append('response', token);
+    
+//     const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/x-www-form-urlencoded'
+//       },
+//       body: formData.toString()
+//     });
+
+//     const data = await response.json();
+    
+//     if (data.success) 
+//       return true;
+//      else {
+//       console.error('Turnstile verification failed:', data.error_codes);
+//       return false;
+//     }
+//   } catch (error) {
+//     console.error('Error verifying Turnstile token:', error);
+//     return false;
+//   }
+// }
+
+export const { auth, handlers, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
-    Credentials({
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "select_account",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
+    }),
+    CredentialsProvider({
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
-        impersonationToken: { label: 'Impersonation Token', type: 'text' }
+        turnstileToken: { label: 'Turnstile Token', type: 'text' } // Add this line
       },
       async authorize(credentials) {
-        if (!credentials) 
-          return null; // No credentials provided
+        if (!credentials?.email) 
+          throw new CredentialsSignin('Email is required');
         
-
-        // Handle temporary login via URL token
-        if (credentials.password === 'temporary-password' && credentials.email) 
-          try {
-            const user = await prisma.user.findUnique({
-              where: { id: credentials.email as string }
-            });
-            if (user) 
-              return user;
-             else 
-              throw new Error('Invalid temporary login link.');
-            
-          } catch (error) {
-            console.error('Error during temporary login:', error);
-            throw new Error('Error during temporary login.');
-          }
+        // // Add Turnstile verification
+        // if (!credentials.turnstileToken)
+        //   throw new CredentialsSignin('Security verification failed');
+          
+        // const turnstileVerified = await verifyTurnstileToken(credentials.turnstileToken as string);
         
+        // if (!turnstileVerified)
+        //   throw new CredentialsSignin('Security verification failed. Please try again.');
 
-        // Existing email/password and impersonation token logic
-        if (!credentials?.email) throw new Error('Email is required');
-
-        try {
-          const user = await prisma.user.findFirst({
-            where: {
-              email: credentials.email as string
-            }
-          });
-
-          if (!user) throw new Error('No user found with this email');
-
-          if (credentials.impersonationToken) {
-            if (user.impersonationToken === credentials.impersonationToken) {
-              await prisma.user.update({
-                where: { id: user.id },
-                data: { impersonationToken: null }
-              });
-
-              return {
-                ...user,
-                isImpersonated: true
-              };
-            }
-
-            throw new Error('Invalid impersonation token');
+        const user = await prisma.user.findFirst({
+          where: {
+            email: credentials.email as string
           }
+        });
 
-          if (!credentials.password) throw new Error('Password is required');
+        if (!user) 
+          throw new CredentialsSignin('No user found with this email');
+        
+        if (!credentials.password) 
+          throw new CredentialsSignin('Password is required');
+        
+        // Check if user has a password (for OAuth users, password might be null)
+        if (!user.password) 
+          throw new CredentialsSignin('Please sign in with Google or reset your password');
+        
+        const passwordString = credentials.password as string;
 
-          const passwordString = credentials.password as string;
+        const passwordMatch = await bcrypt.compare(passwordString, user.password);
 
-          const passwordMatch = await bcrypt.compare(passwordString, user.password);
-
-          if (!passwordMatch) throw new Error('Invalid password');
-
-          return user;
-        } catch (error) {
-          console.error('Authorization error:', error);
-          throw error;
-        }
+        if (!passwordMatch) 
+          throw new CredentialsSignin('Invalid password');
+        
+        return user;
       }
     })
   ],
   session: {
-    strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60
+    strategy: 'database',
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.name = user.name || '';
-        token.email = user.email || '';
-        token.emailVerified = user.emailVerified;
-        token.image = user.image || '';
-        token.role = user.role;
-        token.createdAt = user.createdAt;
-        token.updatedAt = user.updatedAt;
-
-        if (user.isImpersonated) token.isImpersonated = true;
-      }
-
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.name = token.name as string;
-        session.user.email = token.email as string;
-        session.user.emailVerified = token.emailVerified as Date | null;
-        session.user.image = token.image as string;
-        session.user.role = token.role as any;
-        session.user.createdAt = token.createdAt as Date;
-        session.user.updatedAt = token.updatedAt as Date;
-
-        if (token.isImpersonated) session.user.isImpersonated = true;
+    async session({ session, user }) {
+      if (session.user && user) {
+        session.user.id = user.id;
+        session.user.name = user.name || '';
+        session.user.email = user.email || '';
+        session.user.image = user.image || '';
       }
 
       return session;
+    },
+    async signIn({ user, account, profile }) {
+      // Allow OAuth sign-ins
+      if (account?.provider === 'google') {
+        try {
+          // Check if user exists with this email
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            include: { accounts: true }
+          });
+
+          if (existingUser) {
+            // Check if this Google account is already linked
+            const googleAccount = existingUser.accounts.find(
+              acc => acc.provider === 'google' && acc.providerAccountId === account.providerAccountId
+            );
+
+            if (!googleAccount) {
+              // Link the Google account to the existing user
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  refresh_token: account.refresh_token,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                  session_state: account.session_state as string,
+                }
+              });
+
+              // Update user with Google profile information if missing
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: {
+                  name: existingUser.name || user.name,
+                  image: existingUser.image || user.image,
+                }
+              });
+            }
+          }
+          
+          return true;
+        } catch (error) {
+          console.error('Error linking Google account:', error);
+          return false;
+        }
+      }
+      
+      // For credentials provider, use existing logic
+      if (account?.provider === 'credentials') {
+        return true;
+      }
+      
+      return true;
     }
   },
   pages: {
     signIn: '/login',
     error: '/auth/error'
   },
-  debug: process.env.NODE_ENV === 'development'
-};
-
-export const { auth, signIn, signOut, handlers } = NextAuth(authConfig);
+  debug: process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_DEBUG === 'true',
+  secret: process.env.NEXTAUTH_SECRET,
+});
