@@ -3,11 +3,9 @@ import { type FormEvent, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { register } from '@/db/server-actions';
-import { signIn } from 'next-auth/react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { ArrowRight, Mail, Eye, EyeOff, Lock, User } from 'lucide-react';
-import { FcGoogle } from "react-icons/fc";
 import Image from 'next/image';
 import authbg from "../../../../../public/images/auth-bg.png";
 import domliiLogo from "../../../../../public/images/logo/domlii-logo.png";
@@ -39,36 +37,23 @@ export default function RegisterForm() {
 
     setLoading(false);
 
-    if (r?.error) toast.error(r.error);
-    else {
+    if (r?.error) {
+      toast.error(r.error);
+    } else if (r?.success) {
       toast.success('Registration successful!');
-      if (redirectUrl) router.push(`/login?redirectUrl=${encodeURIComponent(redirectUrl)}`);
-      else router.push('/login');
+      ref.current?.reset();
+      if (redirectUrl) {
+        router.push(`/login?redirectUrl=${encodeURIComponent(redirectUrl)}`);
+      } else {
+        router.push('/login');
+      }
+    } else {
+      toast.error('Registration failed. Please try again.');
     }
-    ref.current?.reset();
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  };
-
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    
-    try {
-      const safeRedirectUrl = redirectUrl && redirectUrl.startsWith("/") ? redirectUrl : "/";
-      
-      // For OAuth providers like Google, we should use redirect: true
-      // This will redirect to Google's consent screen with account selection
-      await signIn("google", {
-        callbackUrl: safeRedirectUrl,
-      });
-    } catch (error) {
-      console.error("Google sign-in error:", error);
-      toast.error("Google sign-in failed. Please try again.");
-      setLoading(false);
-    }
-    // Note: setLoading(false) is not needed here because the page will redirect
   };
 
   return (
@@ -177,24 +162,6 @@ export default function RegisterForm() {
                 <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
               </button>
             </form>
-
-            <div className="flex items-center gap-4 w-full">
-              <div className="flex-1 h-px bg-[#E5E7EB]" />
-              <span className="text-xs font-normal text-[#6B7280]">Or Log in with</span>
-              <div className="flex-1 h-px bg-[#E5E7EB]" />
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="h-10 w-full bg-white border border-[#DDE5EC] rounded-lg flex items-center justify-center gap-3 shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FcGoogle size={20} />
-              <span className="text-sm font-medium text-[#1F2937]">
-                {loading ? "Signing in..." : "Google"}
-              </span>
-            </button>
 
             <div className="text-center text-sm font-normal">
               <span className="text-[#1F2937]">

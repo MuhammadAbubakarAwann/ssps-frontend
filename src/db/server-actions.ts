@@ -199,41 +199,6 @@ export const updateUser = async (id: string, name: string, email: string, role: 
   }
 };
 
-export const logInAsUser = async (userId: string) => {
-  const session = await auth();
-  if (!session?.user.role || session?.user.role !== 'ADMIN')
-    return { error: 'Unauthorized access!' };
-
-
-  try {
-    const user = await prisma.user.findFirst({
-      where: {
-        id: userId
-      }
-    });
-
-    if (!user)
-      return { error: 'User not found!' };
-
-
-    // Generate a secure impersonation token
-    const impersonationToken = await bcrypt.hash(`impersonate-${user.id}-${Date.now()}`, 5);
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: { impersonationToken }
-    });
-
-    return {
-      email: user.email,
-      impersonationToken
-    };
-  } catch (e) {
-    console.error('Error logging in as user:', e);
-    return { error: 'Failed to log in as this user!' };
-  }
-};
-
 export const getUserByEmail = async (email: string) => {
   try {
     const user = await prisma.user.findFirst({

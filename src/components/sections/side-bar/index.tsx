@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FiLayout } from 'react-icons/fi';
+import Image from 'next/image';
 
 import { cn } from '@/lib/utils';
 import { useStore } from '@/lib/hooks/use-store';
@@ -8,6 +8,7 @@ import { Menu } from '@/components/sections/menu';
 import { useSidebarToggle } from '@/lib/hooks/use-sidebar-toggle';
 import { SidebarToggle } from '@/components/sections/side-bar-toggle';
 import { Role } from '@prisma/client';
+import domliiLogo from '../../../../public/images/logo/domlii-logo.png';
 
 export function Sidebar({ activeRole }: { activeRole: Role; }) {
   const sidebar = useStore(useSidebarToggle, (state) => state);
@@ -31,18 +32,19 @@ export function Sidebar({ activeRole }: { activeRole: Role; }) {
           variant='link'
           asChild
         >
-          <Link href='/' className='flex items-center gap-2'>
-            <FiLayout className='w-6 h-6 mr-1' />
-            <h1
-              className={cn(
-                'font-bold text-lg whitespace-nowrap transition-[transform,opacity,display] ease-in-out duration-300',
-                sidebar?.isOpen === false
-                  ? '-translate-x-96 opacity-0 hidden'
-                  : 'translate-x-0 opacity-100'
-              )}
-            >
-              Domlii
-            </h1>
+          <Link href='/' className='flex items-center gap-2 w-full  !justify-start'>
+            <div className={cn('flex items-center self-start', sidebar?.isOpen === false ? 'pl-0' : 'pl-0')}>
+              <Image
+                src={domliiLogo}
+                alt="Domlii Logo"
+                width={sidebar?.isOpen === false ? 40 : 100}
+                height={sidebar?.isOpen === false ? 25 : 62}
+                className={cn(
+                  'transition-all ease-in-out duration-300 fill',
+                  sidebar?.isOpen === false ? 'w-10 h-auto' : 'w-[100px] h-auto'
+                )}
+              />
+            </div>
           </Link>
         </Button>
         <Menu activeRole={activeRole} isOpen={sidebar?.isOpen} />

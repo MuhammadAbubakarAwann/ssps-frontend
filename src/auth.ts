@@ -1,10 +1,10 @@
 import NextAuth, { CredentialsSignin } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 import prismaClientGenerator from './lib/prismaClient';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import type { Adapter } from 'next-auth/adapters';
+import { Role } from '@prisma/client';
 
 const prisma = prismaClientGenerator();
 
@@ -49,17 +49,6 @@ const prisma = prismaClientGenerator();
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: "select_account",
-          access_type: "offline",
-          response_type: "code"
-        }
-      }
-    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -68,123 +57,118 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         turnstileToken: { label: 'Turnstile Token', type: 'text' } // Add this line
       },
       async authorize(credentials) {
-        if (!credentials?.email) 
-          throw new CredentialsSignin('Email is required');
-        
-        // // Add Turnstile verification
-        // if (!credentials.turnstileToken)
-        //   throw new CredentialsSignin('Security verification failed');
+        try {
+          if (!credentials?.email) 
+            return null;
           
-        // const turnstileVerified = await verifyTurnstileToken(credentials.turnstileToken as string);
-        
-        // if (!turnstileVerified)
-        //   throw new CredentialsSignin('Security verification failed. Please try again.');
+          // // Add Turnstile verification
+          // if (!credentials.impersonationToken) {
+          //   // Only verify Turnstile for regular login (not impersonation)
+          //   if (!credentials.turnstileToken)
+          //     return null;
+              
+          //   const turnstileVerified = await verifyTurnstileToken(credentials.turnstileToken as string);
+            
+          //   if (!turnstileVerified)
+          //     return null;
+          // }
 
-        const user = await prisma.user.findFirst({
-          where: {
-            email: credentials.email as string
-          }
-        });
+          const user = await prisma.user.findFirst({
+            where: {
+              email: credentials.email as string
+            }
+          });
 
-        if (!user) 
-          throw new CredentialsSignin('No user found with this email');
-        
-        if (!credentials.password) 
-          throw new CredentialsSignin('Password is required');
-        
-        // Check if user has a password (for OAuth users, password might be null)
-        if (!user.password) 
-          throw new CredentialsSignin('Please sign in with Google or reset your password');
-        
-        const passwordString = credentials.password as string;
+          if (!user) 
+            return null;
+          
+          if (!credentials.password) 
+            return null;
+          
+          // Check if user has a password (for OAuth users, password might be null)
+          if (!user.password) 
+            return null;
+          
+          const passwordString = credentials.password as string;
 
-        const passwordMatch = await bcrypt.compare(passwordString, user.password);
+          const passwordMatch = await bcrypt.compare(passwordString, user.password);
 
-        if (!passwordMatch) 
-          throw new CredentialsSignin('Invalid password');
-        
-        return user;
+          if (!passwordMatch) 
+            return null;
+          
+
+          // Transform the user object to match NextAuth User type
+          return {
+            ...user,
+            emailVerified: user.emailVerified ?? null
+          };
+        } catch (error) {
+          console.error('Authorization error:', error);
+          return null;
+        }
       }
     })
   ],
   session: {
-    strategy: 'database',
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60
   },
   callbacks: {
-    async session({ session, user }) {
-      if (session.user && user) {
-        session.user.id = user.id;
-        session.user.name = user.name || '';
-        session.user.email = user.email || '';
-        session.user.image = user.image || '';
+    async jwt({ token, user }) {
+      if (user) {
+        const extendedUser = user as typeof user & {
+          role: Role;
+          emailVerified: Date | null;
+          createdAt: Date;
+          updatedAt: Date;
+        };
+        
+        token.id = extendedUser.id;
+        token.name = extendedUser.name || '';
+        token.email = extendedUser.email || '';
+        token.emailVerified = extendedUser.emailVerified;
+        token.image = extendedUser.image || '';
+        token.role = extendedUser.role || Role.ADMIN;
+        token.createdAt = extendedUser.createdAt;
+        token.updatedAt = extendedUser.updatedAt;
+      }
+
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token.name) {
+        const extendedToken = token as typeof token & {
+          role: Role;
+          createdAt: Date;
+          updatedAt: Date;
+          emailVerified: Date | null;
+        };
+
+        const extendedUser = session.user as typeof session.user & {
+          role: Role;
+          createdAt: Date;
+          updatedAt: Date;
+          emailVerified: Date | null;
+        };
+
+        extendedUser.id = extendedToken.id as string || '';
+        extendedUser.name = extendedToken.name;
+        extendedUser.email = extendedToken.email || '';
+        extendedUser.emailVerified = extendedToken.emailVerified;
+        extendedUser.image = extendedToken.image as string;
+        extendedUser.role = extendedToken.role || Role.ADMIN;
+        extendedUser.createdAt = extendedToken.createdAt || new Date();
+        extendedUser.updatedAt = extendedToken.updatedAt || new Date();
+        
+        session.user = extendedUser;
       }
 
       return session;
-    },
-    async signIn({ user, account, profile }) {
-      // Allow OAuth sign-ins
-      if (account?.provider === 'google') {
-        try {
-          // Check if user exists with this email
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
-            include: { accounts: true }
-          });
-
-          if (existingUser) {
-            // Check if this Google account is already linked
-            const googleAccount = existingUser.accounts.find(
-              acc => acc.provider === 'google' && acc.providerAccountId === account.providerAccountId
-            );
-
-            if (!googleAccount) {
-              // Link the Google account to the existing user
-              await prisma.account.create({
-                data: {
-                  userId: existingUser.id,
-                  type: account.type,
-                  provider: account.provider,
-                  providerAccountId: account.providerAccountId,
-                  refresh_token: account.refresh_token,
-                  access_token: account.access_token,
-                  expires_at: account.expires_at,
-                  token_type: account.token_type,
-                  scope: account.scope,
-                  id_token: account.id_token,
-                  session_state: account.session_state as string,
-                }
-              });
-
-              // Update user with Google profile information if missing
-              await prisma.user.update({
-                where: { id: existingUser.id },
-                data: {
-                  name: existingUser.name || user.name,
-                  image: existingUser.image || user.image,
-                }
-              });
-            }
-          }
-          
-          return true;
-        } catch (error) {
-          console.error('Error linking Google account:', error);
-          return false;
-        }
-      }
-      
-      // For credentials provider, use existing logic
-      if (account?.provider === 'credentials') {
-        return true;
-      }
-      
-      return true;
     }
   },
   pages: {
     signIn: '/login',
     error: '/auth/error'
   },
-  debug: process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_DEBUG === 'true',
-  secret: process.env.NEXTAUTH_SECRET,
+  debug: true
 });
