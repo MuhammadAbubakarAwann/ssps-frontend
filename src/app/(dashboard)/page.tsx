@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ContentLayout } from '@/components/sections/content-layout';
-import { getUserByEmail } from '@/db/server-actions';
-import { auth } from '@/auth';
+// import { getUserByEmail } from '@/db/server-actions';
+// import { auth } from '@/auth';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,12 +10,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
-import { redirect } from 'next/navigation';
-import { getRoles } from '@/lib/utils/auth-helpers/role';
+// import { redirect } from 'next/navigation';
+// import { getRoles } from '@/lib/utils/auth-helpers/role';
 import { DashboardLanding } from '@/components/sections/dashboard-landing';
 
 export default async function DashboardPage() {
-  const session = await auth();
+  // const session = await auth();
   // if (!session?.user?.email) redirect('/unauthorized');
 
   // const allowedRoles = getRoles('ADMIN');
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
     id: '1',
     name: 'Admin User',
     email: 'admin@example.com',
-    role: "ADMIN" as const,
+    role: 'ADMIN' as const,
     image: '/default-avatar.png'
   };
   return (

@@ -11,7 +11,7 @@ export default async function DashboardLayout({
 }>) {
   const user = (await authHelper(['ADMIN']));
   return (
-    <div className="font-graphik">
+    <div className='font-graphik'>
       <main>
         <AdminPanelLayout activeRole={user.role}>
         {/* <AdminPanelLayout activeRole={"ADMIN"}> */}

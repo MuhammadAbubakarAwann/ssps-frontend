@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { useStore } from '@/lib/hooks/use-store'
+import { useStore } from '@/lib/hooks/use-store';
 import { Sidebar } from '@/components/sections/side-bar';
 import { useSidebarToggle } from '@/lib/hooks/use-sidebar-toggle';
 import { Role } from '@prisma/client';

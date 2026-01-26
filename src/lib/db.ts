@@ -1,4 +1,4 @@
-import { prisma } from './prisma'
+import { prisma } from './prisma';
 
 // User management functions
 export async function createUser(data: {
@@ -11,13 +11,13 @@ export async function createUser(data: {
       data: {
         email: data.email || undefined,
         name: data.name || undefined,
-        role: data.role || 'ADMIN',
-      },
-    })
-    return { success: true, data: user }
+        role: data.role || 'ADMIN'
+      }
+    });
+    return { success: true, data: user };
   } catch (error) {
-    console.error('Error creating user:', error)
-    return { success: false, error: 'Failed to create user' }
+    console.error('Error creating user:', error);
+    return { success: false, error: 'Failed to create user' };
   }
 }
 
@@ -27,13 +27,13 @@ export async function getUserByEmail(email: string) {
       where: { email },
       include: {
         accounts: true,
-        sessions: true,
-      },
-    })
-    return { success: true, data: user }
+        sessions: true
+      }
+    });
+    return { success: true, data: user };
   } catch (error) {
-    console.error('Error fetching user:', error)
-    return { success: false, error: 'Failed to fetch user' }
+    console.error('Error fetching user:', error);
+    return { success: false, error: 'Failed to fetch user' };
   }
 }
 
@@ -43,13 +43,13 @@ export async function getUserById(id: string) {
       where: { id },
       include: {
         accounts: true,
-        sessions: true,
-      },
-    })
-    return { success: true, data: user }
+        sessions: true
+      }
+    });
+    return { success: true, data: user };
   } catch (error) {
-    console.error('Error fetching user:', error)
-    return { success: false, error: 'Failed to fetch user' }
+    console.error('Error fetching user:', error);
+    return { success: false, error: 'Failed to fetch user' };
   }
 }
 
@@ -61,15 +61,15 @@ export async function getAllUsers() {
         _count: {
           select: {
             accounts: true,
-            sessions: true,
-          },
-        },
-      },
-    })
-    return { success: true, data: users }
+            sessions: true
+          }
+        }
+      }
+    });
+    return { success: true, data: users };
   } catch (error) {
-    console.error('Error fetching users:', error)
-    return { success: false, error: 'Failed to fetch users' }
+    console.error('Error fetching users:', error);
+    return { success: false, error: 'Failed to fetch users' };
   }
 }
 
@@ -83,24 +83,24 @@ export async function updateUser(id: string, data: {
   try {
     const user = await prisma.user.update({
       where: { id },
-      data,
-    })
-    return { success: true, data: user }
+      data
+    });
+    return { success: true, data: user };
   } catch (error) {
-    console.error('Error updating user:', error)
-    return { success: false, error: 'Failed to update user' }
+    console.error('Error updating user:', error);
+    return { success: false, error: 'Failed to update user' };
   }
 }
 
 export async function deleteUser(id: string) {
   try {
     const user = await prisma.user.delete({
-      where: { id },
-    })
-    return { success: true, data: user }
+      where: { id }
+    });
+    return { success: true, data: user };
   } catch (error) {
-    console.error('Error deleting user:', error)
-    return { success: false, error: 'Failed to delete user' }
+    console.error('Error deleting user:', error);
+    return { success: false, error: 'Failed to delete user' };
   }
 }
 
@@ -112,12 +112,12 @@ export async function createSession(data: {
 }) {
   try {
     const session = await prisma.session.create({
-      data,
-    })
-    return { success: true, data: session }
+      data
+    });
+    return { success: true, data: session };
   } catch (error) {
-    console.error('Error creating session:', error)
-    return { success: false, error: 'Failed to create session' }
+    console.error('Error creating session:', error);
+    return { success: false, error: 'Failed to create session' };
   }
 }
 
@@ -126,24 +126,24 @@ export async function getSessionByToken(sessionToken: string) {
     const session = await prisma.session.findUnique({
       where: { sessionToken },
       include: {
-        user: true,
-      },
-    })
-    return { success: true, data: session }
+        user: true
+      }
+    });
+    return { success: true, data: session };
   } catch (error) {
-    console.error('Error fetching session:', error)
-    return { success: false, error: 'Failed to fetch session' }
+    console.error('Error fetching session:', error);
+    return { success: false, error: 'Failed to fetch session' };
   }
 }
 
 export async function deleteSession(sessionToken: string) {
   try {
     const session = await prisma.session.delete({
-      where: { sessionToken },
-    })
-    return { success: true, data: session }
+      where: { sessionToken }
+    });
+    return { success: true, data: session };
   } catch (error) {
-    console.error('Error deleting session:', error)
-    return { success: false, error: 'Failed to delete session' }
+    console.error('Error deleting session:', error);
+    return { success: false, error: 'Failed to delete session' };
   }
 }

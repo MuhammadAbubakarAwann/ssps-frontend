@@ -36,7 +36,7 @@ export function Sidebar({ activeRole }: { activeRole: Role; }) {
             <div className={cn('flex items-center self-start', sidebar?.isOpen === false ? 'pl-0' : 'pl-0')}>
               <Image
                 src={domliiLogo}
-                alt="Domlii Logo"
+                alt='Domlii Logo'
                 width={sidebar?.isOpen === false ? 40 : 100}
                 height={sidebar?.isOpen === false ? 25 : 62}
                 className={cn(

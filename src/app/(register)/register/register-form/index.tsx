@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { register } from '@/db/server-actions';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
-import { ArrowRight, Mail, Eye, EyeOff, Lock, User } from 'lucide-react';
+import {  Mail, Eye, EyeOff, Lock, User } from 'lucide-react';
 import Image from 'next/image';
-import authbg from "../../../../../public/images/auth-bg.png";
-import domliiLogo from "../../../../../public/images/logo/domlii-logo.png";
+import authbg from '../../../../../public/images/auth-bg.png';
+import domliiLogo from '../../../../../public/images/logo/domlii-logo.png';
 
 
 export default function RegisterForm() {
@@ -18,7 +18,7 @@ export default function RegisterForm() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirectUrl');
   const ref = useRef<HTMLFormElement>(null);
-  const [token, setToken] = useState<string | null>(null);
+  // const [token, setToken] = useState<string | null>(null);
 
 
   const loginLink = redirectUrl ? `/login?redirectUrl=${redirectUrl}` : '/login';
@@ -37,19 +37,19 @@ export default function RegisterForm() {
 
     setLoading(false);
 
-    if (r?.error) {
+    if (r?.error) 
       toast.error(r.error);
-    } else if (r?.success) {
+     else if (r?.success) {
       toast.success('Registration successful!');
       ref.current?.reset();
-      if (redirectUrl) {
+      if (redirectUrl) 
         router.push(`/login?redirectUrl=${encodeURIComponent(redirectUrl)}`);
-      } else {
+       else 
         router.push('/login');
-      }
-    } else {
+      
+    } else 
       toast.error('Registration failed. Please try again.');
-    }
+    
   };
 
   const togglePasswordVisibility = () => {
@@ -57,97 +57,97 @@ export default function RegisterForm() {
   };
 
   return (
-    <section className="flex w-full min-h-screen bg-white">
-      <div className="hidden lg:block lg:w-[35%] relative">
-        <div className="bg-primary-solid w-full h-full"></div>
+    <section className='flex w-full min-h-screen bg-white'>
+      <div className='hidden lg:block lg:w-[35%] relative'>
+        <div className='bg-primary-solid w-full h-full'></div>
         <Image
-          src={authbg || "/placeholder.svg"}
-          alt="Background"
+          src={authbg || '/placeholder.svg'}
+          alt='Background'
           fill
           priority
-          className="object-cover object-center"
-          style={{ filter: "brightness(0.7)" }}
+          className='object-cover object-center'
+          style={{ filter: 'brightness(0.7)' }}
         />
       </div>
 
-      <div className="w-full lg:w-[65%] flex flex-col items-center justify-center px-6 md:px-12 lg:px-12 py-12">
-        <div className="w-full max-w-[450px]">
+      <div className='w-full lg:w-[65%] flex flex-col items-center justify-center px-6 md:px-12 lg:px-12 py-12'>
+        <div className='w-full max-w-[450px]'>
           {/* Form card container */}
-          <div className="bg-white p-6 flex flex-col gap-8">
-            <div className="flex justify-center">
+          <div className='bg-white p-6 flex flex-col gap-8'>
+            <div className='flex justify-center'>
               <Image
                 src={domliiLogo}
-                alt="Domlii Logo"
+                alt='Domlii Logo'
                 width={120}
                 height={74}
-                style={{ width: "120", height: "74" }}
+                style={{ width: '120', height: '74' }}
               />
             </div>
-            <div className="flex flex-col gap-4 text-left">
-              <h1 className="text-[22px] font-semibold leading-[24px] tracking-[-0.04em] text-[#2E2B24]">
+            <div className='flex flex-col gap-4 text-left'>
+              <h1 className='text-[22px] font-semibold leading-[24px] tracking-[-0.04em] text-[#2E2B24]'>
                 Create your account
               </h1>
             </div>
 
-            <form ref={ref} onSubmit={handleSubmit} className="flex flex-col gap-6 w-full">
+            <form ref={ref} onSubmit={handleSubmit} className='flex flex-col gap-6 w-full'>
               {/* Full Name Field */}
-              <div className="flex flex-col gap-2.5">
-                <label className="text-sm font-semibold text-[#1F2937] capitalize">
+              <div className='flex flex-col gap-2.5'>
+                <label className='text-sm font-semibold text-[#1F2937] capitalize'>
                   Full Name
                 </label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#626974]">
+                <div className='relative'>
+                  <div className='absolute left-3 top-1/2 transform -translate-y-1/2 text-[#626974]'>
                     <User size={18} />
                   </div>
                   <Input
-                    type="text"
-                    name="name"
+                    type='text'
+                    name='name'
                     required
-                    placeholder="Enter your full name"
-                    className="h-10 pl-10 border border-[#E3EBF2] bg-white text-sm rounded-lg focus:outline-none focus:ring-0 shadow-sm"
+                    placeholder='Enter your full name'
+                    className='h-10 pl-10 border border-[#E3EBF2] bg-white text-sm rounded-lg focus:outline-none focus:ring-0 shadow-sm'
                   />
                 </div>
               </div>
 
               {/* Email Field */}
-              <div className="flex flex-col gap-2.5">
-                <label className="text-sm font-semibold text-[#1F2937] capitalize">
+              <div className='flex flex-col gap-2.5'>
+                <label className='text-sm font-semibold text-[#1F2937] capitalize'>
                   Email
                 </label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#626974]">
+                <div className='relative'>
+                  <div className='absolute left-3 top-1/2 transform -translate-y-1/2 text-[#626974]'>
                     <Mail size={18} />
                   </div>
                   <Input
-                    type="email"
-                    name="email"
+                    type='email'
+                    name='email'
                     required
-                    placeholder="Enter your email"
-                    className="h-10 pl-10 border border-[#FABB17] bg-white text-sm rounded-lg focus:outline-none focus:ring-0 shadow-sm"
+                    placeholder='Enter your email'
+                    className='h-10 pl-10 border border-[#FABB17] bg-white text-sm rounded-lg focus:outline-none focus:ring-0 shadow-sm'
                   />
                 </div>
               </div>
 
               {/* Password Field */}
-              <div className="flex flex-col gap-2.5">
-                <label className="text-sm font-semibold text-[#1F2937] capitalize">
+              <div className='flex flex-col gap-2.5'>
+                <label className='text-sm font-semibold text-[#1F2937] capitalize'>
                   Password
                 </label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#626974]">
+                <div className='relative'>
+                  <div className='absolute left-3 top-1/2 transform -translate-y-1/2 text-[#626974]'>
                     <Lock size={18} />
                   </div>
                   <Input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    name='password'
                     required
-                    placeholder="Create a password"
-                    className="h-10 pl-10 pr-12 border border-[#E3EBF2] bg-white text-sm rounded-lg focus:outline-none focus:ring-0 shadow-sm"
+                    placeholder='Create a password'
+                    className='h-10 pl-10 pr-12 border border-[#E3EBF2] bg-white text-sm rounded-lg focus:outline-none focus:ring-0 shadow-sm'
                   />
                   <button
-                    type="button"
+                    type='button'
                     onClick={togglePasswordVisibility}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
+                    className='absolute right-3 top-1/2 transform -translate-y-1/2 text-[#6B7280]'
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -155,21 +155,21 @@ export default function RegisterForm() {
               </div>
 
               <button
-                type="submit"
+                type='submit'
                 disabled={loading}
-                className="h-11 bg-gradient-to-b from-[rgba(255,255,255,0.12)] to-[rgba(255,255,255,0)] bg-[#080707] text-white font-medium text-sm rounded-lg flex items-center justify-center gap-2 shadow-lg border border-[#191818] hover:bg-[#1a1a1a] transition-colors"
+                className='h-11 bg-gradient-to-b from-[rgba(255,255,255,0.12)] to-[rgba(255,255,255,0)] bg-[#080707] text-white font-medium text-sm rounded-lg flex items-center justify-center gap-2 shadow-lg border border-[#191818] hover:bg-[#1a1a1a] transition-colors'
               >
                 <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
               </button>
             </form>
 
-            <div className="text-center text-sm font-normal">
-              <span className="text-[#1F2937]">
-                Already have an account?{" "}
+            <div className='text-center text-sm font-normal'>
+              <span className='text-[#1F2937]'>
+                Already have an account?{' '}
               </span>
               <Link
                 href={loginLink}
-                className="font-semibold text-[#1F2937] hover:underline"
+                className='font-semibold text-[#1F2937] hover:underline'
               >
                 Log in
               </Link>
