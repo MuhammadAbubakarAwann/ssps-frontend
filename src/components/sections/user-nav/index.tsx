@@ -20,21 +20,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { UserInfo } from '@/@types';
-import { signOut } from 'next-auth/react';
+import { logout } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
+import { UserInfo } from '@/@types';
 
 export function UserNav({ userInfo }: { userInfo: UserInfo }) {
   const router = useRouter();
+  
   const handleSignOut = async () => {
     try {
-      await signOut();
-      console.log('signout');
+      await logout();
       router.push('/login');
     } catch (error) {
       console.error('Error signing out:', error);
     }
   };
+  
   return (
     <DropdownMenu  >
       <TooltipProvider disableHoverableContent>
@@ -47,7 +48,9 @@ export function UserNav({ userInfo }: { userInfo: UserInfo }) {
               >
                 <Avatar className='h-8 w-8'>
                   <AvatarImage src={userInfo.image || ''} alt={'Avatar'} />
-                  <AvatarFallback className='bg-transparent'>{userInfo.name?.toString()[0].toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className='bg-transparent'>
+                    {userInfo.name?.toString()[0]?.toUpperCase() || 'U'}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

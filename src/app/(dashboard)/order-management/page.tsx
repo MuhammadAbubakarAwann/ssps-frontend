@@ -10,9 +10,9 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { redirect } from 'next/navigation';
-import { DashboardLanding } from '@/components/sections/dashboard-landing';
+import OrderManagementClient from './OrderManagementClient';
 
-export default async function DashboardPage() {
+export default async function OrderManagementPage() {
   const session = await getSession();
   
   if (!session) {
@@ -24,7 +24,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <ContentLayout userInfo={session.user} title='Dashboard'>
+    <ContentLayout userInfo={session.user} title='Order Management'>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -34,11 +34,19 @@ export default async function DashboardPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Dashboard</BreadcrumbPage>
+            <BreadcrumbLink asChild>
+              <Link href='/dashboard'>Dashboard</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Order Management</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <DashboardLanding />
+
+      <OrderManagementClient />
     </ContentLayout>
   );
 }
+

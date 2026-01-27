@@ -1,6 +1,6 @@
 'use client';
 import { type FormEvent, useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { login } from '@/lib/auth-client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -17,7 +17,6 @@ const LoginForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirectUrl');
-  const [token] = useState<string | null>(null);
 
   const safeRedirectUrl =
     redirectUrl && redirectUrl.startsWith('/') ? redirectUrl : '/';
@@ -32,30 +31,32 @@ const LoginForm = () => {
     const formData = new FormData(event.currentTarget);
 
     try {
-      const res = await signIn('credentials', {
+      const response = await login({
         email: formData.get('email') as string,
         password: formData.get('password') as string,
-        redirect: false,
-        turnstileToken: token || undefined
+        role: 'ADMIN'
       });
 
       setLoading(false);
 
-      if (res?.error) 
-        // Handle specific NextAuth errors
-        if (res.error === 'CredentialsSignin') 
-          toast.error('Invalid email or password. Please try again.');
-         else 
-          toast.error(res.error);
-        
-       else if (res?.ok) {
+      if (response.success) {
         toast.success('Sign In successful!');
         // Force a small delay to ensure the session is properly set
         setTimeout(() => {
           router.push(safeRedirectUrl);
         }, 500);
       } else 
-        toast.error('Login failed. Please check your credentials.');
+        // Handle different error scenarios
+        switch (response.code) {
+          case 'EMAIL_NOT_VERIFIED':
+            toast.error('Please verify your email before logging in.');
+            break;
+          case 'PASSWORD_SETUP_REQUIRED':
+            toast.error('This account requires password setup. Please use Google Sign-In or set up a password.');
+            break;
+          default:
+            toast.error(response.message || 'Login failed');
+        }
       
     } catch (error) {
       setLoading(false);
