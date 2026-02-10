@@ -35,7 +35,8 @@ export async function POST(request: NextRequest) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 2 * 60 * 60 // 2 hours
+        maxAge: 2 * 60 * 60, // 2 hours
+        path: '/'
       });
 
       // Set refresh token (expires in 7 days)
@@ -43,7 +44,8 @@ export async function POST(request: NextRequest) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 // 7 days
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: '/'
       });
 
       // Store user data
@@ -51,7 +53,8 @@ export async function POST(request: NextRequest) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 // 7 days
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: '/'
       });
 
       return nextResponse;

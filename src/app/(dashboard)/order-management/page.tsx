@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { ContentLayout } from '@/components/sections/content-layout';
-import { getSession } from '@/lib/auth-service';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,24 +8,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
-import { redirect } from 'next/navigation';
 import OrderManagementClient from '@/components/orders/order-management-client';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 export default async function OrderManagementPage() {
-  const session = await getSession();
-  
-  if (!session) {
-    redirect('/login');
-  }
-
-  if (session.user.role !== 'ADMIN') {
-    redirect('/unauthorized');
-  }
+  // Get user info from cookies since middleware already validated authentication
+  const cookieStore = cookies();
+  const userData = cookieStore.get('user_data')?.value;
+  const user = userData ? JSON.parse(userData) : null;
 
   return (
-    <ContentLayout userInfo={session.user} title='Order Management'>
+    <ContentLayout userInfo={user} title='Order Management'>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

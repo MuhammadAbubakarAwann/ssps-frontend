@@ -1,6 +1,6 @@
 'use server';
 import bcrypt from 'bcryptjs';
-import { auth } from '@/auth';
+import { cookies } from 'next/headers';
 import prismaClientGenerator from '@/lib/prismaClient';
 import type { Role, User } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
@@ -53,9 +53,11 @@ export const registerUserByAdmin = async (values: {
   role: string
 }) => {
   const { email, password, name, role } = values;
-  const session = await auth();
+  const cookieStore = cookies();
+  const userData = cookieStore.get('user_data')?.value;
+  const user = userData ? JSON.parse(userData) : null;
 
-  if (!session?.user.role || session?.user.role !== 'ADMIN')
+  if (!user?.role || user?.role !== 'ADMIN')
     return {
       error: 'Unauthorized access!'
     };
@@ -98,8 +100,11 @@ export const registerUserByAdmin = async (values: {
 };
 
 export const getUsers = async () => {
-  const session = await auth();
-  if (!session?.user.role || session?.user.role !== 'ADMIN')
+  const cookieStore = cookies();
+  const userData = cookieStore.get('user_data')?.value;
+  const user = userData ? JSON.parse(userData) : null;
+  
+  if (!user?.role || user?.role !== 'ADMIN')
     return [] as User[];
 
 
@@ -127,8 +132,11 @@ export const getUsers = async () => {
 };
 
 export const deleteUser = async (userId: string) => {
-  const session = await auth();
-  if (!session?.user.role || session?.user.role !== 'ADMIN')
+  const cookieStore = cookies();
+  const userData = cookieStore.get('user_data')?.value;
+  const user = userData ? JSON.parse(userData) : null;
+  
+  if (!user?.role || user?.role !== 'ADMIN')
     return {
       error: 'Unauthorized access!'
     };
@@ -150,8 +158,11 @@ export const deleteUser = async (userId: string) => {
 };
 
 export const updateUser = async (id: string, name: string, email: string, role: Role) => {
-  const session = await auth();
-  if (!session?.user.role || session?.user.role !== 'ADMIN')
+  const cookieStore = cookies();
+  const userData = cookieStore.get('user_data')?.value;
+  const user = userData ? JSON.parse(userData) : null;
+  
+  if (!user?.role || user?.role !== 'ADMIN')
     return {
       error: 'Unauthorized access!'
     };

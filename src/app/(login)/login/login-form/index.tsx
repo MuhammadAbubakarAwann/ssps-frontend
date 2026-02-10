@@ -1,7 +1,7 @@
 'use client';
 import { type FormEvent, useState } from 'react';
 import { login } from '@/lib/auth-client';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const router = useRouter();
+
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirectUrl');
 
@@ -41,10 +41,11 @@ const LoginForm = () => {
 
       if (response.success) {
         toast.success('Sign In successful!');
-        // Force a small delay to ensure the session is properly set
+        // Force a longer delay to ensure cookies are properly set and available to middleware
         setTimeout(() => {
-          router.push(safeRedirectUrl);
-        }, 500);
+          // Force a page reload to ensure middleware gets fresh cookies
+          window.location.href = safeRedirectUrl;
+        }, 1000);
       } else 
         // Handle different error scenarios
         switch (response.code) {

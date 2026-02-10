@@ -1,46 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession, refreshAccessToken } from '@/lib/auth-service';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public paths that don't require authentication
-  const publicPaths = ['/login', '/auth/error', '/api/auth'];
+  const publicPaths = ['/login', '/register', '/auth/error', '/unauthorized'];
   
   // Check if the current path is public
-  if (publicPaths.some(path => pathname.startsWith(path))) 
+  if (publicPaths.some(path => pathname.startsWith(path))) {
     return NextResponse.next();
-  
+  }
 
-  // Get session
-  let session = await getSession();
+  // Get cookies from request
+  const accessToken = request.cookies.get('access_token')?.value;
+  const refreshToken = request.cookies.get('refresh_token')?.value;
+  const userData = request.cookies.get('user_data')?.value;
 
-  // If no session, try to refresh the token
-  if (!session) 
-    try {
-      const newToken = await refreshAccessToken();
-      if (newToken) 
-        // Try to get session again after refresh
-        session = await getSession();
-      
-    } catch (error) {
-      console.error('Token refresh failed in middleware:', error);
-    }
-  
-
-  // If still no session after refresh attempt, redirect to login
-  if (!session) 
+  // If no authentication cookies, redirect to login
+  if (!accessToken || !refreshToken || !userData) {
     return NextResponse.redirect(new URL('/login', request.url));
-  
+  }
 
-  // For admin routes, ensure user has admin role
-  if (pathname.startsWith('/admin') || pathname.startsWith('/order-management') || pathname === '/') 
-    if (session.user.role !== 'ADMIN') 
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
-    
-  
+  try {
+    // Parse user data to check role
+    const user = JSON.parse(userData);
 
-  return NextResponse.next();
+    // For admin routes, ensure user has admin role
+    if (pathname.startsWith('/admin') || pathname.startsWith('/order-management') || pathname === '/') {
+      if (user.role !== 'ADMIN') {
+        return NextResponse.redirect(new URL('/unauthorized', request.url));
+      }
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error parsing user data:', error);
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
 }
 
 export const config = {

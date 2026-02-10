@@ -35,9 +35,9 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: '',
       menus: [
         {
-          href: '/dashboard',
+          href: '/',
           label: 'Dashboard',
-          active: pathname.includes('/dashboard'),
+          active: pathname === '/',
           icon: IoGrid,
           submenus: [],
           role: getRoles('ADMIN')

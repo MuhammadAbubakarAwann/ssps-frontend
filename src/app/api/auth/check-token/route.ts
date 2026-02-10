@@ -1,32 +1,26 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth-service';
-import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Check both NextAuth session and custom session
-    const authSession = await auth();
-    const customSession = await getSession();
+    // Get cookies from the request headers
+    const cookies = request.headers.get('cookie') || '';
+    const cookieMap = new Map();
     
-    if (!authSession && !customSession) 
-      return NextResponse.json({ error: 'No session' }, { status: 401 });
-    
+    cookies.split(';').forEach(cookie => {
+      const [key, value] = cookie.trim().split('=');
+      if (key && value) {
+        cookieMap.set(key, value);
+      }
+    });
 
-    // For NextAuth sessions, check token expiration
-    if (authSession?.expires) {
-      const tokenExpiry = new Date(authSession.expires);
-      const now = new Date();
-      const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
-      
-      if (tokenExpiry < now) 
-        return NextResponse.json({ error: 'Token expired' }, { status: 401 });
-      
-      
-      if (tokenExpiry < thirtyMinutesFromNow) 
-        return NextResponse.json({ warning: 'Token expiring soon' }, { status: 406 });
-      
+    const accessToken = cookieMap.get('access_token');
+    const refreshToken = cookieMap.get('refresh_token');
+    const userData = cookieMap.get('user_data');
+    
+    if (!accessToken || !refreshToken || !userData) {
+      return NextResponse.json({ error: 'No session' }, { status: 401 });
     }
 
     return NextResponse.json({ status: 'valid' }, { status: 200 });
