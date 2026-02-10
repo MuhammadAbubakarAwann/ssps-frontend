@@ -50,6 +50,7 @@ export interface OrderWithDetails {
 export type OrderFilterStatus = 'ALL' | 'PENDING' | 'DELIVERED' | 'CANCELLED'
 
 export interface OrdersCount {
+  all: number
   total: number
   pending: number
   delivered: number

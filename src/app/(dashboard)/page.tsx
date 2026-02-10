@@ -12,6 +12,8 @@ import {
 import { redirect } from 'next/navigation';
 import { DashboardLanding } from '@/components/sections/dashboard-landing';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const session = await getSession();
   

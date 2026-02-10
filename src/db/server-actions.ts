@@ -135,18 +135,6 @@ export const deleteUser = async (userId: string) => {
 
 
   try {
-    await prisma.likes.deleteMany({
-      where: {
-        userId
-      }
-    });
-
-    await prisma.comments.deleteMany({
-      where: {
-        userId
-      }
-    });
-
     await prisma.user.delete({
       where: {
         id: userId

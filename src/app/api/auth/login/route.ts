@@ -30,12 +30,12 @@ export async function POST(request: NextRequest) {
 
       const nextResponse = NextResponse.json(data);
 
-      // Set access token (expires in 15 minutes)
+      // Set access token (expires in 2 hours)
       nextResponse.cookies.set('access_token', data.data.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 15 * 60 // 15 minutes
+        maxAge: 2 * 60 * 60 // 2 hours
       });
 
       // Set refresh token (expires in 7 days)

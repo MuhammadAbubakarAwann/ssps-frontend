@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { ContentLayout } from '@/components/sections/content-layout';
 import { getSession } from '@/lib/auth-service';
@@ -10,11 +11,15 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { redirect } from 'next/navigation';
-import OrderManagementClient from '@/components/orders/order-management-client';
+import RestaurantDetailClient from '@/components/restaurants/restaurant-detail-client';
 
-export const dynamic = 'force-dynamic';
+interface RestaurantDetailPageProps {
+  params: {
+    id: string;
+  };
+}
 
-export default async function OrderManagementPage() {
+export default async function RestaurantDetailPage({ params }: RestaurantDetailPageProps) {
   const session = await getSession();
   
   if (!session) {
@@ -26,7 +31,7 @@ export default async function OrderManagementPage() {
   }
 
   return (
-    <ContentLayout userInfo={session.user} title='Order Management'>
+    <ContentLayout userInfo={session.user} title='Restaurant Details'>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -42,13 +47,24 @@ export default async function OrderManagementPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Order Management</BreadcrumbPage>
+            <BreadcrumbLink asChild>
+              <Link href='/restaurants'>Restaurant Management</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Restaurant Details</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <OrderManagementClient />
+      <Suspense fallback={
+        <div className='w-full flex items-center justify-center py-8'>
+          <div className='text-[#6B7280]'>Loading restaurant details...</div>
+        </div>
+      }>
+        <RestaurantDetailClient restaurantId={params.id} />
+      </Suspense>
     </ContentLayout>
   );
 }
-

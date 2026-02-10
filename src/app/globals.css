@@ -314,7 +314,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply rounded-[9px] bg-secondary-text hover:bg-fg-border-hover;
+  @apply rounded-[9px] bg-[#FABB17] hover:bg-[#E1A325];
 }
 
 /* Font Application */

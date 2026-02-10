@@ -69,14 +69,22 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                             <Tooltip delayDuration={100}>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant={active ? 'secondary' : 'ghost'}
-                                  className='w-full justify-start h-10 mb-1'
+                                  variant={active ? 'selected' : 'ghost'}
+                                  className={cn(
+                                    'w-full justify-start h-10 mb-1',
+                                    active 
+                                      ? 'bg-black text-[#FABB17] rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-black/90'
+                                      : ''
+                                  )}
                                   asChild
                                 >
 
                                   <Link href={href}>
                                     <span
-                                      className={cn(isOpen === false ? '' : 'mr-4')}
+                                      className={cn(
+                                        isOpen === false ? '' : 'mr-4',
+                                        active ? 'text-[#FABB17]' : ''
+                                      )}
                                     >
                                       <Icon size={18} />
                                     </span>
@@ -85,7 +93,10 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                         'max-w-[200px] truncate',
                                         isOpen === false
                                           ? '-translate-x-96 opacity-0'
-                                          : 'translate-x-0 opacity-100'
+                                          : 'translate-x-0 opacity-100',
+                                        active 
+                                          ? 'text-[#FABB17] font-semibold text-sm leading-[15px] tracking-[-0.03em] capitalize'
+                                          : ''
                                       )}
                                     >
                                       {label}

@@ -2,11 +2,11 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Image from 'next/image';
 import domliiLogo from '../../../../public/images/logo/domlii-logo.png';
 
-export default function AuthError() {
+function AuthErrorContent() {
   const searchParams = useSearchParams();
   // const router = useRouter();
   const [error, setError] = useState<string>('');
@@ -123,5 +123,13 @@ export default function AuthError() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function AuthError() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AuthErrorContent />
+    </Suspense>
   );
 }

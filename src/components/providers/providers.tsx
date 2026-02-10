@@ -3,6 +3,7 @@
 import { SessionProvider } from 'next-auth/react';
 import { ReactNode } from 'react';
 import { ToasterProvider } from '@/components/ui/toaster';
+import { AuthProvider } from './auth-provider';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -12,8 +13,10 @@ interface ProvidersProps {
 export function Providers({ children, session }: ProvidersProps) {
   return (
     <SessionProvider session={session}>
-      <ToasterProvider />
-      {children}
+      <AuthProvider>
+        <ToasterProvider />
+        {children}
+      </AuthProvider>
     </SessionProvider>
   );
 }

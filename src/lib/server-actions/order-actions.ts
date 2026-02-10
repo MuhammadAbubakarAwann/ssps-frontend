@@ -44,16 +44,16 @@ async function makeAuthenticatedRequest(url: string, options: RequestInit = {}) 
 }
 
 export async function getOrders(
-  status: OrderFilterStatus = 'all',
+  status: OrderFilterStatus = 'ALL',
   search: string = ''
 ): Promise<OrderWithDetails[]> {
   try {
     const params = new URLSearchParams();
-    if (status !== 'all') params.append('status', status);
+    if (status !== 'ALL') params.append('status', status);
     if (search) params.append('search', search);
 
     const response = await makeAuthenticatedRequest(
-      `${API_BASE_URL}/admin/orders?${params}`,
+      `${API_BASE_URL}/admin/orders?${params.toString()}`,
       {
         method: 'GET',
         cache: 'no-store' // Always fetch fresh data for admin
@@ -67,7 +67,7 @@ export async function getOrders(
     }
 
     const data = await response.json();
-    return data.data?.orders || [];
+    return (data.data?.orders || []) as OrderWithDetails[];
   } catch (error) {
     console.error('Error fetching orders:', error);
     throw error;
@@ -91,9 +91,13 @@ export async function getOrdersCount(): Promise<OrdersCount> {
     }
 
     const data = await response.json();
-    return data.data?.count || { all: 0, pending: 0, delivered: 0 };
+    const count = data.data?.count;
+    if (count && typeof count === 'object' && 'all' in count && 'pending' in count && 'delivered' in count) 
+      return count as OrdersCount;
+    
+    return { all: 0, pending: 0, delivered: 0, total: 0, cancelled: 0 };
   } catch (error) {
     console.error('Error fetching orders count:', error);
-    return { all: 0, pending: 0, delivered: 0 };
+    return { all: 0, pending: 0, delivered: 0, total: 0, cancelled: 0 };
   }
 }

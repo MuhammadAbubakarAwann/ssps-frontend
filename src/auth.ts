@@ -111,7 +111,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60
+    maxAge: 7 * 24 * 60 * 60 // 7 days instead of 30 days
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -131,6 +131,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         token.role = extendedUser.role || Role.ADMIN;
         token.createdAt = extendedUser.createdAt;
         token.updatedAt = extendedUser.updatedAt;
+        
+        // Set token expiration timestamp
+        token.exp = Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60); // 7 days
       }
 
       return token;

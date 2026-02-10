@@ -10,23 +10,23 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { redirect } from 'next/navigation';
-import OrderManagementClient from '@/components/orders/order-management-client';
+import RestaurantManagementClient from '@/components/restaurants/restaurant-management-client';
 
 export const dynamic = 'force-dynamic';
 
-export default async function OrderManagementPage() {
+export default async function RestaurantManagementPage() {
   const session = await getSession();
   
-  if (!session) {
+  if (!session) 
     redirect('/login');
-  }
+  
 
-  if (session.user.role !== 'ADMIN') {
+  if (session.user.role !== 'ADMIN') 
     redirect('/unauthorized');
-  }
+  
 
   return (
-    <ContentLayout userInfo={session.user} title='Order Management'>
+    <ContentLayout userInfo={session.user} title='Restaurant Management'>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -42,13 +42,12 @@ export default async function OrderManagementPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Order Management</BreadcrumbPage>
+            <BreadcrumbPage>Restaurant Management</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <OrderManagementClient />
+      <RestaurantManagementClient />
     </ContentLayout>
   );
 }
-

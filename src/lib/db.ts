@@ -11,7 +11,7 @@ export async function createUser(data: {
       data: {
         email: data.email || undefined,
         name: data.name || undefined,
-        role: data.role || 'ADMIN'
+        role: data.role === 'ADMIN' ? data.role : undefined
       }
     });
     return { success: true, data: user };
@@ -83,7 +83,10 @@ export async function updateUser(id: string, data: {
   try {
     const user = await prisma.user.update({
       where: { id },
-      data
+      data: {
+        ...data,
+        role: data.role === 'ADMIN' ? data.role : undefined
+      }
     });
     return { success: true, data: user };
   } catch (error) {

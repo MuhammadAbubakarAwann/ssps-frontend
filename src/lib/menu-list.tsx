@@ -2,8 +2,9 @@ import { IconType } from 'react-icons';
 import { Role } from '@prisma/client';
 
 import { FaGear } from 'react-icons/fa6';
-import {  FaBookmark ,FaUsers } from 'react-icons/fa';
+import { FaUsers, FaUtensils } from 'react-icons/fa';
 import { IoGrid } from 'react-icons/io5';
+import { MdShoppingCart } from 'react-icons/md';
 
 import { getRoles } from './utils/auth-helpers/role';
 
@@ -38,6 +39,22 @@ export function getMenuList(pathname: string): Group[] {
           label: 'Dashboard',
           active: pathname.includes('/dashboard'),
           icon: IoGrid,
+          submenus: [],
+          role: getRoles('ADMIN')
+        },
+        {
+          href: '/order-management',
+          label: 'Orders',
+          active: pathname.includes('/order-management'),
+          icon: MdShoppingCart,
+          submenus: [],
+          role: getRoles('ADMIN')
+        },
+        {
+          href: '/restaurants',
+          label: 'Restaurants',
+          active: pathname.includes('/restaurants'),
+          icon: FaUtensils,
           submenus: [],
           role: getRoles('ADMIN')
         }
@@ -115,32 +132,6 @@ export function getMenuList(pathname: string): Group[] {
       ],
       role: getRoles('ADMIN')
     },
-    {
-      groupLabel: 'Access',
-      menus: [
-
-        {
-          href: '/dashboard/vacancies/all-vacancy-categories',
-          label: 'View Tokens',
-          active: pathname.includes('/dashboard/vacancies/all-vacancy-categories'),
-          icon: FaBookmark,
-          submenus: [
-            {
-              href: '/dashboard/tokens',
-              label: 'All Tokens',
-              active: pathname === '/dashboard/tokens'
-            },
-            {
-              href: '/dashboard/tokens/create',
-              label: 'New Token',
-              active: pathname === '/dashboard/tokens/creat'
-            }
-          ],
-          role: getRoles('ADMIN')
-        }
-      ],
-      role: getRoles('ADMIN')
-    },
     // {
     //   groupLabel: 'Payments',
     //   menus: [
@@ -163,6 +154,13 @@ export function getMenuList(pathname: string): Group[] {
     //   ],
     //   role: getRoles('ADMIN')
     // },
+    {
+      groupLabel: 'Management',
+      menus: [
+        
+      ],
+      role: getRoles('ADMIN')
+    },
     {
       groupLabel: 'Settings',
       menus: [

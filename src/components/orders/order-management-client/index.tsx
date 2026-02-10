@@ -20,6 +20,7 @@ import {
 import { Eye } from 'lucide-react';
 import { FiArrowRight, FiArrowLeft } from 'react-icons/fi';
 import { fetchOrders, fetchOrderStatsOnly, fetchOrderDetails, type Order } from '@/lib/server-actions/admin-order-actions';
+import { orderCache } from '@/lib/utils/cache-manager';
 
 // Table configuration
 const TABLE_COLUMNS = [
@@ -97,18 +98,6 @@ export default function OrderManagementPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  
-  // Cache for different tabs to avoid refetching
-  const [cache, setCache] = useState<{
-    [key: string]: {
-      data: Order[];
-      timestamp: number;
-      page: number;
-    }
-  }>({});
-  const [statsTimestamp, setStatsTimestamp] = useState(0);
-  
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   // Function to handle viewing order details
   const handleViewOrderDetails = async (orderId: string) => {
@@ -170,14 +159,15 @@ export default function OrderManagementPage() {
         return;
       }
       
-      // For non-search requests, check cache first
+      // For non-search requests, check persistent cache first
       const cacheKey = `${activeTab}_${currentPage}`;
-      const cachedData = cache[cacheKey];
-      const now = Date.now();
+      const cachedData = orderCache.getData<{
+        orders: Order[];
+      }>(cacheKey);
       
-      // Use cached data if it's fresh (less than 5 minutes old)
-      if (cachedData && (now - cachedData.timestamp) < CACHE_DURATION) {
-        setOrders(cachedData.data);
+      // Use cached data if available
+      if (cachedData) {
+        setOrders(cachedData.orders);
         setLoading(false);
         return;
       }
@@ -185,7 +175,8 @@ export default function OrderManagementPage() {
       // Fetch fresh data
       setLoading(true);
       try {
-        const needStats = (now - statsTimestamp) > CACHE_DURATION;
+        const cachedStats = orderCache.getStats();
+        const needStats = !cachedStats;
         
         const result = await fetchOrders({
           tab: activeTab,
@@ -197,20 +188,15 @@ export default function OrderManagementPage() {
         if (!isCancelled) {
           setOrders(result.orders);
           
-          // Update cache
-          setCache(prev => ({
-            ...prev,
-            [cacheKey]: {
-              data: result.orders,
-              timestamp: now,
-              page: currentPage
-            }
-          }));
+          // Update persistent cache
+          orderCache.setData(cacheKey, {
+            orders: result.orders
+          });
           
           // Update stats if we got them
           if (result.counts) {
             setCounts(result.counts);
-            setStatsTimestamp(now);
+            orderCache.setStats(result.counts);
           }
         }
       } catch (error) {
@@ -231,7 +217,7 @@ export default function OrderManagementPage() {
     return () => {
       isCancelled = true;
     };
-  }, [activeTab, searchQuery, currentPage, cache, statsTimestamp]);
+  }, [activeTab, searchQuery, currentPage]);
 
   // Reset page to 1 when search query or active tab changes
   useEffect(() => {
@@ -241,22 +227,23 @@ export default function OrderManagementPage() {
   // Load initial stats if not cached
   useEffect(() => {
     const loadInitialStats = async () => {
-      const now = Date.now();
-      if ((now - statsTimestamp) > CACHE_DURATION) 
+      const cachedStats = orderCache.getStats();
+      
+      if (cachedStats && typeof cachedStats === 'object' && 'total' in cachedStats) {
+        setCounts(cachedStats as { total: number; pending: number; delivered: number; cancelled: number });
+      } else {
         try {
           const stats = await fetchOrderStatsOnly();
           setCounts(stats);
-          setStatsTimestamp(now);
+          orderCache.setStats(stats);
         } catch (error) {
           console.error('Error fetching initial stats:', error);
         }
-      
+      }
     };
 
-    if (statsTimestamp === 0) 
-      void loadInitialStats();
-    
-  }, []);
+    void loadInitialStats();
+  }, []); // Run once on mount
 
 
   const ordersPerPage = 20; // Match the API limit

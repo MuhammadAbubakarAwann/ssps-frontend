@@ -1,6 +1,6 @@
 'use client';
 
-import { logout } from '@/lib/auth-service';
+import { logout } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 
 interface LogoutButtonProps {

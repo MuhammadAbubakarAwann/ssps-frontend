@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth-service';
+import { getSession, refreshAccessToken } from '@/lib/auth-service';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -13,9 +13,22 @@ export async function middleware(request: NextRequest) {
   
 
   // Get session
-  const session = await getSession();
+  let session = await getSession();
 
-  // If no session and trying to access protected route, redirect to login
+  // If no session, try to refresh the token
+  if (!session) 
+    try {
+      const newToken = await refreshAccessToken();
+      if (newToken) 
+        // Try to get session again after refresh
+        session = await getSession();
+      
+    } catch (error) {
+      console.error('Token refresh failed in middleware:', error);
+    }
+  
+
+  // If still no session after refresh attempt, redirect to login
   if (!session) 
     return NextResponse.redirect(new URL('/login', request.url));
   
