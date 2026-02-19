@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { Star } from 'lucide-react';
 import OverviewTab from '@/components/restaurants/tabs/overview';
 import MenuTab from '@/components/restaurants/tabs/menu';
-import OrdersTab from '@/components/restaurants/tabs/orders';
+import ReviewsTab from '@/components/restaurants/tabs/reviews';
 import DocumentsTab from '@/components/restaurants/tabs/documents';
 
 interface BestSellingItem {
@@ -116,7 +116,7 @@ export default function RestaurantDetailClient({
   const tabs = [
     { key: 'overview', label: 'Overview' },
     { key: 'menu', label: 'Menu' },
-    { key: 'orders', label: 'Orders' },
+    { key: 'reviews', label: 'Reviews' },
     { key: 'documents', label: 'Documents' }
   ];
 
@@ -270,8 +270,8 @@ export default function RestaurantDetailClient({
         );
       case 'menu':
         return <MenuTab restaurantId={restaurantId} />;
-      case 'orders':
-        return <OrdersTab />;
+      case 'reviews':
+        return <ReviewsTab restaurantId={restaurantId} />;
       case 'documents':
         return <DocumentsTab />;
       default:
