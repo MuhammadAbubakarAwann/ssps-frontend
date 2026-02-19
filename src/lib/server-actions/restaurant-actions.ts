@@ -3,6 +3,7 @@
 import type { Restaurant, RestaurantsCount, RestaurantFilterStatus } from '@/types/restaurant';
 import type { MenuApiResponse } from '@/types/menu';
 import type { ReviewsApiResponse } from '@/types/reviews';
+import type { DocumentsApiResponse } from '@/types/documents';
 import { requireAdmin, refreshAccessToken } from '@/lib/auth-service';
 
 const API_BASE_URL = process.env.BACKEND_API_URL || 'https://api.domlii.com/api/v1';
@@ -234,7 +235,6 @@ async function fetchRestaurantStats(): Promise<RestaurantsCount> {
     if (!response.ok) {
       // If endpoint doesn't exist (404), skip to fallback calculation
       if (response.status === 404) {
-        console.log('Stats endpoint not found, calculating from restaurants list');
         throw new Error('Stats endpoint not available');
       }
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -257,7 +257,6 @@ async function fetchRestaurantStats(): Promise<RestaurantsCount> {
       disabled: overview.inactive
     };
   } catch (error) {
-    console.log('Falling back to manual stats calculation');
     // If stats endpoint doesn't exist, calculate from all restaurants
     return calculateStatsFromRestaurants();
   }
@@ -452,8 +451,6 @@ export async function fetchBestSellingItems(restaurantId?: string): Promise<Best
       url += `?restaurantId=${restaurantId}`;
     
 
-    console.log('Fetching best selling items from URL:', url);
-
     const response = await makeAuthenticatedRequest(url, {
       cache: 'no-store',
       signal: controller.signal
@@ -461,15 +458,12 @@ export async function fetchBestSellingItems(restaurantId?: string): Promise<Best
 
     clearTimeout(timeoutId);
 
-    console.log('Best selling items response status:', response.status);
-
     if (!response.ok) {
       console.error('Best selling items API error:', response.status, response.statusText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data: BestSellingItemsResponse = await response.json();
-    console.log('Best selling items raw data:', data);
 
     if (!data.success) {
       console.error('API returned success: false', data);
@@ -642,23 +636,18 @@ export async function toggleRestaurantStatus(id: string, disable: boolean): Prom
 // Fetch revenue overview for chart
 export async function fetchRevenueOverview(restaurantId: string): Promise<RevenueOverviewResponse> {
   try {
-    console.log('Server action: fetchRevenueOverview called with restaurantId:', restaurantId);
     const url = `${API_BASE_URL}/admin/revenue-overview?restaurantId=${restaurantId}`;
-    console.log('Revenue overview API URL:', url);
     
     const response = await makeAuthenticatedRequest(url, {
       method: 'GET',
       cache: 'no-store'
     });
     
-    console.log('Revenue overview response status:', response.status);
-    
     if (!response.ok) 
       throw new Error(`HTTP error! status: ${response.status}`);
     
     
     const data: RevenueOverviewResponse = await response.json();
-    console.log('Revenue overview raw data:', data);
     
     if (!data.success) 
       throw new Error('API returned error');
@@ -676,8 +665,6 @@ export async function fetchRestaurantMenu(restaurantId: string): Promise<MenuApi
   try {
     await requireAdmin();
 
-    console.log('Fetching menu for restaurant:', restaurantId);
-
     const response = await makeAuthenticatedRequest(`${API_BASE_URL}/admin/menus?restaurantId=${restaurantId}`, {
       method: 'GET',
       headers: {
@@ -685,13 +672,10 @@ export async function fetchRestaurantMenu(restaurantId: string): Promise<MenuApi
       }
     });
 
-    console.log('Menu response status:', response.status);
-
     if (!response.ok) 
       throw new Error(`HTTP error! status: ${response.status}`);
 
     const data: MenuApiResponse = await response.json();
-    console.log('Menu raw data:', data);
 
     if (!data.success) 
       throw new Error('API returned error');
@@ -720,13 +704,10 @@ export async function fetchRestaurantReviews(restaurantId: string, rating?: numb
       }
     });
 
-    console.log('Reviews response status:', response.status);
-
     if (!response.ok) 
       throw new Error(`HTTP error! status: ${response.status}`);
 
     const data: ReviewsApiResponse = await response.json();
-    console.log('Reviews raw data:', data);
 
     if (!data.success) 
       throw new Error('API returned error');
@@ -734,6 +715,33 @@ export async function fetchRestaurantReviews(restaurantId: string, rating?: numb
     return data;
   } catch (error) {
     console.error('Error fetching restaurant reviews:', error);
+    throw error;
+  }
+}
+
+// Fetch restaurant documents
+export async function fetchRestaurantDocuments(restaurantId: string): Promise<DocumentsApiResponse> {
+  try {
+    await requireAdmin();
+
+    const response = await makeAuthenticatedRequest(`${API_BASE_URL}/admin/restaurant-documents?restaurantId=${restaurantId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) 
+      throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data: DocumentsApiResponse = await response.json();
+
+    if (!data.success) 
+      throw new Error('API returned error');
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching restaurant documents:', error);
     throw error;
   }
 }

@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { fetchRestaurantDetails, fetchBestSellingItems, fetchRevenueOverview, type RevenueTimeSeriesData } from '@/lib/server-actions/restaurant-actions';
+import {
+  fetchRestaurantDetails,
+  fetchBestSellingItems,
+  fetchRevenueOverview,
+  type RevenueTimeSeriesData
+} from '@/lib/server-actions/restaurant-actions';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { Star } from 'lucide-react';
@@ -104,7 +109,9 @@ export default function RestaurantDetailClient({
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
-  const [bestSellingItems, setBestSellingItems] = useState<BestSellingItem[]>([]);
+  const [bestSellingItems, setBestSellingItems] = useState<BestSellingItem[]>(
+    [],
+  );
   const [bestSellingLoading, setBestSellingLoading] = useState(true);
   const [revenueData, setRevenueData] = useState<RevenueTimeSeriesData[]>([]);
   const [revenueLoading, setRevenueLoading] = useState(true);
@@ -124,22 +131,11 @@ export default function RestaurantDetailClient({
   const fetchBestSellingItemsData = async () => {
     try {
       setBestSellingLoading(true);
-      console.log('Fetching best selling items for restaurant:', restaurantId);
       const data = await fetchBestSellingItems(restaurantId);
-      console.log('Best selling items API response:', data);
-      console.log('API response type:', typeof data);
-      console.log('API response success:', data?.success);
-      console.log('API response data type:', typeof data?.data);
-      console.log('API response data length:', Array.isArray(data?.data) ? data.data.length : 'not an array');
-      console.log('API response data array:', data?.data);
-      
+
       if (data?.success && data?.data && Array.isArray(data.data)) {
-        console.log('Setting best selling items array with', data.data.length, 'items');
         setBestSellingItems(data.data);
-        console.log('Successfully set best selling items state');
       } else {
-        console.log('No best selling items data found or API returned success: false or data is not array');
-        console.log('Success:', data?.success, 'Data:', data?.data, 'Is Array:', Array.isArray(data?.data));
         setBestSellingItems([]);
       }
     } catch (error) {
@@ -155,19 +151,15 @@ export default function RestaurantDetailClient({
   const fetchRevenueData = async () => {
     try {
       setRevenueLoading(true);
-      console.log('Fetching revenue overview for restaurant:', restaurantId);
       const data = await fetchRevenueOverview(restaurantId);
-      console.log('Revenue overview API response:', data);
-      
+
       if (data?.success && data?.data?.timeSeries) {
         setRevenueData(data.data.timeSeries);
         setRevenueSummary({
           totalRevenue: data.data.summary.totalRevenue,
           growthRate: data.data.summary.growthRate
         });
-        console.log('Successfully loaded revenue data:', data.data.timeSeries.length, 'data points');
       } else {
-        console.log('No revenue data found or API returned success: false');
         setRevenueData([]);
         setRevenueSummary({ totalRevenue: 0, growthRate: 0 });
       }
@@ -186,7 +178,7 @@ export default function RestaurantDetailClient({
       try {
         setLoading(true);
         const data = await fetchRestaurantDetails(restaurantId);
-        
+
         const transformedRestaurant: Restaurant = {
           id: data.id,
           restaurantName: data.restaurantName,
@@ -198,41 +190,54 @@ export default function RestaurantDetailClient({
           registrationDate: data.registrationDate,
           cuisineType: data.cuisineType,
           description: data.description,
-          operatingHours: data.operatingHours ? Object.fromEntries(
-            Object.entries(data.operatingHours).map(([day, hours]) => [
-              day,
-              hours ? {
-                isOpen: hours.isOpen,
-                openTime: hours.open,
-                closeTime: hours.close
-              } : undefined
-            ]).filter(([_, hours]) => hours !== undefined)
-          ) : undefined,
-          coordinates: data.latitude && data.longitude ? {
-            latitude: data.latitude,
-            longitude: data.longitude
-          } : undefined,
+          operatingHours: data.operatingHours
+            ? Object.fromEntries(
+                Object.entries(data.operatingHours)
+                  .map(([day, hours]) => [
+                    day,
+                    hours
+                      ? {
+                          isOpen: hours.isOpen,
+                          openTime: hours.open,
+                          closeTime: hours.close
+                        }
+                      : undefined
+                  ])
+                  .filter(([_, hours]) => hours !== undefined),
+              )
+            : undefined,
+          coordinates:
+            data.latitude && data.longitude
+              ? {
+                  latitude: data.latitude,
+                  longitude: data.longitude
+                }
+              : undefined,
           profilePhotoUrl: data.profilePhotoUrl,
           coverPhotoUrl: data.coverPhotoUrl,
           taxRegistrationNumber: data.taxRegistrationNumber,
           verifiedAt: data.verifiedAt,
-          user: data.userId ? {
-            id: data.userId,
-            email: data.userEmail,
-            phone: data.userPhone,
-            status: data.userStatus,
-            createdAt: '', // Not available in API response
-            updatedAt: data.updatedAt
-          } : undefined,
-          stats: data.stats ? {
-            totalMeals: data.stats.totalMeals,
-            totalOrders: data.stats.totalOrders,
-            totalPromotions: data.stats.totalPromotions,
-            totalEarnings: 0 // Not available in API response
-          } : undefined,
+          user: data.userId
+            ? {
+                id: data.userId,
+                email: data.userEmail,
+                phone: data.userPhone,
+                status: data.userStatus,
+                createdAt: '', // Not available in API response
+                updatedAt: data.updatedAt
+              }
+            : undefined,
+          stats: data.stats
+            ? {
+                totalMeals: data.stats.totalMeals,
+                totalOrders: data.stats.totalOrders,
+                totalPromotions: data.stats.totalPromotions,
+                totalEarnings: 0 // Not available in API response
+              }
+            : undefined,
           updatedAt: data.updatedAt
         };
-        
+
         setRestaurant(transformedRestaurant);
       } catch (error) {
         console.error('Error fetching restaurant details:', error);
@@ -273,7 +278,7 @@ export default function RestaurantDetailClient({
       case 'reviews':
         return <ReviewsTab restaurantId={restaurantId} />;
       case 'documents':
-        return <DocumentsTab />;
+        return <DocumentsTab restaurantId={restaurantId} />;
       default:
         return (
           <OverviewTab
@@ -288,26 +293,29 @@ export default function RestaurantDetailClient({
     }
   };
 
-  if (loading) 
+  if (loading)
     return (
       <div className='min-h-screen bg-[#FFFDF8] flex items-center justify-center'>
         <div className='text-[#6B7280]'>Loading restaurant details...</div>
       </div>
     );
-  
 
-  if (!restaurant) 
+  if (!restaurant)
     return (
       <div className='min-h-screen bg-[#FFFDF8] flex items-center justify-center'>
         <div className='text-center'>
           <div className='text-[#6B7280] mb-4'>Restaurant not found</div>
-          <Button color='primary' size='medium' onClick={handleBackClick} variant='outline'>
+          <Button
+            color='primary'
+            size='medium'
+            onClick={handleBackClick}
+            variant='outline'
+          >
             Back to Restaurants
           </Button>
         </div>
       </div>
     );
-  
 
   return (
     <div className='flex flex-col gap-5 pt-4'>
@@ -318,13 +326,13 @@ export default function RestaurantDetailClient({
           {/* Cover & Profile Image Section */}
           <div className='flex flex-col items-center w-full max-w-[341px] h-[138px]'>
             {/* Cover Image */}
-            <div className='relative w-full h-[104px] bg-gradient-to-r from-[#FABB17] to-[#F59E0B] rounded-[10px] overflow-hidden'>
+            <div className='relative w-full h-[104px] bg-white  rounded-[10px] overflow-hidden flex items-center justify-center'>
               {restaurant.coverPhotoUrl && (
                 <Image
                   src={restaurant.coverPhotoUrl}
                   alt='Restaurant cover'
                   fill
-                  className='object-cover opacity-60'
+                  className=' object-cover'
                 />
               )}
             </div>
@@ -333,14 +341,14 @@ export default function RestaurantDetailClient({
             <div className='flex items-center justify-between w-full max-w-[341px] h-[100px] px-[10px] -mt-[50px] relative z-10'>
               {/* Profile Image */}
               <div className='relative'>
-                <div className='w-[100px] h-[100px] rounded-full border-[1.67px] border-white bg-white overflow-hidden shadow-[0px_2px_2px_rgba(0,0,0,0.25)]'>
+                <div className='w-[100px] h-[100px] rounded-full border-[1.67px] border-white bg-white overflow-hidden shadow-[0px_2px_2px_rgba(0,0,0,0.25)] flex items-center justify-center'>
                   {restaurant.profilePhotoUrl ? (
                     <Image
                       src={restaurant.profilePhotoUrl}
                       alt='Restaurant profile'
                       width={100}
                       height={100}
-                      className='object-cover'
+                      className=' object-cover'
                     />
                   ) : (
                     <div className='w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-2xl'>

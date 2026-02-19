@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -39,7 +39,7 @@ const COLUMN_COUNT = TABLE_COLUMNS.length;
 const TABLE_STYLES = {
   header: 'text-[#534E43] font-semibold text-xs uppercase py-4 px-6 whitespace-nowrap',
   cell: 'text-sm text-[#65656A] py-4 px-6 whitespace-nowrap',
-  row: 'border-b border-[#F2F0EA] hover:bg-[#FAFAF8] transition-colors'
+  row: 'border-b border-[#F2F0EA] hover:bg-[#FFF9E8] transition-colors'
 };
 
 // Reusable components
@@ -49,8 +49,8 @@ const TableHeaderCell = ({ children, className = '' }: { children: React.ReactNo
   </TableHead>
 );
 
-const TableDataCell = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <TableCell className={`${TABLE_STYLES.cell} ${className}`}>
+const TableDataCell = ({ children, className = '', onClick }: { children: React.ReactNode; className?: string; onClick?: (e: React.MouseEvent<HTMLTableCellElement>) => void }) => (
+  <TableCell className={`${TABLE_STYLES.cell} ${className}`} onClick={onClick}>
     {children}
   </TableCell>
 );
@@ -80,6 +80,7 @@ const PaginationButton = ({
 );
 
 export default function RestaurantManagementClient() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -288,7 +289,6 @@ export default function RestaurantManagementClient() {
         return newCounts;
       });
 
-      console.log('Restaurant approved successfully');
       toast.success('Restaurant approved successfully!');
     } catch (error) {
       console.error('Error approving restaurant:', error);
@@ -332,7 +332,6 @@ export default function RestaurantManagementClient() {
         return newCounts;
       });
       
-      console.log('Restaurant rejected successfully');
       toast.success('Restaurant rejected successfully!');
     } catch (error) {
       console.error('Error rejecting restaurant:', error);
@@ -376,7 +375,6 @@ export default function RestaurantManagementClient() {
         return newCounts;
       });
       
-      console.log('Restaurant disabled successfully');
       toast.success('Restaurant disabled successfully!');
     } catch (error) {
       console.error('Error disabling restaurant:', error);
@@ -420,7 +418,6 @@ export default function RestaurantManagementClient() {
         return newCounts;
       });
       
-      console.log('Restaurant enabled successfully');
       toast.success('Restaurant enabled successfully!');
     } catch (error) {
       console.error('Error enabling restaurant:', error);
@@ -453,7 +450,7 @@ export default function RestaurantManagementClient() {
         <div className='bg-white border border-[#F2F0EA] rounded-[10px] overflow-hidden'>
           <Table>
             <TableHeader>
-              <TableRow className='border-b border-[#ECE9E1] bg-white hover:bg-white'>
+              <TableRow className='border-b border-[#ECE9E1] bg-white '>
                 {TABLE_COLUMNS.map((column) => (
                   <TableHeaderCell key={column.key} className={column.className}>
                     {column.label}
@@ -475,15 +472,11 @@ export default function RestaurantManagementClient() {
                 currentRestaurants.map((restaurant) => (
                   <TableRow
                     key={restaurant.id}
-                    className={TABLE_STYLES.row}
+                    className={`${TABLE_STYLES.row} cursor-pointer`}
+                    onClick={() => router.push(`/restaurants/${restaurant.id}`)}
                   >
                     <TableDataCell className='font-medium'>
-                      <Link 
-                        href={`/restaurants/${restaurant.id}`}
-                        className='text-[#FABB17] hover:text-[#E5A815] hover:underline transition-colors'
-                      >
-                        {restaurant.restaurantName}
-                      </Link>
+                      {restaurant.restaurantName}
                     </TableDataCell>
                     <TableDataCell>
                       {restaurant.restaurantId}
@@ -506,7 +499,7 @@ export default function RestaurantManagementClient() {
                     <TableDataCell>
                       {restaurant.cuisineType}
                     </TableDataCell>
-                    <TableDataCell className='text-right'>
+                    <TableDataCell className='text-right' onClick={(e) => e.stopPropagation()}>
                       <RestaurantActionsMenu
                         restaurant={restaurant}
                         onApprove={handleApprove}

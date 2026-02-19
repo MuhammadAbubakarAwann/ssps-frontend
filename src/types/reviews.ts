@@ -24,20 +24,20 @@ export interface Review {
 
 export interface RatingStats {
   distribution: {
-    "1": number;
-    "2": number;
-    "3": number;
-    "4": number;
-    "5": number;
+    '1': number;
+    '2': number;
+    '3': number;
+    '4': number;
+    '5': number;
   };
   totalReviews: number;
   averageRating: number;
   ratingPercentages: {
-    "1": number;
-    "2": number;
-    "3": number;
-    "4": number;
-    "5": number;
+    '1': number;
+    '2': number;
+    '3': number;
+    '4': number;
+    '5': number;
   };
 }
 
