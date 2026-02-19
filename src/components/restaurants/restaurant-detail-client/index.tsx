@@ -269,7 +269,7 @@ export default function RestaurantDetailClient({
           />
         );
       case 'menu':
-        return <MenuTab />;
+        return <MenuTab restaurantId={restaurantId} />;
       case 'orders':
         return <OrdersTab />;
       case 'documents':

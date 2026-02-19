@@ -1,9 +1,10 @@
 'use server';
 
 import type { Restaurant, RestaurantsCount, RestaurantFilterStatus } from '@/types/restaurant';
+import type { MenuApiResponse } from '@/types/menu';
 import { requireAdmin, refreshAccessToken } from '@/lib/auth-service';
 
-const API_BASE_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL = process.env.BACKEND_API_URL || 'https://api.domlii.com/api/v1';
 
 // Export interface types
 export interface FetchRestaurantsParams {
@@ -665,6 +666,38 @@ export async function fetchRevenueOverview(restaurantId: string): Promise<Revenu
     return data;
   } catch (error) {
     console.error('Error fetching revenue overview:', error);
+    throw error;
+  }
+}
+
+// Menu-related actions
+export async function fetchRestaurantMenu(restaurantId: string): Promise<MenuApiResponse> {
+  try {
+    await requireAdmin();
+
+    console.log('Fetching menu for restaurant:', restaurantId);
+
+    const response = await makeAuthenticatedRequest(`${API_BASE_URL}/admin/menus?restaurantId=${restaurantId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('Menu response status:', response.status);
+
+    if (!response.ok) 
+      throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data: MenuApiResponse = await response.json();
+    console.log('Menu raw data:', data);
+
+    if (!data.success) 
+      throw new Error('API returned error');
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching restaurant menu:', error);
     throw error;
   }
 }
