@@ -5,6 +5,7 @@ import { FaGear } from 'react-icons/fa6';
 import { FaUsers, FaUtensils } from 'react-icons/fa';
 import { IoGrid } from 'react-icons/io5';
 import { MdShoppingCart } from 'react-icons/md';
+import { FaMotorcycle } from 'react-icons/fa';
 
 import { getRoles } from './utils/auth-helpers/role';
 
@@ -55,6 +56,14 @@ export function getMenuList(pathname: string): Group[] {
           label: 'Restaurants',
           active: pathname.includes('/restaurants'),
           icon: FaUtensils,
+          submenus: [],
+          role: getRoles('ADMIN')
+        },
+        {
+          href: '/riders',
+          label: 'Riders',
+          active: pathname.includes('/riders'),
+          icon: FaMotorcycle,
           submenus: [],
           role: getRoles('ADMIN')
         }

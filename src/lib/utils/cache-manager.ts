@@ -162,3 +162,16 @@ export const orderCache = {
   clear: () => 
     cacheManager.clear({ storage: 'sessionStorage' })
 };
+
+export const riderCache = {
+  setData: (key: string, data: any) => 
+    cacheManager.set(`riders_${key}`, data, { storage: 'sessionStorage' }),
+  getData: <T>(key: string): T | null => 
+    cacheManager.get<T>(`riders_${key}`, { storage: 'sessionStorage' }),
+  setStats: (stats: any) => 
+    cacheManager.set('riders_stats', stats, { storage: 'sessionStorage' }),
+  getStats: () => 
+    cacheManager.get('riders_stats', { storage: 'sessionStorage' }),
+  clear: () => 
+    cacheManager.clear({ storage: 'sessionStorage' })
+};
