@@ -174,23 +174,23 @@ function mapApiStatus(rider: ApiRider): string {
 }
 
 // Map verification status for display in table
-function mapVerificationStatusForDisplay(rider: ApiRider): string {
-  // Show the actual verification status in the table
-  switch (rider.verification.status) {
-    case 'VERIFIED':
-      return 'APPROVED';
-    case 'REJECTED':
-      return 'REJECTED';
-    case 'PROFILE_INCOMPLETE':
-      return 'PROFILE_INCOMPLETE';
-    case 'DOCUMENT_PENDING':
-      return 'DOCUMENTS_PENDING';
-    case 'UNDER_REVIEW':
-      return 'UNDER_REVIEW';
-    default:
-      return 'PENDING';
-  }
-}
+// function mapVerificationStatusForDisplay(rider: ApiRider): string {
+//   // Show the actual verification status in the table
+//   switch (rider.verification.status) {
+//     case 'VERIFIED':
+//       return 'APPROVED';
+//     case 'REJECTED':
+//       return 'REJECTED';
+//     case 'PROFILE_INCOMPLETE':
+//       return 'PROFILE_INCOMPLETE';
+//     case 'DOCUMENT_PENDING':
+//       return 'DOCUMENTS_PENDING';
+//     case 'UNDER_REVIEW':
+//       return 'UNDER_REVIEW';
+//     default:
+//       return 'PENDING';
+//   }
+// }
 
 // Fetch rider stats from API
 async function fetchRiderStats(): Promise<RidersCount> {
@@ -222,7 +222,7 @@ async function fetchRiderStats(): Promise<RidersCount> {
       throw new Error('Stats API returned error');
 
 
-    const { totalRiders, verificationStatus, userStatus, summary } = data.data;
+    const { totalRiders, verificationStatus, userStatus } = data.data;
 
     // Calculate counts prioritizing account status over verification status
     const disabledCount = userStatus.INACTIVE + userStatus.SUSPENDED;

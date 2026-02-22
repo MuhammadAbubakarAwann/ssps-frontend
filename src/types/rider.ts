@@ -51,4 +51,4 @@ export const RIDER_STATUS_MAP = {
   approved: ['APPROVED'],
   rejected: ['REJECTED'],
   disabled: ['DISABLED']
-}
+};
