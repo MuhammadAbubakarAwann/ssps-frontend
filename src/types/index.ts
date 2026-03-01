@@ -50,6 +50,49 @@ export type CreateUserInput = {
   role?: Role
 }
 
+export type SubscriptionPlan = {
+  id: string
+  restaurantId: string | null
+  isSystemPlan: boolean
+  name: string
+  description: string
+  planType: string
+  durationWeeks: number
+  price: number
+  mealsPerWeek: number
+  paymentFrequency: string
+  weeklyPrice: number
+  biweeklyPrice: number
+  monthlyPrice: number
+  startDayOfWeek: number
+  deliveryDays: number[]
+  features: string[]
+  isActive: boolean
+  isMostPopular: boolean
+  createdAt: string
+  updatedAt: string
+  restaurant: any
+  activatedByRestaurants: any[]
+  customerPlans: any[]
+  _count: {
+    customerPlans: number
+    activatedByRestaurants: number
+  }
+}
+
+export type CreateSubscriptionPlanInput = {
+  name: string
+  price: number | string
+  mealsIncluded: number
+  features: string[]
+  isActive: boolean
+  isMostPopular: boolean
+}
+
+export type UpdateSubscriptionPlanInput = Partial<CreateSubscriptionPlanInput> & {
+  id: string
+}
+
 export type UpdateUserInput = {
   name?: string
   email?: string
