@@ -25,35 +25,34 @@ export interface FetchRidersResult {
 interface ApiRider {
   id: string;
   name: string;
-  firstName: string;
-  lastName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   status: string;
-  avatar: string | null;
-  registrationDate: string;
-  lastLoginAt: string | null;
-  vehicleInfo: {
-    type: string;
-    brand: string | null;
-    plateNumber: string | null;
+  isVerified: boolean;
+  vehicleDetails: {
+    vehicleType: string;
+    licensePlateNumber: string;
+    brand: string;
   };
-  verification: {
-    status: string;
-    rejectionReason: string | null;
-    verifiedAt: string | null;
-    isDocumentsVerified: boolean;
+  bankInformation: {
+    accountNumber: string;
+    accountName: string;
+    bank: string;
   };
-  workInfo: {
-    scheduleType: string | null;
-    isAvailable: boolean;
-  };
-  statistics: {
-    totalDeliveries: number;
-    totalEarnings: number;
-  };
-  profileCreatedAt: string;
-  profileUpdatedAt: string;
+  rating: number;
+  totalReviews: number;
+  totalDeliveries: number;
+  totalDeliveriesCompleted: number;
+  averageDeliveryTime: string;
+  distanceCovered: string;
+  totalRevenue: number;
+  baseEarnings: number;
+  tipsEarned: number;
+  verificationStatus: string;
+  isAvailable: boolean;
+  joinedDate: string;
+  lastActive: string;
+  lastLocationUpdate: string;
 }
 
 interface RiderDetailsResponse {
@@ -210,9 +209,8 @@ async function fetchRiderStats(): Promise<RidersCount> {
 
     if (!response.ok) {
       // If endpoint doesn't exist (404), skip to fallback calculation
-      if (response.status === 404) {
+      if (response.status === 404)
         throw new Error('Stats endpoint not available');
-      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
@@ -337,9 +335,8 @@ async function fetchRidersData(params: FetchRidersParams = {}): Promise<{ riders
   searchParams.append('limit', limit.toString());
   
   // Only add filter if not ALL
-  if (tab !== 'ALL') {
+  if (tab !== 'ALL')
     searchParams.append('filter', mapFilterToApi(tab));
-  }
 
   if (search)
     searchParams.append('search', search);
@@ -423,7 +420,7 @@ export async function fetchRiderDetails(id: string): Promise<ApiRider> {
 
   try {
     const response = await makeAuthenticatedRequest(
-      `${API_BASE_URL}/admin/riders/${id}`,
+      `${API_BASE_URL}/admin/riders/${id}/details`,
       {
         cache: 'no-store',
         signal: controller.signal
@@ -630,5 +627,89 @@ export async function enableRider(id: string): Promise<StandardApiResponse> {
   } catch (error) {
     console.error('Error enabling rider:', error);
     throw new Error('Failed to enable rider');
+  }
+}
+
+// Rider detail interfaces
+interface RiderDetailsResponse {
+  success: boolean;
+  data: ApiRider;
+}
+
+interface RiderMetricsResponse {
+  success: boolean;
+  data: {
+    averageDeliveryTime: string;
+    totalDeliveries: number;
+    distanceCovered: string;
+    totalRevenue: number;
+    tipsEarned: number;
+    customerRating: number;
+  };
+}
+
+export interface RiderRevenueData {
+  date: string;
+  revenue: number;
+}
+
+interface RiderRevenueResponse {
+  success: boolean;
+  data: {
+    timeSeries: RiderRevenueData[];
+    summary: {
+      totalRevenue: number;
+      growthRate: number;
+    };
+  };
+}
+
+// Fetch rider metrics
+export async function fetchRiderMetrics(id: string): Promise<RiderMetricsResponse['data']> {
+  try {
+    const response = await makeAuthenticatedRequest(
+      `${API_BASE_URL}/admin/riders/${id}/metrics`,
+      {
+        cache: 'no-store'
+      }
+    );
+
+    if (!response.ok)
+      throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data: RiderMetricsResponse = await response.json();
+
+    if (!data.success)
+      throw new Error('API returned error');
+
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching rider metrics:', error);
+    throw new Error('Failed to fetch rider metrics');
+  }
+}
+
+// Fetch rider revenue overview
+export async function fetchRiderRevenueOverview(id: string): Promise<RiderRevenueResponse['data']> {
+  try {
+    const response = await makeAuthenticatedRequest(
+      `${API_BASE_URL}/admin/riders/${id}/revenue-overview?period=monthly`,
+      {
+        cache: 'no-store'
+      }
+    );
+
+    if (!response.ok)
+      throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data: RiderRevenueResponse = await response.json();
+
+    if (!data.success)
+      throw new Error('API returned error');
+
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching rider revenue data:', error);
+    throw new Error('Failed to fetch rider revenue data');
   }
 }
