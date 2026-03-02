@@ -51,8 +51,8 @@ export function RiderActionsMenu({ rider, onApprove, onReject, onDisable, onEnab
   const getMenuItems = () => {
     const items = [];
 
-    // For UNDER_REVIEW status: show approve/reject
-    if (rider.status === 'UNDER_REVIEW') {
+    // For PENDING status (mapped from UNDER_REVIEW): show approve/reject
+    if (rider.status === 'PENDING') {
       items.push(
         <DropdownMenuItem
           key='approve'

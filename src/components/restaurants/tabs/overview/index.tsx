@@ -94,6 +94,12 @@ interface Restaurant {
     totalPromotions: number;
     totalEarnings: number;
   };
+  analytics?: {
+    totalOrdersCompleted: number;
+    orderCompletionRate: number;
+    averageDeliveryTime: number;
+    totalRevenueTransferred: number;
+  };
   recentMeals?: Array<{
     id: string;
     name: string;
@@ -133,12 +139,16 @@ export default function OverviewTab({
     ? [
         {
           title: 'Average Delivery Time',
-          value: '28 min',
+          value: restaurant.analytics?.averageDeliveryTime !== undefined && restaurant.analytics?.averageDeliveryTime !== null
+            ? `${restaurant.analytics.averageDeliveryTime} min`
+            : 'N/A',
           icon: MdDeliveryDining
         },
         {
           title: 'Order Completion Rate',
-          value: '96.5%',
+          value: restaurant.analytics?.orderCompletionRate !== undefined && restaurant.analytics?.orderCompletionRate !== null
+            ? `${restaurant.analytics.orderCompletionRate}%`
+            : 'N/A',
           icon: MdCheckCircle
         },
         {

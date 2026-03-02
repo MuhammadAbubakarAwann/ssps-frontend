@@ -745,3 +745,45 @@ export async function fetchRestaurantDocuments(restaurantId: string): Promise<Do
     throw error;
   }
 }
+
+interface RestaurantMetricsResponse {
+  success: boolean;
+  data: {
+    averageDeliveryTime: string;
+    orderCompletionRate: string;
+  };
+}
+
+// Fetch restaurant metrics (optional - returns null if endpoint doesn't exist)
+export async function fetchRestaurantMetrics(id: string): Promise<RestaurantMetricsResponse['data'] | null> {
+  try {
+    const response = await makeAuthenticatedRequest(
+      `${API_BASE_URL}/admin/restaurants/${id}/metrics`,
+      {
+        cache: 'no-store'
+      }
+    );
+
+    if (!response.ok) {
+      // If endpoint doesn't exist (404), return null instead of throwing
+      if (response.status === 404) {
+        console.warn('Restaurant metrics endpoint not available (404)');
+        return null;
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: RestaurantMetricsResponse = await response.json();
+
+    if (!data.success) {
+      console.warn('Restaurant metrics API returned success: false');
+      return null;
+    }
+
+    return data.data;
+  } catch (error) {
+    console.warn('Error fetching restaurant metrics:', error);
+    // Return null instead of throwing to make it optional
+    return null;
+  }
+}

@@ -85,6 +85,12 @@ interface Restaurant {
     totalPromotions: number;
     totalEarnings: number;
   };
+  analytics?: {
+    totalOrdersCompleted: number;
+    orderCompletionRate: number;
+    averageDeliveryTime: number;
+    totalRevenueTransferred: number;
+  };
   recentMeals?: Array<{
     id: string;
     name: string;
@@ -133,11 +139,11 @@ export default function RestaurantDetailClient({
       setBestSellingLoading(true);
       const data = await fetchBestSellingItems(restaurantId);
 
-      if (data?.success && data?.data && Array.isArray(data.data)) {
+      if (data?.success && data?.data && Array.isArray(data.data)) 
         setBestSellingItems(data.data);
-      } else {
+       else 
         setBestSellingItems([]);
-      }
+      
     } catch (error) {
       console.error('Error fetching best selling items:', error);
       toast.error('Failed to load best selling items');
@@ -232,7 +238,15 @@ export default function RestaurantDetailClient({
                 totalMeals: data.stats.totalMeals,
                 totalOrders: data.stats.totalOrders,
                 totalPromotions: data.stats.totalPromotions,
-                totalEarnings: 0 // Not available in API response
+                totalEarnings: (data.stats as any).totalEarnings || 0
+              }
+            : undefined,
+          analytics: (data as any).analytics
+            ? {
+                totalOrdersCompleted: (data as any).analytics.totalOrdersCompleted,
+                orderCompletionRate: (data as any).analytics.orderCompletionRate,
+                averageDeliveryTime: (data as any).analytics.averageDeliveryTime,
+                totalRevenueTransferred: (data as any).analytics.totalRevenueTransferred
               }
             : undefined,
           updatedAt: data.updatedAt

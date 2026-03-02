@@ -19,7 +19,7 @@ export function RiderStatusBadge({ status }: RiderStatusBadgeProps) {
         };
       case 'PENDING':
         return {
-          label: 'Documents Pending',
+          label: 'Pending',
           className: 'bg-[#FFF9E6] text-[#ffac05] border border-[#FFE066]',
           dotColor: 'bg-[#ffac05]'
         };
@@ -31,9 +31,9 @@ export function RiderStatusBadge({ status }: RiderStatusBadgeProps) {
         };
       case 'UNDER_REVIEW':
         return {
-          label: 'Review Requested',
-          className: 'bg-[#EFF6FF] text-[#2563EB] border border-[#DBEAFE]',
-          dotColor: 'bg-[#2563EB]'
+          label: 'Pending',
+          className: 'bg-[#FFF9E6] text-[#ffac05] border border-[#FFE066]',
+          dotColor: 'bg-[#ffac05]'
         };
       case 'DISABLED':
         return {
