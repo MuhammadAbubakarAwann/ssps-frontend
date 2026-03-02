@@ -29,6 +29,17 @@ interface ApiRider {
   phoneNumber: string;
   status: string;
   isVerified: boolean;
+  verification: {
+    status: string;
+  };
+  vehicleInfo: {
+    type: string;
+    plateNumber: string;
+  };
+  phone: string;
+  firstName?: string;
+  lastName?: string;
+  registrationDate: string;
   vehicleDetails: {
     vehicleType: string;
     licensePlateNumber: string;
