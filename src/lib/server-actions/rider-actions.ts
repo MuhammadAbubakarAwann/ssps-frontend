@@ -64,6 +64,7 @@ interface ApiRider {
   joinedDate: string;
   lastActive: string;
   lastLocationUpdate: string;
+  avatar?: string;
 }
 
 interface RiderDetailsResponse {
@@ -664,6 +665,30 @@ export interface RiderRevenueData {
   revenue: number;
 }
 
+interface RiderRevenueApiResponse {
+  success: boolean;
+  message: string;
+  data: {
+    rider: {
+      id: string;
+      name: string;
+    };
+    period: string;
+    chart: Array<{
+      label: string;
+      earnings: number;
+      deliveries: number;
+      date: string;
+    }>;
+    summary: {
+      totalEarnings: number;
+      totalDeliveries: number;
+      maxEarnings: number;
+      maxDeliveries: number;
+    };
+  };
+}
+
 interface RiderRevenueResponse {
   success: boolean;
   data: {
@@ -713,14 +738,282 @@ export async function fetchRiderRevenueOverview(id: string): Promise<RiderRevenu
     if (!response.ok)
       throw new Error(`HTTP error! status: ${response.status}`);
 
-    const data: RiderRevenueResponse = await response.json();
+    const data: RiderRevenueApiResponse = await response.json();
 
     if (!data.success)
       throw new Error('API returned error');
 
-    return data.data;
+    // Transform API response to match expected format
+    const timeSeries: RiderRevenueData[] = data.data.chart.map(item => ({
+      date: item.date,
+      revenue: item.earnings
+    }));
+
+    // Calculate growth rate (simplified - comparing last two months)
+    let growthRate = 0;
+    if (timeSeries.length >= 2) {
+      const lastMonth = timeSeries[timeSeries.length - 1].revenue;
+      const previousMonth = timeSeries[timeSeries.length - 2].revenue;
+      if (previousMonth > 0)
+        growthRate = ((lastMonth - previousMonth) / previousMonth) * 100;
+    }
+
+    return {
+      timeSeries,
+      summary: {
+        totalRevenue: data.data.summary.totalEarnings,
+        growthRate
+      }
+    };
   } catch (error) {
     console.error('Error fetching rider revenue data:', error);
     throw new Error('Failed to fetch rider revenue data');
+  }
+}
+
+export interface RiderDeliveryItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+export interface RiderDelivery {
+  id: string;
+  restaurantName: string;
+  customerDeliveryAddress: string;
+  itemsDelivered: RiderDeliveryItem[];
+  dateTime: string;
+  rating: number | null;
+  status: string;
+  totalAmount: number;
+}
+
+export interface RiderDeliveriesResponse {
+  success: boolean;
+  message: string;
+  data: {
+    rider: {
+      id: string;
+      name: string;
+    };
+    deliveries: RiderDelivery[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  };
+}
+
+export interface FetchRiderDeliveriesParams {
+  riderId: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface FetchRiderDeliveriesResult {
+  deliveries: RiderDelivery[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+// Fetch rider deliveries
+export async function fetchRiderDeliveries({
+  riderId,
+  page = 1,
+  limit = 10
+}: FetchRiderDeliveriesParams): Promise<FetchRiderDeliveriesResult> {
+  try {
+    const response = await makeAuthenticatedRequest(
+      `${API_BASE_URL}/admin/riders/${riderId}/deliveries?page=${page}&limit=${limit}`,
+      {
+        cache: 'no-store'
+      }
+    );
+
+    if (!response.ok)
+      throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data: RiderDeliveriesResponse = await response.json();
+
+    if (!data.success)
+      throw new Error('API returned error');
+
+    return {
+      deliveries: data.data.deliveries,
+      pagination: data.data.pagination
+    };
+  } catch (error) {
+    console.error('Error fetching rider deliveries:', error);
+    throw new Error('Failed to fetch rider deliveries');
+  }
+}
+
+// Rider Reviews Types
+export interface RiderReviewCustomer {
+  id: string;
+  name: string;
+  avatar: string | null;
+}
+
+export interface RiderReviewOrder {
+  id: string;
+  orderDate: string;
+  createdAt: string;
+  status: string;
+}
+
+export interface RiderReview {
+  id: string;
+  rating: number;
+  comment: string;
+  isAnonymous: boolean;
+  createdAt: string;
+  customer: RiderReviewCustomer;
+  order: RiderReviewOrder;
+}
+
+export interface RiderRatingStats {
+  distribution: {
+    '1': number;
+    '2': number;
+    '3': number;
+    '4': number;
+    '5': number;
+  };
+  totalReviews: number;
+  averageRating: number;
+  ratingPercentages: {
+    '1': number;
+    '2': number;
+    '3': number;
+    '4': number;
+    '5': number;
+  };
+}
+
+export interface RiderReviewRider {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  avatar: string | null;
+  status: string;
+  riderProfile: {
+    vehicleType: string;
+    licensePlate: string;
+    isAvailable: boolean;
+    verificationStatus: string;
+  };
+}
+
+export interface RiderReviewPagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface RiderReviewAppliedFilters {
+  riderId: string;
+  rating: number | null;
+}
+
+export interface RiderReviewsApiResponse {
+  success: boolean;
+  data: {
+    rider: RiderReviewRider;
+    ratingStats: RiderRatingStats;
+    reviews: RiderReview[];
+    pagination: RiderReviewPagination;
+    appliedFilters: RiderReviewAppliedFilters;
+  };
+}
+
+// Rider Documents Types
+export interface RiderDocumentsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    rider: {
+      id: string;
+      name: string;
+    };
+    documents: {
+      drivingLicense: string;
+      vehicleRegistration: string;
+      workEligibilityCanada: string;
+      vehicleInsurance: string;
+    };
+  };
+}
+
+export interface RiderDocumentForUI {
+  id: string;
+  category: string;
+  filename: string;
+  url: string;
+  uploaded: boolean;
+}
+
+// Fetch rider reviews
+export async function fetchRiderReviews(riderId: string, rating?: number | null): Promise<RiderReviewsApiResponse> {
+  try {
+    let url = `${API_BASE_URL}/admin/reviews/riders?riderId=${riderId}`;
+    if (rating) {
+      url += `&rating=${rating}`;
+    }
+
+    const response = await makeAuthenticatedRequest(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok)
+      throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data: RiderReviewsApiResponse = await response.json();
+
+    if (!data.success)
+      throw new Error('API returned error');
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching rider reviews:', error);
+    throw error;
+  }
+}
+
+// Fetch rider documents
+export async function fetchRiderDocuments(riderId: string): Promise<RiderDocumentsResponse> {
+  try {
+    const response = await makeAuthenticatedRequest(`${API_BASE_URL}/admin/riders/${riderId}/documents`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok)
+      throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data: RiderDocumentsResponse = await response.json();
+
+    if (!data.success)
+      throw new Error('API returned error');
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching rider documents:', error);
+    throw error;
   }
 }

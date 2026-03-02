@@ -1,21 +1,99 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Clock, CheckCircle, XCircle, Package } from 'lucide-react';
+import { Package, Star } from 'lucide-react';
+import { fetchRiderDeliveries, type RiderDelivery } from '@/lib/server-actions/rider-actions';
+import { toast } from 'sonner';
 
-interface Delivery {
-  id: string;
-  orderId: string;
-  customerName: string;
-  restaurantName: string;
-  pickupAddress: string;
-  deliveryAddress: string;
-  status: string;
-  deliveryTime: string;
-  distance: string;
-  amount: number;
-  tip: number;
-  createdAt: string;
+interface DeliveryCardProps {
+  delivery: RiderDelivery;
+}
+
+function DeliveryCard({ delivery }: DeliveryCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const itemsText = delivery.itemsDelivered
+    .map((item) => `${item.quantity}x ${item.name}`)
+    .join(', ');
+
+  const formattedDate = new Date(delivery.dateTime).toLocaleString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+
+  return (
+    <div className='flex flex-col border border-[#EFEFEF] rounded-[10px] bg-white overflow-hidden'>
+      {/* Main Card Content - Always Visible */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className='w-full flex flex-col gap-5 p-[21px] hover:bg-gray-50 transition-colors'
+      >
+        {/* Top Row - Restaurant Info and Items/Timestamp */}
+        <div className='flex items-center justify-between gap-[97px]'>
+          {/* Left Side - Timeline and Info */}
+          <div className='flex items-center gap-2'>
+            {/* Timeline */}
+            <div className='flex flex-col items-center h-[65px] gap-0'>
+              <div className='w-4 h-4 rounded-full bg-[#FABB17] border-2 border-[#755504]' />
+              <div className='w-0.5 h-8 bg-[#FABB17]' />
+              <div className='w-4 h-4 rounded-full border-2 border-[#FABB17]' />
+            </div>
+
+            {/* Text Info */}
+            <div className='flex flex-col gap-[18px] ml-2'>
+              {/* Restaurant */}
+              <div className='flex flex-col gap-2'>
+                <h3 className='text-[15px] font-semibold text-left  text-[#4A463B] capitalize'>
+                  {delivery.restaurantName}
+                </h3>
+              </div>
+
+              {/* Address */}
+              <div className='flex flex-col gap-2'>
+                <p className='text-[14px] text-left font-normal text-[#4A463B] capitalize'>
+                  {delivery.customerDeliveryAddress}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Items and Time */}
+          <div className='flex flex-col gap-[14px] '>
+            <p className='text-[14px] text-left font-normal text-[#65656A] capitalize'>
+              Items Delivered: {itemsText}
+            </p>
+            <p className='text-[13px] text-left font-normal text-[#454950] lowercase'>
+              {formattedDate}
+            </p>
+          </div>
+        </div>
+
+        {/* Divider */}
+
+        {/* Expanded Row - Delivery Rating */}
+        {isExpanded && delivery.rating && (
+          <>
+            <div className='w-full h-px bg-[#EFEFEF]' />
+            <div className='flex items-center justify-between  p-[15px]  bg-[#F6F2E8] rounded-[10px]'>
+              <span className='text-[15px] font-medium text-[#4A463B] capitalize'>
+                Delivery Rating
+              </span>
+              <div className='flex items-center gap-2 bg-[#FABB17] px-[5px] py-[2px] rounded-[4px]'>
+                <span className='text-[14px] font-medium text-black'>
+                  {delivery.rating.toFixed(1)}
+                </span>
+                <Star className='w-3 h-3 fill-black text-black' />
+              </div>
+            </div>
+          </>
+        )}
+      </button>
+    </div>
+  );
 }
 
 interface DeliveriesTabProps {
@@ -23,204 +101,61 @@ interface DeliveriesTabProps {
 }
 
 export default function DeliveriesTab({ riderId }: DeliveriesTabProps) {
-  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [deliveries, setDeliveries] = useState<RiderDelivery[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
-
-  useEffect(() => {
-    // Simulate API call - replace with actual API call
-    const mockDeliveries: Delivery[] = [
-      {
-        id: '1',
-        orderId: 'ORD-001',
-        customerName: 'John Doe',
-        restaurantName: 'Pizza Palace',
-        pickupAddress: '123 Restaurant St',
-        deliveryAddress: '456 Customer Ave',
-        status: 'delivered',
-        deliveryTime: '25',
-        distance: '3.2',
-        amount: 24.50,
-        tip: 3.00,
-        createdAt: '2024-03-01T10:30:00Z'
-      },
-      {
-        id: '2',
-        orderId: 'ORD-002',
-        customerName: 'Jane Smith',
-        restaurantName: 'Burger House',
-        pickupAddress: '789 Food Court',
-        deliveryAddress: '321 Home Street',
-        status: 'delivered',
-        deliveryTime: '18',
-        distance: '2.1',
-        amount: 32.75,
-        tip: 5.00,
-        createdAt: '2024-03-01T14:15:00Z'
-      }
-    ];
-
-    setTimeout(() => {
-      setDeliveries(mockDeliveries);
-      setLoading(false);
-    }, 1000);
-  }, [riderId]);
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'delivered':
-        return <CheckCircle className='w-5 h-5 text-green-600' />;
-      case 'cancelled':
-        return <XCircle className='w-5 h-5 text-red-600' />;
-      case 'in-progress':
-        return <Package className='w-5 h-5 text-blue-600' />;
-      default:
-        return <Clock className='w-5 h-5 text-yellow-600' />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
-    }
-  };
-
-  const filteredDeliveries = deliveries.filter(delivery => {
-    if (filter === 'all') return true;
-    return delivery.status === filter;
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0
   });
 
-  if (loading)
-    return (
-      <div className='flex items-center justify-center h-64'>
-        <div className='text-[#6B7280]'>Loading deliveries...</div>
-      </div>
-    );
+  useEffect(() => {
+    const fetchDeliveries = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchRiderDeliveries({
+          riderId,
+          page: pagination.page,
+          limit: pagination.limit
+        });
+        setDeliveries(data.deliveries);
+        setPagination(data.pagination);
+      } catch (error) {
+        console.error('Error fetching deliveries:', error);
+        toast.error('Failed to load deliveries');
+        setDeliveries([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void fetchDeliveries();
+  }, [riderId, pagination.page, pagination.limit]);
 
   return (
-    <div className='flex flex-col gap-6 p-6 w-full'>
-      {/* Header with filters */}
-      <div className='flex justify-between items-center'>
-        <h2 className='text-xl font-semibold text-[#1F2937]'>Delivery History</h2>
-        
-        <div className='flex gap-2'>
-          {['all', 'delivered', 'cancelled', 'in-progress'].map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilter(status)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
-                filter === status
-                  ? 'bg-[#FABB17] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {status === 'all' ? 'All' : status.replace('-', ' ')}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Deliveries List */}
-      <div className='space-y-4'>
-        {filteredDeliveries.length === 0 ? (
-          <div className='text-center py-12 text-[#6B7280]'>
-            <Package className='w-16 h-16 mx-auto mb-4 text-gray-300' />
-            <h3 className='text-lg font-medium mb-2'>No deliveries found</h3>
-            <p className='text-sm'>
-              {filter === 'all' 
-                ? 'This rider has no delivery history yet.'
-                : `No ${filter.replace('-', ' ')} deliveries found.`
-              }
-            </p>
+    <div className='py-6 w-full'>
+      <div className='space-y-3'>
+        {loading ? (
+          <div className='flex items-center justify-center h-96 text-center'>
+            <div>
+              <Package className='w-12 h-12 text-[#D1D5DB] mx-auto mb-3 animate-pulse' />
+              <p className='text-[#6B7280] font-medium'>Loading deliveries...</p>
+            </div>
+          </div>
+        ) : deliveries.length === 0 ? (
+          <div className='flex items-center justify-center h-96 text-center'>
+            <div>
+              <Package className='w-12 h-12 text-[#D1D5DB] mx-auto mb-3' />
+              <p className='text-[#6B7280] font-medium'>No deliveries yet</p>
+              <p className='text-[#9CA3AF] text-sm'>
+                Your completed deliveries will appear here
+              </p>
+            </div>
           </div>
         ) : (
-          filteredDeliveries.map((delivery) => (
-            <div
-              key={delivery.id}
-              className='bg-white border border-[#E5E7EB] rounded-[10px] p-6 shadow-sm hover:shadow-md transition-shadow'
-            >
-              <div className='flex justify-between items-start mb-4'>
-                <div className='flex items-center gap-3'>
-                  {getStatusIcon(delivery.status)}
-                  <div>
-                    <h3 className='font-semibold text-[#1F2937]'>Order #{delivery.orderId}</h3>
-                    <p className='text-sm text-[#6B7280]'>
-                      {new Date(delivery.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
-                </div>
-                
-                <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(delivery.status)}`}>
-                  {delivery.status.replace('-', ' ')}
-                </span>
-              </div>
-
-              <div className='grid grid-cols-2 gap-6 mb-4'>
-                <div>
-                  <h4 className='font-medium text-[#1F2937] mb-2'>Customer</h4>
-                  <p className='text-sm text-[#6B7280]'>{delivery.customerName}</p>
-                </div>
-                
-                <div>
-                  <h4 className='font-medium text-[#1F2937] mb-2'>Restaurant</h4>
-                  <p className='text-sm text-[#6B7280]'>{delivery.restaurantName}</p>
-                </div>
-              </div>
-
-              <div className='grid grid-cols-2 gap-6 mb-4'>
-                <div>
-                  <h4 className='font-medium text-[#1F2937] mb-2 flex items-center gap-2'>
-                    <MapPin className='w-4 h-4' />
-                    Pickup
-                  </h4>
-                  <p className='text-sm text-[#6B7280]'>{delivery.pickupAddress}</p>
-                </div>
-                
-                <div>
-                  <h4 className='font-medium text-[#1F2937] mb-2 flex items-center gap-2'>
-                    <MapPin className='w-4 h-4' />
-                    Delivery
-                  </h4>
-                  <p className='text-sm text-[#6B7280]'>{delivery.deliveryAddress}</p>
-                </div>
-              </div>
-
-              <div className='flex justify-between items-center pt-4 border-t border-[#F3F4F6]'>
-                <div className='flex gap-6'>
-                  <div className='text-center'>
-                    <p className='text-xs text-[#6B7280] mb-1'>Delivery Time</p>
-                    <p className='font-semibold text-[#1F2937]'>{delivery.deliveryTime} min</p>
-                  </div>
-                  
-                  <div className='text-center'>
-                    <p className='text-xs text-[#6B7280] mb-1'>Distance</p>
-                    <p className='font-semibold text-[#1F2937]'>{delivery.distance} km</p>
-                  </div>
-                </div>
-                
-                <div className='text-right'>
-                  <p className='text-sm text-[#6B7280] mb-1'>
-                    Amount: <span className='font-semibold text-[#1F2937]'>${delivery.amount.toFixed(2)}</span>
-                  </p>
-                  <p className='text-sm text-[#6B7280]'>
-                    Tip: <span className='font-semibold text-green-600'>${delivery.tip.toFixed(2)}</span>
-                  </p>
-                </div>
-              </div>
-            </div>
+          deliveries.map((delivery) => (
+            <DeliveryCard key={delivery.id} delivery={delivery} />
           ))
         )}
       </div>

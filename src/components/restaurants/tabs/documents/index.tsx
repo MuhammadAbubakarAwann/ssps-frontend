@@ -7,7 +7,9 @@ import { fetchRestaurantDocuments } from '@/lib/server-actions/restaurant-action
 import type { DocumentsApiResponse, DocumentForUI } from '@/types/documents';
 
 // Helper function to extract filename from URL
-const getFilenameFromUrl = (url: string): string => {
+const getFilenameFromUrl = (url: string | null | undefined): string => {
+  if (!url) return 'document.pdf';
+
   const urlParts = url.split('/');
   const filename = urlParts[urlParts.length - 1];
   // If it's a UUID filename, use a generic name
@@ -56,7 +58,7 @@ export default function DocumentsTab({ restaurantId }: DocumentsTabProps) {
         id: `${key}_${index}`,
         category: doc.name,
         filename: getFilenameFromUrl(doc.url),
-        url: doc.url,
+        url: doc.url || '',
         uploaded: doc.uploaded,
         required: doc.required
       }))

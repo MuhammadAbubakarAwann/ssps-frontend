@@ -79,6 +79,7 @@ interface OverviewTabProps {
     totalRevenue: number;
     growthRate: number;
   };
+  onSwitchToReviews?: () => void;
 }
 
 export default function OverviewTab({
@@ -87,7 +88,8 @@ export default function OverviewTab({
   metricsLoading,
   revenueData,
   revenueLoading,
-  revenueSummary
+  revenueSummary,
+  onSwitchToReviews
 }: OverviewTabProps) {
   const [selectedPeriod, setSelectedPeriod] = useState('Last 30 days');
 
@@ -275,7 +277,10 @@ export default function OverviewTab({
                     />
                   ))}
                 </div>
-                <button className='text-[#FABB17] text-sm font-medium hover:underline'>
+                <button 
+                  onClick={onSwitchToReviews}
+                  className='text-[#FABB17] text-sm font-medium hover:underline'
+                >
                   See Reviews
                 </button>
               </div>

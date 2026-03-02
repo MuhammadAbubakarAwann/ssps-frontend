@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Star, Mail, Phone, Car } from 'lucide-react';
+import { Star, Mail, Phone, Car, User, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import {
   fetchRiderDetails,
@@ -10,6 +10,9 @@ import {
 } from '@/lib/server-actions/rider-actions';
 import { toast } from 'sonner';
 import OverviewTab from '../tabs/overview';
+import DeliveriesTab from '../tabs/deliveries';
+import ReviewsTab from '../tabs/reviews';
+import RiderDocumentsTab from '../tabs/documents';
 
 interface Rider {
   id: string;
@@ -100,7 +103,7 @@ export default function RiderDetailClient({ riderId }: RiderDetailClientProps) {
         email: data.email,
         phone: data.phoneNumber,
         status: data.status,
-        avatar: null, // No avatar in API response
+        avatar: data.avatar || null,
         registrationDate: data.joinedDate,
         lastLoginAt: data.lastActive,
         vehicleInfo: {
@@ -192,25 +195,20 @@ export default function RiderDetailClient({ riderId }: RiderDetailClientProps) {
             revenueData={revenueData}
             revenueLoading={revenueLoading}
             revenueSummary={revenueSummary}
+            onSwitchToReviews={() => setActiveTab('reviews')}
           />
         );
       case 'deliveries':
         return (
-          <div className='flex items-center justify-center h-96 text-[#6B7280]'>
-            Deliveries content will be implemented here
-          </div>
+          <DeliveriesTab riderId={riderId} />
         );
       case 'reviews':
         return (
-          <div className='flex items-center justify-center h-96 text-[#6B7280]'>
-            Reviews content will be implemented here
-          </div>
+          <ReviewsTab riderId={riderId} />
         );
       case 'documents':
         return (
-          <div className='flex items-center justify-center h-96 text-[#6B7280]'>
-            Documents content will be implemented here
-          </div>
+          <RiderDocumentsTab riderId={riderId} />
         );
       default:
         return null;
@@ -224,9 +222,9 @@ export default function RiderDetailClient({ riderId }: RiderDetailClientProps) {
         <div className='flex flex-col items-center p-4 m-4  w-[20%] min-w-[320px] max-w-[400px] h-auto bg-[#F6F2E8] rounded-[10px] sticky top-0'>
           {/* Profile Picture */}
           <div className='flex justify-center mb-3'>
-            <div className='relative w-[189px] h-[189px] rounded-[34px] overflow-hidden border-4 border-white shadow-[0px_1.71818px_3.43636px_rgba(169,194,209,0.05),0px_10.3091px_13.7455px_rgba(169,194,209,0.1)] flex items-center justify-center bg-white'>
+            <div className='relative w-[189px] h-[189px] rounded-[34px] overflow-hidden border-none flex items-center justify-center bg-[#fa97b4]'>
               {loading ? (
-                <div className='text-4xl text-gray-400'>⏳</div>
+                <Loader2 className='w-16 h-16 text-[#fa97b4] animate-spin' />
               ) : rider?.avatar ? (
                 <Image
                   fill
@@ -235,7 +233,7 @@ export default function RiderDetailClient({ riderId }: RiderDetailClientProps) {
                   className='object-cover'
                 />
               ) : (
-                <div className='text-4xl text-gray-400'>👤</div>
+                <User className='w-20 h-20 text-[#880d32]' />
               )}
             </div>
           </div>
@@ -356,7 +354,7 @@ export default function RiderDetailClient({ riderId }: RiderDetailClientProps) {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex justify-center items-center p-[0_4px_16px] gap-[8px] h-[40px] border-b-2 rounded-none ${
+                  className={`flex justify-center items-center p-[0_px_16px] gap-[8px] h-[40px] border-b-2 rounded-none ${
                     activeTab === tab.key
                       ? 'border-[#FABB17] text-[#FABB17]'
                       : 'border-transparent text-[#6B7280] hover:text-[#4B5563]'

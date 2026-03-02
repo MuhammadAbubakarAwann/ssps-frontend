@@ -11,7 +11,7 @@ import {
 } from '@/lib/server-actions/restaurant-actions';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { Star } from 'lucide-react';
+import { Star, ChefHat } from 'lucide-react';
 import OverviewTab from '@/components/restaurants/tabs/overview';
 import MenuTab from '@/components/restaurants/tabs/menu';
 import ReviewsTab from '@/components/restaurants/tabs/reviews';
@@ -351,8 +351,8 @@ export default function RestaurantDetailClient({
                       className=' object-cover'
                     />
                   ) : (
-                    <div className='w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-2xl'>
-                      🍽️
+                    <div className='w-full h-full bg-gray-200 flex items-center justify-center text-gray-400'>
+                      <ChefHat className='w-8 h-8' />
                     </div>
                   )}
                 </div>
