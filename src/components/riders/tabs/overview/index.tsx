@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, Clock, CheckCircle, MapPin, DollarSign, Gift, Star } from 'lucide-react';
-import { GiPathDistance } from "react-icons/gi";
-import { AiOutlineDollar } from "react-icons/ai";
+import { ChevronDown, Clock, CheckCircle, DollarSign, Gift, Star } from 'lucide-react';
+import { GiPathDistance } from 'react-icons/gi';
 import {
   Chart as ChartJS,
   CategoryScale,
