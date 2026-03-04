@@ -147,7 +147,19 @@ export const restaurantCache = {
   getStats: () => 
     cacheManager.get('restaurants_stats', { storage: 'sessionStorage' }),
   clear: () => 
-    cacheManager.clear({ storage: 'sessionStorage' })
+    cacheManager.clear({ storage: 'sessionStorage' }),
+  clearTabData: (tab: string) => {
+    // Clear all cached data for a specific tab
+    if (typeof window !== 'undefined') {
+      const storage = window.sessionStorage;
+      const keys = Object.keys(storage);
+      keys.forEach(key => {
+        if (key.startsWith('cache_restaurants_') && key.includes(`_${tab}_`)) {
+          storage.removeItem(key);
+        }
+      });
+    }
+  }
 };
 
 export const orderCache = {
@@ -173,5 +185,17 @@ export const riderCache = {
   getStats: () => 
     cacheManager.get('riders_stats', { storage: 'sessionStorage' }),
   clear: () => 
-    cacheManager.clear({ storage: 'sessionStorage' })
+    cacheManager.clear({ storage: 'sessionStorage' }),
+  clearTabData: (tab: string) => {
+    // Clear all cached data for a specific tab
+    if (typeof window !== 'undefined') {
+      const storage = window.sessionStorage;
+      const keys = Object.keys(storage);
+      keys.forEach(key => {
+        if (key.startsWith('cache_riders_') && key.includes(`_${tab}_`)) {
+          storage.removeItem(key);
+        }
+      });
+    }
+  }
 };

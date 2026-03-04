@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -81,7 +81,18 @@ const PaginationButton = ({
 
 export default function RestaurantManagementClient() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('ALL');
+  const searchParams = useSearchParams();
+
+  // Initialize activeTab from URL params first
+  const getInitialTab = () => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'DISABLED'].includes(tabParam)) {
+      return tabParam;
+    }
+    return 'ALL';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -94,6 +105,39 @@ export default function RestaurantManagementClient() {
     disabled: 0
   });
   const [totalPages, setTotalPages] = useState(1);
+
+  // Clear cache for current tab when component mounts with URL param
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    console.log('Component mounted with URL tab param:', tabParam, 'initial activeTab:', activeTab);
+    if (tabParam && ['PENDING', 'APPROVED', 'REJECTED', 'DISABLED'].includes(tabParam)) {
+      // Clear all restaurant cache to ensure fresh data when coming from dashboard
+      restaurantCache.clear();
+    }
+  }, []); // Run once on mount
+
+  // Handle tab changes and update URL
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setCurrentPage(1); // Reset to first page when changing tabs
+
+    // Clear cache for this tab to ensure fresh data
+    restaurantCache.clearTabData(tab);
+
+    // Update URL without causing a page reload
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set('tab', tab);
+    router.replace(`/restaurants?${newSearchParams.toString()}`, { scroll: false });
+  };
+
+  // Initialize activeTab from URL params
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'DISABLED'].includes(tabParam)) {
+      setActiveTab(tabParam);
+      setCurrentPage(1); // Reset to first page when tab changes from URL
+    }
+  }, [searchParams]);
 
   // Fetch data when component mounts or when filters change
   useEffect(() => {
@@ -138,8 +182,8 @@ export default function RestaurantManagementClient() {
         totalPages: number;
       }>(cacheKey);
       
-      // Use cached data if available
-      if (cachedData) {
+      // Use cached data if available (but not for PENDING tab to ensure fresh data)
+      if (cachedData && activeTab !== 'PENDING') {
         setRestaurants(cachedData.restaurants);
         setTotalPages(cachedData.totalPages);
         setLoading(false);
@@ -433,7 +477,7 @@ export default function RestaurantManagementClient() {
           <div className=''>
             <RestaurantTabs
               activeTab={activeTab}
-              onTabChange={setActiveTab}
+              onTabChange={handleTabChange}
               counts={counts}
             />
           </div>

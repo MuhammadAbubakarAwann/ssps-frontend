@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -82,7 +82,18 @@ const PaginationButton = ({
 
 export default function RiderManagementClient() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('ALL');
+  const searchParams = useSearchParams();
+
+  // Initialize activeTab from URL params first
+  const getInitialTab = () => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'DISABLED'].includes(tabParam)) {
+      return tabParam;
+    }
+    return 'ALL';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [riders, setRiders] = useState<Rider[]>([]);
@@ -96,11 +107,37 @@ export default function RiderManagementClient() {
   });
   const [totalPages, setTotalPages] = useState(1);
 
+  // Clear cache for current tab when component mounts with URL param
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    console.log('Component mounted with URL tab param:', tabParam, 'initial activeTab:', activeTab);
+    if (tabParam && ['PENDING', 'APPROVED', 'REJECTED', 'DISABLED'].includes(tabParam)) {
+      // Clear all rider cache to ensure fresh data when coming from dashboard
+      riderCache.clear();
+    }
+  }, []); // Run once on mount
+
+  // Handle tab changes and update URL
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setCurrentPage(1); // Reset to first page when changing tabs
+
+    // Clear cache for this tab to ensure fresh data
+    riderCache.clearTabData(tab);
+
+    // Update URL without causing a page reload
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set('tab', tab);
+    router.replace(`/riders?${newSearchParams.toString()}`, { scroll: false });
+  };
+
   // Fetch data when component mounts or when filters change
   useEffect(() => {
     let isCancelled = false;
 
     const fetchData = async () => {
+      console.log('Fetching riders for tab:', activeTab, 'page:', currentPage);
+
       // If searching, always fetch fresh data
       const isSearching = searchQuery.trim() !== '';
 
@@ -139,8 +176,8 @@ export default function RiderManagementClient() {
         totalPages: number;
       }>(cacheKey);
 
-      // Use cached data if available
-      if (cachedData) {
+      // Use cached data if available (but not for PENDING tab to ensure fresh data)
+      if (cachedData && activeTab !== 'PENDING') {
         setRiders(cachedData.riders);
         setTotalPages(cachedData.totalPages);
         setLoading(false);
@@ -432,7 +469,7 @@ export default function RiderManagementClient() {
           <div className=''>
             <RiderTabs
               activeTab={activeTab}
-              onTabChange={setActiveTab}
+              onTabChange={handleTabChange}
               counts={counts}
             />
           </div>
@@ -516,9 +553,21 @@ export default function RiderManagementClient() {
                 <TableRow>
                   <TableCell
                     colSpan={COLUMN_COUNT}
-                    className='text-center py-8 text-[#6B7280]'
+                    className='text-center py-12 text-[#6B7280]'
                   >
-                    No riders found
+                    <div className='flex flex-col items-center gap-3'>
+                      <div className='w-12 h-12 rounded-full bg-[#F3F4F6] flex items-center justify-center'>
+                        <svg className='w-6 h-6 text-[#9CA3AF]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
+                        </svg>
+                      </div>
+                      <div className='text-center'>
+                        <p className='font-medium text-[#374151]'>No riders found</p>
+                        <p className='text-sm text-[#6B7280] mt-1'>
+                          {activeTab === 'PENDING' ? 'No riders awaiting approval at this time.' : `No ${activeTab.toLowerCase()} riders found.`}
+                        </p>
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

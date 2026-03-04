@@ -343,12 +343,12 @@ async function fetchRidersData(params: FetchRidersParams = {}): Promise<{ riders
 
   // Build query parameters
   const searchParams = new URLSearchParams();
-  searchParams.append('page', page.toString());
-  searchParams.append('limit', limit.toString());
+  searchParams.append('page', '1'); // Always fetch page 1
+  searchParams.append('limit', tab === 'ALL' ? limit.toString() : '10000'); // Fetch all for filtering tabs
   
   // Only add filter if not ALL
   if (tab !== 'ALL')
-    searchParams.append('filter', mapFilterToApi(tab));
+    searchParams.append('verification_status', mapFilterToApi(tab));
 
   if (search)
     searchParams.append('search', search);
@@ -357,9 +357,9 @@ async function fetchRidersData(params: FetchRidersParams = {}): Promise<{ riders
     tab,
     filter: tab !== 'ALL' ? mapFilterToApi(tab) : 'none',
     page,
-    limit,
+    limit: tab === 'ALL' ? limit : 'all (for filtering)',
     search,
-    fullUrl: `${API_BASE_URL}/admin/riders}`
+    fullUrl: `${API_BASE_URL}/admin/riders?${searchParams.toString()}`
   });
 
   const controller = new AbortController();
@@ -415,10 +415,38 @@ async function fetchRidersData(params: FetchRidersParams = {}): Promise<{ riders
       licenseNumber: apiRider.vehicleInfo.plateNumber || 'Not provided'
     }));
 
+    // Client-side filtering as fallback
+    let filteredRiders = riders;
+    if (tab !== 'ALL') {
+      filteredRiders = riders.filter(rider => {
+        switch (tab) {
+          case 'PENDING':
+            return rider.status === 'PENDING';
+          case 'APPROVED':
+            return rider.status === 'APPROVED';
+          case 'REJECTED':
+            return rider.status === 'REJECTED';
+          case 'DISABLED':
+            return rider.status === 'DISABLED';
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Calculate total pages based on filtered results
+    const totalFiltered = filteredRiders.length;
+    const calculatedTotalPages = Math.ceil(totalFiltered / limit);
+
+    // Apply client-side pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedRiders = filteredRiders.slice(startIndex, endIndex);
+
     return {
-      riders,
-      totalPages: data.data.pagination?.totalPages || 1,
-      currentPage: data.data.pagination?.currentPage || params.page || 1
+      riders: paginatedRiders,
+      totalPages: calculatedTotalPages,
+      currentPage: page
     };
   } catch (error) {
     clearTimeout(timeoutId);

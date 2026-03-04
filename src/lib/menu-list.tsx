@@ -37,7 +37,7 @@ export function getMenuList(pathname: string): Group[] {
       menus: [
         {
           href: '/',
-          label: 'Dashboard',
+          label: 'Overview',
           active: pathname === '/',
           icon: IoGrid,
           submenus: [],
