@@ -98,7 +98,6 @@ const SubscriptionPlanBadge = ({ plan }: { plan: 'basic' | 'standard' | 'premium
 export default function CustomerManagementClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCustomers, setTotalCustomers] = useState(0);
