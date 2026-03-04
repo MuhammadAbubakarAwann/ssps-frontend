@@ -385,20 +385,6 @@ async function fetchRidersData(params: FetchRidersParams = {}): Promise<{ riders
     if (!data.success)
       throw new Error('API returned error');
 
-    // Log the API response for debugging
-    console.log('API Response - Get All Riders:', {
-      url: `${API_BASE_URL}/admin/riders?${searchParams.toString()}`,
-      params,
-      totalRiders: data.data.riders.length,
-      pagination: data.data.pagination,
-      ridersData: data.data.riders.map(r => ({
-        id: r.id,
-        name: r.name,
-        status: r.status,
-        verificationStatus: r.verification.status,
-        mappedStatus: mapApiStatus(r)
-      }))
-    });
 
     // Transform API data to match our component interface
     const riders: Rider[] = data.data.riders.map((apiRider) => ({
