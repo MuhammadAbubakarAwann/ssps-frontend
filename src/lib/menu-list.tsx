@@ -2,7 +2,7 @@ import { IconType } from 'react-icons';
 import { Role } from '@prisma/client';
 
 import { FaGear } from 'react-icons/fa6';
-import { FaUsers, FaUtensils } from 'react-icons/fa';
+import { FaUsers, FaUtensils, FaUserFriends } from 'react-icons/fa';
 import { IoGrid } from 'react-icons/io5';
 import { MdShoppingCart, MdSubscriptions } from 'react-icons/md';
 import { FaMotorcycle } from 'react-icons/fa';
@@ -45,9 +45,17 @@ export function getMenuList(pathname: string): Group[] {
         },
         {
           href: '/order-management',
-          label: 'Orders',
+          label: 'OrderManagement',
           active: pathname.includes('/order-management'),
           icon: MdShoppingCart,
+          submenus: [],
+          role: getRoles('ADMIN')
+        },
+         {
+          href: '/customers',
+          label: 'Customers',
+          active: pathname.includes('/customers'),
+          icon: FaUserFriends,
           submenus: [],
           role: getRoles('ADMIN')
         },
@@ -59,6 +67,7 @@ export function getMenuList(pathname: string): Group[] {
           submenus: [],
           role: getRoles('ADMIN')
         },
+       
         {
           href: '/riders',
           label: 'Riders',
@@ -85,14 +94,6 @@ export function getSettingsMenu(pathname: string): Group {
   return {
     groupLabel: 'Settings',
     menus: [
-      {
-        href: '/dashboard/users',
-        label: 'Users',
-        active: pathname.includes('/dashboard/users'),
-        icon: FaUsers,
-        submenus: [],
-        role: getRoles('ADMIN')
-      },
       {
         href: '/dashboard/account',
         label: 'Account',
