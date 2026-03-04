@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import {  NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth-service';
 
 const API_BASE_URL = process.env.BACKEND_API_URL || 'https://api.domlii.com/api/v1';

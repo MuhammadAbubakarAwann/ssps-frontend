@@ -60,7 +60,7 @@ export function ChartsSection() {
       }
     };
 
-    fetchCustomerData();
+    void fetchCustomerData();
   }, [customerPeriod]);
 
   // Fetch revenue data
@@ -86,7 +86,7 @@ export function ChartsSection() {
       }
     };
 
-    fetchRevenueData();
+    void fetchRevenueData();
   }, [revenuePeriod]);
 
   if (customerLoading && revenueLoading) {
@@ -144,9 +144,9 @@ export function ChartsSection() {
             disabled={customerLoading}
             className='text-[13px] text-[#6B7280] border border-[#EDEDEB] rounded-[6px] px-2 py-1 bg-white disabled:opacity-50'
           >
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
+            <option value='weekly'>Weekly</option>
+            <option value='monthly'>Monthly</option>
+            <option value='yearly'>Yearly</option>
           </select>
         </div>
         {customerError ? (
@@ -212,9 +212,9 @@ export function ChartsSection() {
             disabled={revenueLoading}
             className='text-[13px] text-[#6B7280] border border-[#EDEDEB] rounded-[6px] px-2 py-1 bg-white disabled:opacity-50'
           >
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
+            <option value='weekly'>Weekly</option>
+            <option value='monthly'>Monthly</option>
+            <option value='yearly'>Yearly</option>
           </select>
         </div>
         {revenueError ? (

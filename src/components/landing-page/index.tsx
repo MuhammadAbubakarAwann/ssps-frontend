@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { KPISection } from './kpi-section';
 import { ApprovalLists } from './approval-list';
 import { ChartsSection } from './charts-section';
@@ -41,7 +40,6 @@ interface PendingRestaurant {
 
 
 export function DashboardLanding({ userInfo }: { userInfo: UserInfo }) {
-  const { data: session } = useSession();
   const [metrics, setMetrics] = useState<KPIMetrics | null>(null);
   const [pendingRiders, setPendingRiders] = useState<PendingRider[]>([]);
   const [pendingRestaurants, setPendingRestaurants] = useState<PendingRestaurant[]>([]);
@@ -79,7 +77,7 @@ export function DashboardLanding({ userInfo }: { userInfo: UserInfo }) {
       }
     };
 
-    fetchData();
+    void fetchData();
   }, []);
 
   if (loading) {

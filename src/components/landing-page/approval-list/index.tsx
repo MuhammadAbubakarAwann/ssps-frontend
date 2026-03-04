@@ -42,7 +42,6 @@ function ListCard({
   onItemClick?: (item: ApprovalItem) => void;
   onSeeAll?: () => void;
 }) {
-  const router = useRouter();
   return (
     <div className='flex flex-col gap-4 p-6 bg-white border border-[#EDEDEB] rounded-[10px]'>
       <div className='flex items-center justify-between'>
@@ -125,11 +124,11 @@ export function ApprovalLists({ pendingRiders, pendingRestaurants }: ApprovalLis
     avatar: '' // Will use FiUser icon
   }));
 
-  const handleRiderClick = (rider: ApprovalItem) => {
+  const handleRiderClick = () => {
     router.push('/riders?tab=PENDING');
   };
 
-  const handleRestaurantClick = (restaurant: ApprovalItem) => {
+  const handleRestaurantClick = () => {
     router.push('/restaurants?tab=PENDING');
   };
 
