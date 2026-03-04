@@ -2,7 +2,7 @@ import { IconType } from 'react-icons';
 import { Role } from '@prisma/client';
 
 import { FaGear } from 'react-icons/fa6';
-import { FaUsers, FaUtensils, FaUserFriends } from 'react-icons/fa';
+import { FaUtensils, FaUserFriends } from 'react-icons/fa';
 import { IoGrid } from 'react-icons/io5';
 import { MdShoppingCart, MdSubscriptions } from 'react-icons/md';
 import { FaMotorcycle } from 'react-icons/fa';
