@@ -103,28 +103,35 @@ export default function CustomerManagementClient() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCustomers, setTotalCustomers] = useState(0);
 
-  // Fetch data when component mounts or when filters change
+  const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
+
+  // Fetch data when component mounts or when page changes (but not search)
   useEffect(() => {
     let isCancelled = false;
     
     const fetchData = async () => {
       setLoading(true);
+      
       try {
         const result = await fetchCustomers({
-          search: searchQuery,
+          search: '', // Always fetch all customers, filter client-side
           page: currentPage,
           limit: 10
         });
         
         if (!isCancelled) {
-          setCustomers(result.customers);
+          setAllCustomers(prev => {
+            // Merge with existing customers to handle pagination
+            const existing = prev.slice(0, (currentPage - 1) * 10);
+            return [...existing, ...result.customers];
+          });
           setTotalPages(result.totalPages);
           setTotalCustomers(result.totalCustomers);
         }
       } catch (error) {
         if (!isCancelled) {
           console.error('Error fetching customers:', error);
-          setCustomers([]);
+          setAllCustomers([]);
         }
       } finally {
         if (!isCancelled) 
@@ -138,15 +145,21 @@ export default function CustomerManagementClient() {
     return () => {
       isCancelled = true;
     };
-  }, [searchQuery, currentPage]);
+  }, [currentPage]); // Only depend on currentPage, not searchQuery
 
-  // Reset page to 1 when search query changes
+  // Reset to page 1 when search query changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
 
-  // API handles pagination, use totalPages from server
-  const currentCustomers = customers; // API already returns the correct page
+  // Client-side filtering based on search query
+  const currentCustomers = searchQuery 
+    ? allCustomers.filter(customer => 
+        customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.phone.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : allCustomers.slice((currentPage - 1) * 10, currentPage * 10); // Show paginated results when not searching
 
   // Generate page numbers for pagination
   const getPageNumbers = () => {
@@ -180,18 +193,25 @@ export default function CustomerManagementClient() {
       <div className='mx-auto flex flex-col '>
         {/* Search Container */}
         <div className='flex flex-col lg:flex-row lg:items-end lg:justify-between border-b border-gray-300'>
-          
-            <div className='flex items-center justify-center gap-2 text-sm text-[#6B7280] pb-2'>
+          <div className=''>
+            <div className='flex items-center gap-2 text-sm text-[#6B7280]'>
               <span>Total Customers: </span>
-              <span className='font-medium text-[#FABB17]'>
-                {totalCustomers.toLocaleString()}
+              <span className='font-medium text-[#1F2937]'>
+                {searchQuery ? currentCustomers.length : totalCustomers.toLocaleString()}
               </span>
+              {searchQuery && (
+                <span className='text-xs text-[#6B7280]'>
+                  (filtered from {totalCustomers.toLocaleString()} total)
+                </span>
+              )}
             </div>
+          </div>
           <div className=''>
             <SearchBar 
               searchQuery={searchQuery} 
               onSearch={setSearchQuery}
               placeholder='Search customers...'
+              debounceMs={0}
             />
           </div>
         </div>
@@ -270,8 +290,8 @@ export default function CustomerManagementClient() {
             </TableBody>
           </Table>
 
-          {/* Pagination - Only show if there are multiple pages */}
-          {totalPages > 1 && (
+          {/* Pagination - Only show if there are multiple pages and not searching */}
+          {totalPages > 1 && !searchQuery && (
             <div className='flex flex-row justify-between items-center py-3 border-t border-[#F2F0EA] h-16 px-4'>
               {/* Previous Button */}
               <PaginationButton

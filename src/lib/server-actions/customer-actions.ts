@@ -116,7 +116,7 @@ async function fetchCustomersData(params: FetchCustomersParams = {}): Promise<Fe
   searchParams.append('limit', limit.toString());
   
   if (search) 
-    searchParams.append('search', search);
+    searchParams.append('q', search); // Try 'q' instead of 'search'
 
   console.log('Fetching customers with params:', {
     page,
@@ -139,20 +139,19 @@ async function fetchCustomersData(params: FetchCustomersParams = {}): Promise<Fe
 
     clearTimeout(timeoutId);
 
-    if (!response.ok) 
+    if (!response.ok) {
+      console.error(' API Response Error:', response.status, response.statusText);
       throw new Error(`HTTP error! status: ${response.status}`);
+    }
     
     const data: ApiResponse = await response.json();
+    console.log(' Raw API Response:', data);
 
-    if (!data.success) 
+    if (!data.success) {
+      console.error(' API returned error:', data);
       throw new Error('API returned error');
-    
-    console.log('API Response - Get All Customers:', {
-      url: `${API_BASE_URL}/admin/customers?${searchParams.toString()}`,
-      params,
-      totalCustomers: data.data.customers.length,
-      pagination: data.data.pagination
-    });
+    }
+ 
 
     // Transform API data to match our component interface
     const customers: Customer[] = data.data.customers.map((apiCustomer) => ({
