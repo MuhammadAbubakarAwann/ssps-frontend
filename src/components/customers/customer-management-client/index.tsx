@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/table';
 import { SearchBar } from '@/components/orders/search-bar';
 import { FiArrowRight, FiArrowLeft } from 'react-icons/fi';
+import { Eye } from 'lucide-react';
 import { fetchCustomers } from '@/lib/server-actions/customer-actions';
 import type { Customer } from '@/types/customer';
 
@@ -22,7 +24,8 @@ const TABLE_COLUMNS = [
   { key: 'registrationDate', label: 'Registration Date', className: '' },
   { key: 'totalOrders', label: 'Total Orders', className: '' },
   { key: 'totalSpendings', label: 'Total Spending', className: '' },
-  { key: 'subscriptionPlan', label: 'Subscription Plan', className: '' }
+  { key: 'subscriptionPlan', label: 'Subscription Plan', className: '' },
+  { key: 'actions', label: 'Actions', className: 'text-center' }
 ];
 
 const COLUMN_COUNT = TABLE_COLUMNS.length;
@@ -31,7 +34,7 @@ const COLUMN_COUNT = TABLE_COLUMNS.length;
 const TABLE_STYLES = {
   header: 'text-[#534E43] font-semibold text-xs uppercase py-4 px-6 whitespace-nowrap',
   cell: 'text-sm text-[#65656A] py-4 px-6 whitespace-nowrap',
-  row: 'border-b border-[#F2F0EA] hover:bg-[#FFF9E8] transition-colors'
+  row: 'border-b border-[#F2F0EA] hover:bg-[#FFF9E8] transition-colors hover:shadow-sm'
 };
 
 // Reusable components
@@ -101,8 +104,13 @@ export default function CustomerManagementClient() {
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCustomers, setTotalCustomers] = useState(0);
-
   const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
+
+  const router = useRouter();
+
+  const handleCustomerClick = (customerId: string) => {
+    router.push(`/customers/${customerId}`);
+  };
 
   // Fetch data when component mounts or when page changes (but not search)
   useEffect(() => {
@@ -241,7 +249,8 @@ export default function CustomerManagementClient() {
                 currentCustomers.map((customer) => (
                   <TableRow
                     key={customer.id}
-                    className={`${TABLE_STYLES.row}`}
+                    className={`${TABLE_STYLES.row} cursor-pointer`}
+                    onClick={() => handleCustomerClick(customer.id)}
                   >
                     <TableDataCell className='font-medium'>
                       {customer.name}
@@ -273,6 +282,20 @@ export default function CustomerManagementClient() {
                     
                     <TableDataCell>
                       <SubscriptionPlanBadge plan={customer.subscriptionPlan} />
+                    </TableDataCell>
+
+                    <TableDataCell className='text-center'>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCustomerClick(customer.id);
+                        }}
+                          className='inline-flex items-center gap-1 px-3 py-1 text-[13px] text-[#FABB17] hover:text-[#FABB17]/80 hover:bg-[#F3F4F6] rounded-lg transition-colors'
+                        title='View Details'
+                      >
+                        <Eye className='w-4 h-4' />
+                        View
+                      </button>
                     </TableDataCell>
                   </TableRow>
                 ))
