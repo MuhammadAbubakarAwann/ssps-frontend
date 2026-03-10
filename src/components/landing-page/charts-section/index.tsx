@@ -47,11 +47,11 @@ export function ChartsSection() {
         const response = await fetch(`/api/admin/analytics/customer-growth?period=${customerPeriod}`);
         const data = await response.json();
 
-        if (!response.ok) {
+        if (!response.ok) 
           setCustomerError(`Failed to load customer growth: ${data.message || 'Unknown error'}`);
-        } else if (data.success) {
+         else if (data.success) 
           setCustomerGrowthData(data.data.growth);
-        }
+        
       } catch (error) {
         console.error('Error fetching customer growth data:', error);
         setCustomerError('Network error occurred while loading customer data');
@@ -73,11 +73,11 @@ export function ChartsSection() {
         const response = await fetch(`/api/admin/analytics/revenue-overview?period=${revenuePeriod}`);
         const data = await response.json();
 
-        if (!response.ok) {
+        if (!response.ok) 
           setRevenueError(`Failed to load revenue data: ${data.message || 'Unknown error'}`);
-        } else if (data.success) {
+         else if (data.success) 
           setRevenueData(data.data.revenue);
-        }
+        
       } catch (error) {
         console.error('Error fetching revenue data:', error);
         setRevenueError('Network error occurred while loading revenue data');
@@ -89,7 +89,7 @@ export function ChartsSection() {
     void fetchRevenueData();
   }, [revenuePeriod]);
 
-  if (customerLoading && revenueLoading) {
+  if (customerLoading && revenueLoading) 
     return (
       <div className='grid grid-cols-2 gap-4'>
         <div className='flex flex-col gap-4 p-6 bg-white border border-[#EDEDEB] rounded-[10px]'>
@@ -110,7 +110,7 @@ export function ChartsSection() {
         </div>
       </div>
     );
-  }
+  
 
   // Transform data for charts
   const transformedCustomerData = customerGrowthData.map(item => ({
