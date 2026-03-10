@@ -8,6 +8,7 @@ import { MdShoppingCart, MdSubscriptions } from 'react-icons/md';
 import { FaMotorcycle } from 'react-icons/fa';
 
 import { getRoles } from './utils/auth-helpers/role';
+import { ChartLine } from 'lucide-react';
 
 type Submenu = {
   href: string;
@@ -40,6 +41,14 @@ export function getMenuList(pathname: string): Group[] {
           label: 'Overview',
           active: pathname === '/',
           icon: IoGrid,
+          submenus: [],
+          role: getRoles('ADMIN')
+        },
+         {
+          href: '/finance',
+          label: 'Finance',
+          active: pathname === '/finance',
+          icon: ChartLine,
           submenus: [],
           role: getRoles('ADMIN')
         },
