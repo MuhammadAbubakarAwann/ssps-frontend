@@ -9,6 +9,7 @@ import { FaMotorcycle } from 'react-icons/fa';
 
 import { getRoles } from './utils/auth-helpers/role';
 import { ChartLine } from 'lucide-react';
+import { CiShop } from 'react-icons/ci';
 
 type Submenu = {
   href: string;
@@ -90,6 +91,14 @@ export function getMenuList(pathname: string): Group[] {
           label: 'Subscription Plans',
           active: pathname.includes('/subscription-management'),
           icon: MdSubscriptions,
+          submenus: [],
+          role: getRoles('ADMIN')
+        },
+        {
+          href: '/commission-setup',
+          label: 'Commission Setup',
+          active: pathname.includes('/commission-setup'),
+          icon: CiShop,
           submenus: [],
           role: getRoles('ADMIN')
         }
