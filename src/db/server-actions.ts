@@ -73,7 +73,7 @@ export const registerUserByAdmin = async (values: {
     if (userFound)
       return { error: 'Email already exists!' };
 
-    const validRoles = ['USER', 'ADMIN', 'EDITOR', 'WRITER', 'ACCOUNTANT'];
+    const validRoles = ['STUDENT', 'TEACHER', 'ADMIN'];
     if (!validRoles.includes(role))
       return { error: 'Invalid role specified' };
 

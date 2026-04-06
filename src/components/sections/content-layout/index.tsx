@@ -4,7 +4,7 @@ import { Navbar } from '@/components/sections/nav-bar';
 interface ContentLayoutProps {
   title: string;
   children: React.ReactNode;
-  userInfo: UserInfo;
+  userInfo: UserInfo | null;
 }
 
 export function ContentLayout({ title, children, userInfo }: ContentLayoutProps) {

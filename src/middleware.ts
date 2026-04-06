@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const allowedDashboardRoles = ['ADMIN', 'TEACHER', 'STUDENT'];
 
   // Public paths that don't require authentication
   const publicPaths = ['/login', '/register', '/auth/error', '/unauthorized'];
@@ -25,11 +26,9 @@ export async function middleware(request: NextRequest) {
     // Parse user data to check role
     const user = JSON.parse(userData);
 
-    // For admin routes, ensure user has admin role
-    if (pathname.startsWith('/admin') || pathname.startsWith('/order-management') || pathname === '/') {
-      if (user.role !== 'ADMIN') {
+    // Ensure only supported dashboard roles can access protected pages.
+    if (!allowedDashboardRoles.includes(user.role)) {
         return NextResponse.redirect(new URL('/unauthorized', request.url));
-      }
     }
 
     return NextResponse.next();

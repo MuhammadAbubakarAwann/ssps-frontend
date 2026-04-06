@@ -1,5 +1,5 @@
 // Define types manually until Prisma client is regenerated
-export type Role = 'ADMIN' | 'USER' | 'MODERATOR'
+export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN'
 
 export type User = {
   id: string

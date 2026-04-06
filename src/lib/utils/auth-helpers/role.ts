@@ -1,6 +1,8 @@
 import { Role } from '@prisma/client';
 
 const roleHierarchy: Record<Role, Role[]> = {
+  STUDENT: ['STUDENT'],
+  TEACHER: ['TEACHER'],
   ADMIN: ['ADMIN']
 };
 

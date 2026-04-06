@@ -4,7 +4,7 @@ import { UserInfo } from '@/@types';
 
 interface NavbarProps {
   title: string;
-  userInfo: UserInfo
+  userInfo: UserInfo | null
 }
 
 export function Navbar({ title, userInfo }: NavbarProps) {

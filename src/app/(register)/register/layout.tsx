@@ -8,12 +8,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html className='font-graphik'>
-      <body>
-        <NextTopLoader color='#0a778f' />
-        {children}
-        <Toaster></Toaster>
-      </body>
-    </html>
+    <div className='font-graphik'>
+      <NextTopLoader color='#0a778f' />
+      {children}
+      <Toaster />
+    </div>
   );
 }

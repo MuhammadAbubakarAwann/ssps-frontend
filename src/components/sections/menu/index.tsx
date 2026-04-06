@@ -73,9 +73,9 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                 <Button
                                   variant={active ? 'selected' : 'ghost'}
                                   className={cn(
-                                    'w-full justify-start h-10 mb-1',
+                                    'w-full justify-start h-10 mb-1 text-white hover:text-white',
                                     active 
-                                      ? 'bg-black text-[#FABB17] rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-black/90'
+                                      ? 'bg-[#B9AFAF33] text-white rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-[#B9AFAF33]'
                                       : ''
                                   )}
                                   asChild
@@ -85,19 +85,19 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                     <span
                                       className={cn(
                                         isOpen === false ? '' : 'mr-4',
-                                        active ? 'text-[#FABB17]' : ''
+                                        'text-white'
                                       )}
                                     >
                                       <Icon size={18} />
                                     </span>
                                     <p
                                       className={cn(
-                                        'max-w-[200px] truncate',
+                                        'max-w-[200px] truncate text-white',
                                         isOpen === false
                                           ? '-translate-x-96 opacity-0'
                                           : 'translate-x-0 opacity-100',
                                         active 
-                                          ? 'text-[#FABB17] font-semibold text-sm leading-[15px] tracking-[-0.03em] capitalize'
+                                          ? 'font-semibold text-sm leading-[15px] tracking-[-0.03em] capitalize'
                                           : ''
                                       )}
                                     >
@@ -171,9 +171,9 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                 <Button
                                   variant={active ? 'selected' : 'ghost'}
                                   className={cn(
-                                    'w-full justify-start h-10 mb-1',
+                                    'w-full justify-start h-10 mb-1 text-white hover:text-white',
                                     active 
-                                      ? 'bg-black text-[#FABB17] rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-black/90'
+                                      ? 'bg-[#B9AFAF33] text-white rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-[#B9AFAF33]'
                                       : ''
                                   )}
                                   asChild
@@ -183,19 +183,19 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                     <span
                                       className={cn(
                                         isOpen === false ? '' : 'mr-4',
-                                        active ? 'text-[#FABB17]' : ''
+                                        'text-white'
                                       )}
                                     >
                                       <Icon size={18} />
                                     </span>
                                     <p
                                       className={cn(
-                                        'max-w-[200px] truncate',
+                                        'max-w-[200px] truncate text-white',
                                         isOpen === false
                                           ? '-translate-x-96 opacity-0'
                                           : 'translate-x-0 opacity-100',
                                         active 
-                                          ? 'text-[#FABB17] font-semibold text-sm leading-[15px] tracking-[-0.03em] capitalize'
+                                          ? 'font-semibold text-sm leading-[15px] tracking-[-0.03em] capitalize'
                                           : ''
                                       )}
                                     >

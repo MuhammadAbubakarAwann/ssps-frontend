@@ -9,56 +9,57 @@
   --text: white;
  /* editor colors end */
 
-  /* Design System Colors - Domlii Dashboard Theme */
+  /* Design System Colors - SPPS Figma Theme */
   
   /* Base/Background Colors */
-  --bg-default: #FFFDF8; /* Main background - warm cream */
-  --bg-base: #FFFFFF; /* Pure white for cards/tables */
-  --bg-bg-subtle: #FFF9E8; /* Sidebar background - light cream */
-  --bg-bg: #F8F5F0; /* Subtle background variation */
-  --bg-bg-hover: #F2F0EA; /* Hover states */
-  --bg-bg-color:#2A313B; /* Keep for compatibility */
-  --bg-bg-active: #E0DDD5; /* Active/pressed states */
+  --bg-default: #F1F1F1; /* App background */
+  --bg-base: #FDFDFD; /* Top bar/footer/card surface */
+  --bg-bg-subtle: #2A313B; /* Sidebar */
+  --bg-bg: #FFFFFF; /* Inputs/cards */
+  --bg-bg-hover: rgba(185, 175, 175, 0.2); /* Sidebar active/hover block */
+  --bg-bg-color: #2A313B; /* Keep for compatibility */
+  --bg-bg-active: rgba(0, 0, 0, 0.1); /* Pressed state */
   
   /* Border Colors */
-  --fg-line: #F2F0EA; /* Table borders */
-  --fg-border: #E0DDD5; /* Primary borders */
-  --fg-border-hover: #D0CCC3; /* Hover borders */
-  --fg-solid: #534E43; /* Header text color */
-  --fg-solid-hover: #6B7280; /* Light gray text */
-  --fg-text: #65656A; /* Body text */
-  --fg-text-contrast: #1F2937; /* Dark contrast text */
-  --fg-default: #2E2B24; /* Default dark text */
+  --fg-line: rgba(0, 0, 0, 0.1);
+  --fg-border: rgba(0, 0, 0, 0.18);
+  --fg-border-hover: rgba(0, 0, 0, 0.26);
+  --fg-solid: #000000;
+  --fg-solid-hover: rgba(0, 0, 0, 0.6);
+  --fg-text: rgba(0, 0, 0, 0.5);
+  --fg-text-contrast: #000000;
+  --fg-default: #000000;
 
-  /* Primary Colors - Golden Yellow Theme */
-  --primary-base: #FEFDFB; /* Very light yellow */
-  --primary-bg-subtle: #FDF9E8; /* Light yellow background */
-  --primary-bg: #FCF4D6; /* Soft yellow */
-  --primary-bg-hover: #FAEFB7; /* Yellow hover */
-  --primary-bg-active: #F8EA98; /* Yellow active */
-  --primary-line: #F4D76B; /* Yellow borders */
-  --primary-border: #F0C94C; /* Medium yellow borders */
-  --primary-border-hover: #FABB17; /* Accent yellow (button color) */
-  --primary-solid: #FABB17; /* Accent yellow */
-  --primary-solid-hover: #E1A325; /* Darker yellow on hover */
-  --primary-text: #8B6914; /* Dark yellow text */
-  --primary-text-contrast: #2E2B24; /* Dark text on yellow */
-  --primary-on-primary: #2E2B24;
-  --primary-light: #FABB17;
-  /* Secondary Colors - Green Theme */
-  --secondary-base: #F0F9F4; /* Very light green */
-  --secondary-bg-subtle: #E6F7ED; /* Light green background */
-  --secondary-bg: #CCEFDC; /* Soft green */
-  --secondary-bg-hover: #B3E7CB; /* Green hover */
-  --secondary-bg-active: #9ADFBA; /* Green active */
-  --secondary-line: #6BC48F; /* Green borders */
-  --secondary-border: #4DB370; /* Medium green borders */
-  --secondary-border-hover: #39996B; /* Primary green (tab color) */
-  --secondary-solid: #39996B; /* Primary green */
-  --secondary-solid-hover: #2E8055; /* Darker green on hover */
-  --secondary-text: #1F5F3F; /* Dark green text */
-  --secondary-text-contrast: #FFFFFF; /* White text on green */
-  --secondary-on-secondary: #FFFFFF; /* White text on green backgrounds */
+  /* Primary Colors - Main CTA Button */
+  --primary-base: #FDFDFD;
+  --primary-bg-subtle: #FFFFFF;
+  --primary-bg: rgba(255, 255, 255, 0.94);
+  --primary-bg-hover: #F1F1F1;
+  --primary-bg-active: rgba(0, 0, 0, 0.1);
+  --primary-line: rgba(0, 0, 0, 0.26);
+  --primary-border: rgba(0, 0, 0, 0.62);
+  --primary-border-hover: #2A313B;
+  --primary-solid: rgba(71, 74, 82, 0.94);
+  --primary-solid-hover: #2A313B;
+  --primary-text: rgba(0, 0, 0, 0.72);
+  --primary-text-contrast: #FFFFFF;
+  --primary-on-primary: #FFFFFF;
+  --primary-light: rgba(255, 255, 255, 0.94);
+
+  /* Secondary Colors - Sidebar/Navigation */
+  --secondary-base: #2A313B;
+  --secondary-bg-subtle: #2A313B;
+  --secondary-bg: rgba(185, 175, 175, 0.2);
+  --secondary-bg-hover: rgba(185, 175, 175, 0.28);
+  --secondary-bg-active: rgba(185, 175, 175, 0.34);
+  --secondary-line: rgba(255, 255, 255, 0.2);
+  --secondary-border: rgba(255, 255, 255, 0.35);
+  --secondary-border-hover: rgba(255, 255, 255, 0.5);
+  --secondary-solid: #FFFFFF;
+  --secondary-solid-hover: rgba(255, 255, 255, 0.85);
+  --secondary-text: #FFFFFF;
+  --secondary-text-contrast: #2A313B;
+  --secondary-on-secondary: #FFFFFF;
   
   /* Badge Colors from Design */
   --badge-published-bg: #FDF0EC; /* Light orange background */
@@ -314,13 +315,15 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply rounded-[9px] bg-[#FABB17] hover:bg-[#E1A325];
+  @apply rounded-[9px] bg-[#474A52] hover:bg-[#2A313B];
 }
 
 /* Font Application */
 @layer base {
   body {
     font-family: 'Graphik', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-default);
+    color: var(--fg-default);
     @apply antialiased;
   }
   

@@ -63,16 +63,16 @@ export function CollapseMenuButton({
       >
         <Button
           variant={active ? 'secondary' : 'ghost'}
-          className='w-full justify-start h-10'
+          className='w-full justify-start h-10 text-white hover:text-white'
         >
           <div className='w-full items-center flex justify-between'>
             <div className='flex items-center'>
-              <span className='mr-4'>
+              <span className='mr-4 text-white'>
                 <Icon size={18} />
               </span>
               <p
                 className={cn(
-                  'max-w-[150px] truncate',
+                  'max-w-[150px] truncate text-white',
                   isOpen
                     ? 'translate-x-0 opacity-100'
                     : '-translate-x-96 opacity-0'
@@ -83,7 +83,7 @@ export function CollapseMenuButton({
             </div>
             <div
               className={cn(
-                'whitespace-nowrap',
+                'whitespace-nowrap text-white',
                 isOpen
                   ? 'translate-x-0 opacity-100'
                   : '-translate-x-96 opacity-0'
@@ -101,17 +101,19 @@ export function CollapseMenuButton({
         {submenus.map(({ href, label, active }, index) => (
           <Button
             key={index}
-            variant={active ? 'secondary' : 'ghost'}
-            className='w-full justify-start h-10 mb-1'
+            className={cn(
+              'w-full justify-start h-10 mb-1 text-white hover:text-white',
+              active && 'bg-[#B9AFAF33] hover:bg-[#B9AFAF33]'
+            )}
             asChild
           >
             <Link href={href}>
-              <span className='mr-4 ml-2'>
+              <span className='mr-4 ml-2 text-white'>
                 <GoDot size={18} />
               </span>
               <p
                 className={cn(
-                  'max-w-[170px] truncate',
+                  'max-w-[170px] truncate text-white',
                   isOpen
                     ? 'translate-x-0 opacity-100'
                     : '-translate-x-96 opacity-0'
@@ -131,17 +133,19 @@ export function CollapseMenuButton({
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
               <Button
-                variant={active ? 'secondary' : 'ghost'}
-                className='w-full justify-start h-10 mb-1'
+                className={cn(
+                  'w-full justify-start h-10 mb-1 text-white hover:text-white',
+                  active && 'bg-[#B9AFAF33] hover:bg-[#B9AFAF33]'
+                )}
               >
                 <div className='w-full items-center flex justify-between'>
                   <div className='flex items-center'>
-                    <span className={cn(isOpen === false ? '' : 'mr-4')}>
+                    <span className={cn(isOpen === false ? 'text-white' : 'mr-4 text-white')}>
                       <Icon size={18} />
                     </span>
                     <p
                       className={cn(
-                        'max-w-[200px] truncate',
+                        'max-w-[200px] truncate text-white',
                         isOpen === false ? 'opacity-0' : 'opacity-100'
                       )}
                     >
@@ -162,10 +166,16 @@ export function CollapseMenuButton({
           {label}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {submenus.map(({ href, label }, index) => (
-          <DropdownMenuItem key={index} asChild>
+        {submenus.map(({ href, label, active }, index) => (
+          <DropdownMenuItem 
+            key={index} 
+            asChild
+            className={cn(active && 'bg-[#B9AFAF33]')}
+          >
             <Link className='cursor-pointer' href={href}>
-              <p className='max-w-[180px] truncate'>{label}</p>
+              <p className={cn('max-w-[180px] truncate', active && 'text-white')}>
+                {label}
+              </p>
             </Link>
           </DropdownMenuItem>
         ))}

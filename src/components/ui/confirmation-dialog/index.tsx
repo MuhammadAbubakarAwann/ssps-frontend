@@ -42,6 +42,10 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   cancelVariant = 'bg-muted text-muted-foreground',
   customContent
 }) => {
+  const stopPropagation = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
+  };
+
   return (
     <RadixAlertDialog>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
@@ -50,11 +54,15 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           className={cn(
             'fixed inset-0 z-50 bg-black/20 data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in'
           )}
+          onClick={stopPropagation}
+          onPointerDown={stopPropagation}
         />
         <AlertDialogContent
           className={cn(
             'fixed left-[50%] top-[50%] z-50 w-[90%] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-lg'
           )}
+          onClick={stopPropagation}
+          onPointerDown={stopPropagation}
         >
           <AlertDialogHeader>
             <AlertDialogTitle className='text-lg font-semibold'>

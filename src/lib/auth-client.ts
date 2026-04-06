@@ -11,6 +11,15 @@ export async function login(credentials: LoginRequest): Promise<AuthResponse> {
       body: JSON.stringify(credentials)
     });
 
+    const contentType = response.headers.get('content-type') || '';
+
+    if (!contentType.includes('application/json')) {
+      return {
+        success: false,
+        message: 'Authentication service returned an invalid response'
+      };
+    }
+
     const data: AuthResponse = await response.json();
     return data;
   } catch (error) {

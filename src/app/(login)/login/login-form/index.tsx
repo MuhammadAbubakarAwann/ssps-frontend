@@ -1,28 +1,23 @@
 'use client';
 import { type FormEvent, useState } from 'react';
-import { login } from '@/lib/auth-client';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
-import { Mail, Eye, EyeOff, Lock } from 'lucide-react';
+import { ArrowRight, Mail, Eye, EyeOff, Lock } from 'lucide-react';
 import Image from 'next/image';
-import authbg from '../../../../../public/images/auth-bg.png';
-import domliiLogo from '../../../../../public/images/logo/domlii-logo.png';
+import { login } from '@/lib/auth-client';
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-
+  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirectUrl');
 
-  const safeRedirectUrl =
-    redirectUrl && redirectUrl.startsWith('/') ? redirectUrl : '/';
-  const registerLink = redirectUrl
-    ? `/register?redirectUrl=${redirectUrl}`
-    : '/register';
+  const safeRedirectUrl = redirectUrl && redirectUrl.startsWith('/') ? redirectUrl : '/';
+  const registerLink = redirectUrl ? `/register?redirectUrl=${redirectUrl}` : '/register';
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,38 +26,25 @@ const LoginForm = () => {
     const formData = new FormData(event.currentTarget);
 
     try {
+      const email = formData.get('email') as string;
+      const password = formData.get('password') as string;
+
       const response = await login({
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
-        role: 'ADMIN'
+        email,
+        password
       });
 
-      setLoading(false);
+      if (!response.success) {
+        throw new Error(response.message || 'Invalid credentials');
+      }
 
-      if (response.success) {
-        toast.success('Sign In successful!');
-        // Force a longer delay to ensure cookies are properly set and available to middleware
-        setTimeout(() => {
-          // Force a page reload to ensure middleware gets fresh cookies
-          window.location.href = safeRedirectUrl;
-        }, 1000);
-      } else 
-        // Handle different error scenarios
-        switch (response.code) {
-          case 'EMAIL_NOT_VERIFIED':
-            toast.error('Please verify your email before logging in.');
-            break;
-          case 'PASSWORD_SETUP_REQUIRED':
-            toast.error('This account requires password setup. Please use Google Sign-In or set up a password.');
-            break;
-          default:
-            toast.error(response.message || 'Login failed');
-        }
-      
+      setLoading(false);
+      toast.success('Sign In successful!');
+      router.push(safeRedirectUrl);
     } catch (error) {
       setLoading(false);
       console.error('Login error:', error);
-      toast.error('Login failed. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Login failed. Please try again.');
     }
   };
 
@@ -71,125 +53,102 @@ const LoginForm = () => {
   };
 
   return (
-    <section className='flex w-full min-h-screen bg-white'>
-      <div className='hidden lg:block lg:w-[35%] relative'>
-        <div className='bg-primary-solid w-full h-full'></div>
-        <Image
-          src={authbg || '/placeholder.svg'}
-          alt='Background'
-          fill
-          priority
-          className='object-cover object-center'
-          style={{ filter: 'brightness(0.7)' }}
-        />
-      </div>
+    <section className='flex w-full min-h-screen'>
+      <div className='w-full lg:w-2/5 flex flex-col items-center justify-center px-6 md:px-12 lg:px-20'>
+        <div className='w-full max-w-[419px] flex flex-col gap-12'>
+          <div className='flex justify-center'>
+            <div className='text-2xl font-bold text-gray-900'>Your Logo</div>
+          </div>
 
-      <div className='w-full lg:w-[65%] flex flex-col items-center justify-center px-6 md:px-12 lg:px-12 py-12'>
-        <div className='w-full max-w-[450px]'>
-          {/* Form card container */}
-          <div className='bg-white  p-6 flex flex-col gap-8 '>
-            <div className='flex justify-center'>
-              <Image
-                src={domliiLogo}
-                alt='Domlii Logo'
-                width={120}
-                height={74}
-                style={{ width: '120', height: '74' }}
-              />
-            </div>
-            <div className='flex flex-col gap-4 text-left'>
-              <h1 className='text-[22px] font-semibold leading-[24px] tracking-[-0.04em] text-[#2E2B24]'>
-                Log in to your account
-              </h1>
+          <div className='flex flex-col gap-2.5 text-center'>
+            <h1 className='text-[28px] font-medium leading-[130%] tracking-[-0.02em]'>Log in to your account</h1>
+            <p className='text-lg text-black/50'>Welcome back! Please enter your details.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className='flex flex-col gap-8 w-full'>
+            <div className='flex flex-col gap-2.5'>
+              <label className='text-lg font-medium'>Email*</label>
+              <div className='relative'>
+                <div className='absolute left-4 top-1/2 transform -translate-y-1/2 text-black/50'>
+                  <Mail size={20} />
+                </div>
+                <Input
+                  type='email'
+                  name='email'
+                  required
+                  placeholder='Enter your email'
+                  className='h-12 pl-12 border border-black/10 bg-black/[0.01] text-lg rounded-none focus:outline-none focus:ring-0 focus:border-black/20'
+                />
+              </div>
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className='flex flex-col gap-6 w-full'
-            >
-              {/* Email Field */}
-              <div className='flex flex-col gap-2.5'>
-                <label className='text-sm font-semibold text-[#1F2937] capitalize'>
-                  Email
-                </label>
-                <div className='relative'>
-                  <div className='absolute left-3 top-1/2 transform -translate-y-1/2 text-[#626974]'>
-                    <Mail size={18} />
-                  </div>
-                  <Input
-                    type='email'
-                    name='email'
-                    required
-                    placeholder='Enter your email'
-                    className='h-10 pl-10 border border-[#FABB17] bg-white text-sm !rounded-lg focus:outline-none focus:ring-0 shadow-sm'
-                  />
+            <div className='flex flex-col gap-2.5'>
+              <label className='text-lg font-medium'>Password*</label>
+              <div className='relative'>
+                <div className='absolute left-4 top-1/2 transform -translate-y-1/2 text-black/50'>
+                  <Lock size={20} />
                 </div>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  name='password'
+                  required
+                  placeholder='••••••••'
+                  className='h-12 pl-12 pr-12 border border-black/10 bg-black/[0.01] text-lg rounded-none focus:outline-none focus:ring-0 focus:border-black/20'
+                />
+                <button
+                  type='button'
+                  onClick={togglePasswordVisibility}
+                  className='absolute right-4 top-1/2 transform -translate-y-1/2 text-black/50 hover:text-black'
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
+            </div>
 
-              {/* Password Field */}
-              <div className='flex flex-col gap-2.5'>
-                <label className='text-sm font-semibold text-[#1F2937] capitalize'>
-                  Password
-                </label>
-                <div className='relative'>
-                  <div className='absolute left-3 top-1/2 transform -translate-y-1/2 text-[#626974]'>
-                    <Lock size={18} />
-                  </div>
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    name='password'
-                    required
-                    placeholder='••••••••'
-                    className='h-10 pl-10 pr-12 border border-[#E3EBF2] bg-white text-sm rounded-lg focus:outline-none focus:ring-0 shadow-sm'
-                  />
-                  <button
-                    type='button'
-                    onClick={togglePasswordVisibility}
-                    className='absolute right-3 top-1/2 transform -translate-y-1/2 text-[#6B7280]'
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Remember for 30 days */}
+            <div className='flex items-center justify-between'>
               <div className='flex items-center gap-2.5'>
                 <input
                   type='checkbox'
                   id='remember'
                   checked={rememberMe}
                   onChange={() => setRememberMe(!rememberMe)}
-                  className='w-4 h-4 border border-[#E3EBF2] rounded accent-[#FABB17]'
+                  className='w-5 h-5 border border-black/10 bg-black/[0.01] cursor-pointer'
                 />
-                <label
-                  htmlFor='remember'
-                  className='text-xs font-normal text-[#6B7280]'
-                >
+                <label htmlFor='remember' className='text-base text-black/50 cursor-pointer'>
                   Remember for 30 days
                 </label>
               </div>
-
-              <button
-                type='submit'
-                disabled={loading}
-                className='h-11 bg-gradient-to-b from-[rgba(255,255,255,0.12)] to-[rgba(255,255,255,0)] bg-[#080707] text-white font-medium text-sm rounded-lg flex items-center justify-center gap-2 shadow-lg border border-[#191818] hover:bg-[#1a1a1a] transition-colors'
-              >
-                <span>log in</span>
-              </button>
-            </form>
-
-            <div className='text-center text-sm font-normal'>
-              <span className='text-[#1F2937]'>
-                Don&apos;t have an account?{' '}
-              </span>
-              <Link
-                href={registerLink}
-                className='font-semibold text-[#1F2937] hover:underline'
-              >
-                Register here
+              <Link href='/forgot-password' className='text-base font-semibold text-black hover:text-black/70'>
+                Forgot password?
               </Link>
             </div>
+
+            <button
+              type='submit'
+              className='h-12 bg-[#2A313B] text-white flex items-center justify-center gap-2 hover:bg-[#1f2430] transition-colors disabled:opacity-70'
+              disabled={loading}
+            >
+              <span className='text-lg font-medium'>{loading ? 'Logging in...' : 'Log in'}</span>
+              {!loading && <ArrowRight size={20} />}
+            </button>
+          </form>
+
+          <div className='text-center text-lg'>
+            Don&apos;t have an account?{' '}
+            <Link href={registerLink} className='font-semibold text-black hover:text-black/70'>
+              Register here
+            </Link>
           </div>
+        </div>
+      </div>
+
+      <div className='hidden lg:block lg:w-3/5 relative bg-gray-900'>
+        <div className='absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black' />
+        <div className='absolute bottom-20 left-10 text-white max-w-[474px] flex flex-col gap-5 z-10'>
+          <h2 className='text-[28px] font-semibold tracking-[0.05em]'>Your Company</h2>
+          <p className='text-xl font-normal leading-[180%] tracking-[-0.02em]'>
+            From vision to reality — we empower your digital journey with purpose and precision.
+          </p>
         </div>
       </div>
     </section>

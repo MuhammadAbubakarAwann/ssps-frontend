@@ -4,14 +4,14 @@ import { prisma } from './prisma';
 export async function createUser(data: {
   email?: string
   name?: string
-  role?: 'ADMIN' | 'USER' | 'MODERATOR'
+  role?: 'STUDENT' | 'TEACHER' | 'ADMIN'
 }) {
   try {
     const user = await prisma.user.create({
       data: {
         email: data.email || undefined,
         name: data.name || undefined,
-        role: data.role === 'ADMIN' ? data.role : undefined
+        role: data.role
       }
     });
     return { success: true, data: user };
@@ -78,14 +78,13 @@ export async function updateUser(id: string, data: {
   email?: string
   emailVerified?: Date
   image?: string
-  role?: 'ADMIN' | 'USER' | 'MODERATOR'
+  role?: 'STUDENT' | 'TEACHER' | 'ADMIN'
 }) {
   try {
     const user = await prisma.user.update({
       where: { id },
       data: {
-        ...data,
-        role: data.role === 'ADMIN' ? data.role : undefined
+        ...data
       }
     });
     return { success: true, data: user };

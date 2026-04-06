@@ -2,7 +2,7 @@
 export interface LoginRequest {
   email: string
   password: string
-  role: 'ADMIN' | 'CUSTOMER' | 'RESTAURANT_OWNER' | 'RIDER'
+  role?: 'STUDENT' | 'TEACHER' | 'ADMIN'
 }
 
 export interface User {

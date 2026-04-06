@@ -35,7 +35,7 @@ export default async function DashboardPage() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <DashboardLanding userInfo={user} />
+      <p>dashboard content</p>
     </ContentLayout>
   );
 }
