@@ -38,7 +38,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
   const [editingRowId, setEditingRowId] = useState<string | number | null>(null);
   const [classData, setClassData] = useState({
     name: '',
-    code: '',
+    subject: '',
     section: '',
     semester: ''
   });
@@ -88,7 +88,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
 
           setClassData({
             name: String(classInfo.name || ''),
-            code: String(classInfo.code || ''),
+            subject: String(classInfo.subject || classInfo.code || ''),
             section: String(classInfo.section || ''),
             semester: String(classInfo.semester || '')
           });
@@ -245,7 +245,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
       showToast.error('Please finish editing the current row first');
       return;
     }
-    if (!classData.name || !classData.code || !classData.section || !classData.semester) {
+    if (!classData.name || !classData.subject || !classData.section || !classData.semester) {
       showToast.error('Please fill all class fields first.');
       return;
     }
@@ -258,7 +258,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
     const payload = {
       class: {
         name: classData.name,
-        code: classData.code,
+        subject: classData.subject,
         section: classData.section,
         semester: classData.semester
       },
@@ -342,12 +342,12 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
             </div>
 
             <div className='flex flex-col gap-1.5'>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Class Code</label>
+              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Subject</label>
               <Input
                 type='text'
-                name='code'
+                name='subject'
                 placeholder='CS-601'
-                value={classData.code}
+                value={classData.subject}
                 onChange={handleClassInputChange}
                 className='h-10 w-full bg-white placeholder:text-gray-300 focus-visible:ring-1 focus-visible:ring-black/30 focus-visible:ring-offset-0'
                 style={{ borderRadius: '5px', border: '1px solid rgba(0, 0, 0, 0.2)', fontSize: '14px' }}
