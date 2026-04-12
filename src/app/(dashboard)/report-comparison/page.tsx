@@ -77,7 +77,6 @@ export default function ReportComparisonPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [classes, setClasses] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedClassId, setSelectedClassId] = useState('');
-  const [selectedClassName, setSelectedClassName] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [selectedFirstHistory, setSelectedFirstHistory] = useState<PredictionHistory | null>(null);
@@ -129,13 +128,13 @@ export default function ReportComparisonPage() {
 
   useEffect(() => {
     const userData = localStorage.getItem('user_data');
-    if (userData) {
+    if (userData) 
       try {
         setUser(JSON.parse(userData));
       } catch (e) {
         console.error('Failed to parse user data:', e);
       }
-    }
+    
     setIsLoading(false);
   }, []);
 
@@ -149,9 +148,9 @@ export default function ReportComparisonPage() {
         });
         const payload = await response.json();
         
-        if (!response.ok || !payload.success) {
+        if (!response.ok || !payload.success) 
           throw new Error(payload.message || 'Failed to fetch classes');
-        }
+        
 
         const classList = (payload.data?.classes || []).map((cls: any) => ({
           id: String(cls.id),
@@ -165,16 +164,14 @@ export default function ReportComparisonPage() {
       }
     };
 
-    if (!isLoading) {
-      fetchClasses();
-    }
+    if (!isLoading) 
+      void fetchClasses();
+    
   }, [isLoading]);
 
   const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const classId = e.target.value;
-    const selectedClass = classes.find((c) => c.id === classId);
     setSelectedClassId(classId);
-    setSelectedClassName(selectedClass?.name || '');
     setSelectedStudent(null);
     setSelectedFirstHistory(null);
     setSelectedSecondHistory(null);
@@ -275,9 +272,21 @@ export default function ReportComparisonPage() {
     };
   }, [selectedStudent?.apiStudentId, selectedFirstHistory, selectedSecondHistory]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  if (isLoading) 
+    return (
+      <ContentLayout userInfo={user} title='Report Comparison'>
+        <div className='mt-8 space-y-6 animate-pulse'>
+          <div className='h-8 w-2/3 rounded-full bg-gray-200' />
+          <div className='h-10 w-72 rounded-md bg-gray-200' />
+          <div className='rounded-xl border border-gray-200 bg-white p-5 space-y-4'>
+            {[0, 1, 2].map((index) => (
+              <div key={index} className='h-16 rounded-md bg-gray-100' />
+            ))}
+          </div>
+        </div>
+      </ContentLayout>
+    );
+  
 
   return (
     <ContentLayout userInfo={user} title='Report Comparison'>
@@ -308,18 +317,22 @@ export default function ReportComparisonPage() {
           <label className='mb-2 block font-medium text-black'>
             Step 1: Select Class
           </label>
-          <select
-            value={selectedClassId}
-            onChange={handleClassChange}
-            className={`min-w-[300px] cursor-pointer rounded-[7px] border border-black/40 bg-white p-2.5 text-base ${selectedClassId ? 'text-black' : 'text-black/50'}`}
-          >
-            <option value="">Select Class</option>
-            {classes.map((cls) => (
-              <option key={cls.id} value={cls.id}>
-                {cls.name}
-              </option>
-            ))}
-          </select>
+          {classesLoading ? (
+            <div className='h-11 w-[300px] animate-pulse rounded-[7px] border border-gray-200 bg-gray-100' />
+          ) : (
+            <select
+              value={selectedClassId}
+              onChange={handleClassChange}
+              className={`min-w-[300px] cursor-pointer rounded-[7px] border border-black/40 bg-white p-2.5 text-base ${selectedClassId ? 'text-black' : 'text-black/50'}`}
+            >
+              <option value=''>Select Class</option>
+              {classes.map((cls) => (
+                <option key={cls.id} value={cls.id}>
+                  {cls.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Step 2: Student Selection Button */}
@@ -329,9 +342,9 @@ export default function ReportComparisonPage() {
               Step 2: Select Student
             </label>
             <Button
-              color="primary"
-              size="medium"
-              variant="solid"
+              color='primary'
+              size='medium'
+              variant='solid'
               onClick={() => setIsStudentModalOpen(true)}
               className='w-[300px]'
             >
@@ -356,7 +369,17 @@ export default function ReportComparisonPage() {
         {/* Step 4: Comparison Panels (when first prediction is selected) */}
         {selectedFirstHistory && selectedSecondHistory && (
           <div className='mb-4 mt-4'>
-            {comparisonLoading && <div>Loading comparison panels...</div>}
+            {comparisonLoading && (
+              <div className='grid grid-cols-1 gap-4 lg:grid-cols-2 animate-pulse'>
+                {[0, 1].map((index) => (
+                  <div key={index} className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'>
+                    <div className='h-5 w-40 rounded-full bg-gray-200' />
+                    <div className='h-4 w-28 rounded-full bg-gray-200' />
+                    <div className='h-24 rounded-md bg-gray-100' />
+                  </div>
+                ))}
+              </div>
+            )}
             {comparisonError && <div className='text-[#d32f2f]'>{comparisonError}</div>}
             {!comparisonLoading && !comparisonError && comparisonLeft && comparisonRight && (
               <ComparisonPanels leftPanel={comparisonLeft} rightPanel={comparisonRight} />

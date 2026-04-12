@@ -207,7 +207,12 @@ export function ClassDetailModal({ classItem, onClose, onDelete }: ClassDetailMo
         {/* Content */}
         <div className='flex-1 overflow-y-auto px-3 pb-3' style={{ backgroundColor: '#FFFFFF' }}>
           {isLoading ? (
-            <div className='py-10 text-center text-slate-600'>Loading class details...</div>
+            <div className='animate-pulse space-y-3 py-3'>
+              <div className='h-6 w-52 rounded-full bg-gray-200' />
+              {[0, 1, 2, 3, 4, 5].map((index) => (
+                <div key={index} className='h-7 rounded-md bg-gray-100' />
+              ))}
+            </div>
           ) : errorMessage ? (
             <div className='py-10 text-center text-red-500'>{errorMessage}</div>
           ) : (

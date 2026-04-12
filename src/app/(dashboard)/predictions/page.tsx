@@ -131,31 +131,33 @@ export default function PredictionsPage() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPredictionModal, setShowPredictionModal] = useState(false);
-  const [classes, setClasses] = useState<PredictionClass[]>([]);
+  const [_classes, setClasses] = useState<PredictionClass[]>([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [scope, setScope] = useState<'CLASS' | 'SELECTED'>('CLASS');
-  const [students, setStudents] = useState<FilterStudent[]>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState('');
-  const [predictionHistory, setPredictionHistory] = useState<PredictionHistoryCardItem[]>([]);
+  const [_students, setStudents] = useState<FilterStudent[]>([]);
+  const [_selectedStudentId, setSelectedStudentId] = useState('');
+  const [predictionHistory, setPredictionHistory] = useState<
+    PredictionHistoryCardItem[]
+  >([]);
   const [totalPredictionCount, setTotalPredictionCount] = useState(0);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const [metricsData, setMetricsData] = useState<PredictionMetricsViewModel>(DEFAULT_METRICS);
+  const [metricsData, setMetricsData] =
+    useState<PredictionMetricsViewModel>(DEFAULT_METRICS);
 
   useEffect(() => {
     const userData = localStorage.getItem('user_data');
-    if (userData) {
+    if (userData)
       try {
         setUser(JSON.parse(userData));
       } catch (e) {
         console.error('Failed to parse user data:', e);
       }
-    }
+
     setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    if (isLoading)
-      return;
+    if (isLoading) return;
 
     const fetchClasses = async () => {
       try {
@@ -180,16 +182,17 @@ export default function PredictionsPage() {
           setSelectedClass((prev) => prev || classList[0].id);
       } catch (error) {
         console.error('Error fetching classes:', error);
-        showToast.error(error instanceof Error ? error.message : 'Failed to fetch classes');
+        showToast.error(
+          error instanceof Error ? error.message : 'Failed to fetch classes',
+        );
       }
     };
 
-    fetchClasses();
+    void fetchClasses();
   }, [isLoading]);
 
   useEffect(() => {
-    if (isLoading)
-      return;
+    if (isLoading) return;
 
     const fetchPredictionMetrics = async () => {
       try {
@@ -201,14 +204,28 @@ export default function PredictionsPage() {
         const payload: PredictionMetricsApiResponse = await response.json();
 
         if (!response.ok || !payload.success)
-          throw new Error(payload.message || 'Failed to fetch prediction metrics');
+          throw new Error(
+            payload.message || 'Failed to fetch prediction metrics',
+          );
 
-        const totalPredictionsValue = Number(payload.data?.totalPredictions?.value ?? 0);
-        const totalPredictionsIncrease = Number(payload.data?.totalPredictions?.increasePercentage ?? 0);
-        const activeClassesValue = Number(payload.data?.activeClasses?.value ?? 0);
-        const activeClassesIncrease = Number(payload.data?.activeClasses?.increaseNumber ?? 0);
-        const averageImprovementValue = Number(payload.data?.averageImprovement?.value ?? 0);
-        const averageImprovementIncrease = Number(payload.data?.averageImprovement?.increasePercentage ?? 0);
+        const totalPredictionsValue = Number(
+          payload.data?.totalPredictions?.value ?? 0,
+        );
+        const totalPredictionsIncrease = Number(
+          payload.data?.totalPredictions?.increasePercentage ?? 0,
+        );
+        const activeClassesValue = Number(
+          payload.data?.activeClasses?.value ?? 0,
+        );
+        const activeClassesIncrease = Number(
+          payload.data?.activeClasses?.increaseNumber ?? 0,
+        );
+        const averageImprovementValue = Number(
+          payload.data?.averageImprovement?.value ?? 0,
+        );
+        const averageImprovementIncrease = Number(
+          payload.data?.averageImprovement?.increasePercentage ?? 0,
+        );
 
         setMetricsData({
           totalPredictions: `${Number.isFinite(totalPredictionsValue) ? totalPredictionsValue : 0}`,
@@ -220,12 +237,16 @@ export default function PredictionsPage() {
         });
       } catch (error) {
         console.error('Error fetching prediction metrics:', error);
-        showToast.error(error instanceof Error ? error.message : 'Failed to fetch prediction metrics');
+        showToast.error(
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch prediction metrics',
+        );
         setMetricsData(DEFAULT_METRICS);
       }
     };
 
-    fetchPredictionMetrics();
+    void fetchPredictionMetrics();
   }, [isLoading]);
 
   useEffect(() => {
@@ -237,23 +258,31 @@ export default function PredictionsPage() {
 
     const fetchStudents = async () => {
       try {
-        const response = await fetch(`/api/teacher/classes/${selectedClass}/students/prediction-status`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
+        const response = await fetch(
+          `/api/teacher/classes/${selectedClass}/students/prediction-status`,
+          {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          },
+        );
 
         const payload: ClassStudentsApiResponse = await response.json();
 
         if (!response.ok || !payload.success)
           throw new Error(payload.message || 'Failed to fetch students');
 
-        const studentList = (payload.data?.students || []).reduce<FilterStudent[]>((acc, student) => {
+        const studentList = (payload.data?.students || []).reduce<
+          FilterStudent[]
+        >((acc, student) => {
           const rawId = student.id ?? student.studentId ?? student.userId;
-          if (rawId === undefined || rawId === null)
-            return acc;
+          if (rawId === undefined || rawId === null) return acc;
 
           const normalizedId = String(rawId).trim();
-          if (!normalizedId || normalizedId === 'undefined' || normalizedId === 'null')
+          if (
+            !normalizedId ||
+            normalizedId === 'undefined' ||
+            normalizedId === 'null'
+          )
             return acc;
 
           acc.push({
@@ -267,22 +296,23 @@ export default function PredictionsPage() {
 
         setStudents(studentList);
 
-        if (scope === 'SELECTED') {
-          setSelectedStudentId((prev) => (
+        if (scope === 'SELECTED')
+          setSelectedStudentId((prev) =>
             prev && studentList.some((student) => student.id === prev)
               ? prev
-              : (studentList[0]?.id || '')
-          ));
-        }
+              : studentList[0]?.id || '',
+          );
       } catch (error) {
         console.error('Error fetching students:', error);
-        showToast.error(error instanceof Error ? error.message : 'Failed to fetch students');
+        showToast.error(
+          error instanceof Error ? error.message : 'Failed to fetch students',
+        );
         setStudents([]);
         setSelectedStudentId('');
       }
     };
 
-    fetchStudents();
+    void fetchStudents();
   }, [selectedClass, scope]);
 
   useEffect(() => {
@@ -292,22 +322,28 @@ export default function PredictionsPage() {
       try {
         const query = new URLSearchParams({ scope });
 
-        const response = await fetch(`/api/teacher/predictions/history?${query.toString()}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
+        const response = await fetch(
+          `/api/teacher/predictions/history?${query.toString()}`,
+          {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          },
+        );
 
         const payload: PredictionHistoryApiResponse = await response.json();
 
         if (!response.ok || !payload.success)
-          throw new Error(payload.message || 'Failed to fetch prediction history');
+          throw new Error(
+            payload.message || 'Failed to fetch prediction history',
+          );
 
         const mappedHistory = (payload.data?.predictions || []).map((item) => ({
           id: item.id,
           classId: String(item.class?.id ?? selectedClass),
           status: item.status || 'completed',
           date: new Date(item.date).toLocaleDateString('en-GB'),
-          className: item.title || item.name || item.class?.name || 'Prediction',
+          className:
+            item.title || item.name || item.class?.name || 'Prediction',
           studentsAnalyzed: item.studentsAnalyzed,
           avgScore: `${Number(item.avgScore).toFixed(1)}%`
         }));
@@ -316,7 +352,11 @@ export default function PredictionsPage() {
         setTotalPredictionCount(payload.data?.totalCount || 0);
       } catch (error) {
         console.error('Error fetching prediction history:', error);
-        showToast.error(error instanceof Error ? error.message : 'Failed to fetch prediction history');
+        showToast.error(
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch prediction history',
+        );
         setPredictionHistory([]);
         setTotalPredictionCount(0);
       } finally {
@@ -324,8 +364,8 @@ export default function PredictionsPage() {
       }
     };
 
-    fetchPredictionHistory();
-  }, [scope]);
+    void fetchPredictionHistory();
+  }, [scope, selectedClass]);
 
   const handlePredictionSaved = (newPrediction: SavedPredictionSummary) => {
     if (newPrediction.scope === 'SELECTED') {
@@ -335,24 +375,65 @@ export default function PredictionsPage() {
       return;
     }
 
-    if (scope !== 'CLASS')
-      return;
+    if (scope !== 'CLASS') return;
 
-    const alreadyExists = predictionHistory.some((item) => item.id === newPrediction.id);
+    const alreadyExists = predictionHistory.some(
+      (item) => item.id === newPrediction.id,
+    );
     setPredictionHistory((prev) => {
-      const withoutDuplicate = prev.filter((item) => item.id !== newPrediction.id);
+      const withoutDuplicate = prev.filter(
+        (item) => item.id !== newPrediction.id,
+      );
       return [newPrediction, ...withoutDuplicate].slice(0, 6);
     });
 
-    if (!alreadyExists)
-      setTotalPredictionCount((prev) => prev + 1);
+    if (!alreadyExists) setTotalPredictionCount((prev) => prev + 1);
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  if (isLoading)
+    return (
+      <ContentLayout userInfo={user} title='Predictions'>
+        <div className='mt-8 space-y-6 animate-pulse'>
+          <div className='h-8 w-2/3 rounded-full bg-gray-200' />
 
-  const remainingCount = Math.max(0, totalPredictionCount - predictionHistory.length);
+          <div className='grid grid-cols-3 gap-6'>
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'
+              >
+                <div className='h-4 w-28 rounded-full bg-gray-200' />
+                <div className='h-8 w-20 rounded-full bg-gray-200' />
+                <div className='h-3 w-24 rounded-full bg-gray-200' />
+              </div>
+            ))}
+          </div>
+
+          <div className='flex items-center justify-between'>
+            <div className='h-4 w-64 rounded-full bg-gray-200' />
+            <div className='h-10 w-36 rounded-md bg-gray-200' />
+          </div>
+
+          <div className='grid grid-cols-3 gap-6'>
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'
+              >
+                <div className='h-4 w-36 rounded-full bg-gray-200' />
+                <div className='h-8 w-20 rounded-full bg-gray-200' />
+                <div className='h-3 w-28 rounded-full bg-gray-200' />
+              </div>
+            ))}
+          </div>
+        </div>
+      </ContentLayout>
+    );
+
+  const remainingCount = Math.max(
+    0,
+    totalPredictionCount - predictionHistory.length,
+  );
 
   return (
     <ContentLayout userInfo={user} title='Predictions'>
@@ -360,71 +441,80 @@ export default function PredictionsPage() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/dashboard' style={{ color: '#000000' }}>Dashboard</Link>
+              <Link href='/dashboard' style={{ color: '#000000' }}>
+                Dashboard
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage style={{ color: '#000000' }}>Predictions</BreadcrumbPage>
+            <BreadcrumbPage style={{ color: '#000000' }}>
+              Predictions
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="mt-8">
+      <div className='mt-8'>
         {/* Page Title */}
-        <h1 className="text-2xl font-semibold mb-6" style={{ color: '#000000', fontSize: '24px', fontWeight: '600' }}>
+        <h1
+          className='text-2xl font-semibold mb-6'
+          style={{ color: '#000000', fontSize: '24px', fontWeight: '600' }}
+        >
           Make a new predictions, or see recent predictions
         </h1>
 
         {/* Metric Cards */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className='grid grid-cols-3 gap-6 mb-8'>
           <MetricCard
-            title="Total Predictions"
+            title='Total Predictions'
             value={metricsData.totalPredictions}
             change={metricsData.predictionsChange}
-            changeText="from last month"
+            changeText='from last month'
             icon={<FiBarChart2 size={32} style={{ color: '#4A90E2' }} />}
-            changeColor="#447C00"
+            changeColor='#447C00'
           />
           <MetricCard
-            title="Active Classes"
+            title='Active Classes'
             value={metricsData.activeClasses}
             change={metricsData.classesChange}
-            changeText="from last month"
+            changeText='from last month'
             icon={<FiUsers size={32} style={{ color: '#8B5CF6' }} />}
-            changeColor="#447C00"
+            changeColor='#447C00'
           />
           <MetricCard
-            title="Average Improvement"
+            title='Average Improvement'
             value={metricsData.averageImprovement}
             change={metricsData.improvementChange}
-            changeText="from last month"
+            changeText='from last month'
             icon={<FiTrendingUp size={32} style={{ color: '#A78BFA' }} />}
-            changeColor="#447C00"
+            changeColor='#447C00'
           />
         </div>
 
         {/* View and Manage Section */}
-        <div className="flex justify-between items-center mb-6">
+        <div className='flex justify-between items-center mb-6'>
           <p style={{ color: 'rgba(0, 0, 0, 0.58)', fontSize: '14px' }}>
             View and manage your prediction history
           </p>
-          <div className="flex items-center gap-3">
+          <div className='flex items-center gap-3'>
             <select
-              className="h-10  rounded-[5px] border border-black/20 bg-white px-3 text-[14px]"
+              className='h-10  rounded-[5px] border border-black/20 bg-white px-3 text-[14px]'
               value={scope}
-              onChange={(event) => setScope(event.target.value as 'CLASS' | 'SELECTED')}
+              onChange={(event) =>
+                setScope(event.target.value as 'CLASS' | 'SELECTED')
+              }
             >
-              <option value="CLASS">Class Prediction</option>
-              <option value="SELECTED">Selected Prediction</option>
+              <option value='CLASS'>Class Prediction</option>
+              <option value='SELECTED'>Selected Prediction</option>
             </select>
 
             <Button
-            size='medium'
-            color='primary'
-            variant='solid'
+              size='medium'
+              color='primary'
+              variant='solid'
               onClick={() => setShowPredictionModal(true)}
-              className="gap-2 text-white !rounded-[5px] text-sm font-semibold"
+              className='gap-2 text-white !rounded-[5px] text-sm font-semibold'
               style={{ backgroundColor: '#000000' }}
             >
               <Plus size={20} />
@@ -435,25 +525,45 @@ export default function PredictionsPage() {
 
         {/* Prediction History Cards Grid */}
         {isLoadingHistory && predictionHistory.length === 0 ? (
-          <div className="py-12 text-center text-[14px] text-black/60">Loading prediction history...</div>
+          <div className='grid grid-cols-3 gap-6 animate-pulse'>
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                className='rounded-[10px] border border-gray-200 bg-white p-5 space-y-3'
+              >
+                <div className='h-4 w-36 rounded-full bg-gray-200' />
+                <div className='h-9 w-20 rounded-full bg-gray-200' />
+                <div className='h-3 w-24 rounded-full bg-gray-200' />
+              </div>
+            ))}
+          </div>
         ) : predictionHistory.length === 0 ? (
-          <div className="py-12 text-center text-[14px] text-black/60">No prediction history found</div>
+          <div className='py-12 text-center text-[14px] text-black/60'>
+            No prediction history found
+          </div>
         ) : (
-          <div className="grid grid-cols-3 gap-6">
+          <div className='grid grid-cols-3 gap-6'>
             {predictionHistory.map((prediction) => (
-              <PredictionHistoryCard key={prediction.id} prediction={prediction} />
+              <PredictionHistoryCard
+                key={prediction.id}
+                prediction={prediction}
+              />
             ))}
           </div>
         )}
 
         {remainingCount > 0 && (
-          <div className="mt-6 flex justify-center">
+          <div className='mt-6 flex justify-center'>
             <Button
-              color="gray"
-              size="medium"
-              variant="outline"
-              className="rounded-[7px]"
-              onClick={() => showToast.info(`Showing latest 6 results. ${remainingCount} more available.`)}
+              color='gray'
+              size='medium'
+              variant='outline'
+              className='rounded-[7px]'
+              onClick={() =>
+                showToast.info(
+                  `Showing latest 6 results. ${remainingCount} more available.`,
+                )
+              }
             >
               View {remainingCount} more
             </Button>

@@ -110,7 +110,7 @@ export function PredictionHistoryTimeline({
       }
     };
 
-    fetchHistories();
+    void fetchHistories();
   }, [studentId]);
 
   const selectFirst = (reportCode: string) => {
@@ -153,7 +153,21 @@ export function PredictionHistoryTimeline({
   const hasMore = displayCount < allHistories.length;
 
   if (isLoading)
-    return <div>Loading prediction history...</div>;
+    return (
+      <div className='mb-4 animate-pulse'>
+        <div className='mb-2 h-7 w-52 rounded-full bg-gray-200' />
+        <div className='mb-4 h-4 w-56 rounded-full bg-gray-200' />
+        <div className='flex gap-5 overflow-x-auto px-2 pb-4 pt-4'>
+          {[0, 1, 2, 3].map((index) => (
+            <div key={index} className='min-w-[215px] rounded-[10px] border border-gray-200 bg-white p-5 space-y-3'>
+              <div className='h-4 w-32 rounded-full bg-gray-200' />
+              <div className='h-9 w-20 rounded-full bg-gray-200' />
+              <div className='h-3 w-24 rounded-full bg-gray-200' />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
 
   if (error)
     return <div className='text-[#d32f2f]'>{error}</div>;
@@ -220,9 +234,9 @@ export function PredictionHistoryTimeline({
       {hasMore && (
         <div className='text-center'>
           <Button
-            color="primary"
-            size="medium"
-            variant="outline"
+            color='primary'
+            size='medium'
+            variant='outline'
             onClick={handleViewMore}
           >
             View More

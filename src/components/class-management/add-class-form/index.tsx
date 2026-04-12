@@ -31,6 +31,16 @@ interface AddClassFormProps {
   editClassId?: string | number;
 }
 
+function normalizeStudentId(value: unknown): Student['id'] {
+  if (typeof value === 'string' || typeof value === 'number')
+    return value;
+
+  if (typeof value === 'bigint')
+    return value.toString();
+
+  return undefined;
+}
+
 export function AddClassForm({ editClassId }: AddClassFormProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -97,7 +107,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
             studentsList
               .filter((student): student is Record<string, unknown> => typeof student === 'object' && student !== null)
               .map((student) => ({
-                id: student.id,
+                id: normalizeStudentId(student.id),
                 name: String(student.name || ''),
                 regNo: String(student.regNo || ''),
                 Q1: String(student.quiz1 ?? ''),
@@ -184,10 +194,10 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
   };
 
   const handleEditRow = (id: string | number | undefined) => {
-    setEditingRowId(id);
+    setEditingRowId(id ?? null);
   };
 
-  const handleSaveRow = (id: string | number | undefined) => {
+  const handleSaveRow = (_id: string | number | undefined) => {
     setEditingRowId(null);
   };
 
@@ -299,9 +309,8 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
 
       const result = await response.json();
 
-      if (!response.ok || !result?.success) {
+      if (!response.ok || !result?.success)
         throw new Error(result?.message || 'Failed to save class and students');
-      }
 
       showToast.success(result.message || 'Class and students saved successfully');
       router.push('/class-management');
@@ -313,11 +322,29 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
     }
   };
 
-  if (isLoading) {
+  if (isLoading)
     return (
-      <div className='py-10 text-center text-slate-600'>Loading class details...</div>
+      <div className='animate-pulse space-y-5'>
+        <div className='rounded-[10px] border border-gray-200 bg-white p-5 space-y-4'>
+          <div className='h-5 w-36 rounded-full bg-gray-200' />
+          <div className='grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4'>
+            {[0, 1, 2, 3].map((index) => (
+              <div key={index} className='space-y-2'>
+                <div className='h-4 w-24 rounded-full bg-gray-200' />
+                <div className='h-10 rounded-md bg-gray-200' />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className='rounded-[10px] border border-gray-200 bg-white p-5 space-y-3'>
+          <div className='h-5 w-48 rounded-full bg-gray-200' />
+          {[0, 1, 2, 3, 4].map((index) => (
+            <div key={index} className='h-9 rounded-md bg-gray-100' />
+          ))}
+        </div>
+      </div>
     );
-  }
 
   return (
     <div className='w-full' style={{ backgroundColor: '#FFFFFF', borderRadius: '10px', border: '1px solid rgba(0, 0, 0, 0.18)' }}>
@@ -671,7 +698,8 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                           {isEditing ? (
                             <>
                               <Button
-                                size='sm'
+                                color='gray'
+                                size='small'
                                 variant='ghost'
                                 className='w-6 h-6 p-0 rounded'
                                 style={{ 
@@ -683,7 +711,8 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                                 <Check className='w-3.5 h-3.5' style={{ color: '#4CAF50' }} />
                               </Button>
                               <Button
-                                size='sm'
+                                color='gray'
+                                size='small'
                                 variant='ghost'
                                 className='w-6 h-6 p-0 rounded'
                                 style={{ 
@@ -698,7 +727,8 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                           ) : (
                             <>
                               <Button
-                                size='sm'
+                                color='gray'
+                                size='small'
                                 variant='ghost'
                                 className='w-6 h-6 p-0 rounded'
                                 style={{ 
@@ -710,7 +740,8 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                                 <Edit2 className='w-3.5 h-3.5' style={{ color: '#000000' }} />
                               </Button>
                               <Button
-                                size='sm'
+                                color='gray'
+                                size='small'
                                 variant='ghost'
                                 className='w-6 h-6 p-0 rounded'
                                 style={{ 

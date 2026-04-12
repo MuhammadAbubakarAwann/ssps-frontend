@@ -62,9 +62,9 @@ export const StudentSelectionModal = ({
         );
         const payload: ClassStudentsApiResponse = await response.json();
 
-        if (!response.ok || !payload.success) {
+        if (!response.ok || !payload.success) 
           throw new Error(payload.message || 'Failed to fetch students');
-        }
+        
 
         const studentsSource = payload.data?.students || [];
 
@@ -83,9 +83,9 @@ export const StudentSelectionModal = ({
           return acc;
         }, []);
 
-        if (studentsSource.length > 0 && studentsList.length === 0) {
+        if (studentsSource.length > 0 && studentsList.length === 0) 
           setError('Students were returned but no valid student id was found in the response.');
-        }
+        
 
         setStudents(studentsList);
       } catch (err) {
@@ -96,7 +96,7 @@ export const StudentSelectionModal = ({
       }
     };
 
-    fetchStudents();
+    void fetchStudents();
   }, [isOpen, classId]);
 
   const handleStudentSelect = (studentId: string) => {
@@ -133,7 +133,12 @@ export const StudentSelectionModal = ({
 
         {isLoading && (
           <div className={styles.loadingState}>
-            <p>Loading students...</p>
+            <div className='w-full animate-pulse space-y-3'>
+              <div className='h-4 w-36 rounded-full bg-gray-200' />
+              {[0, 1, 2, 3].map((index) => (
+                <div key={index} className='h-10 rounded-md bg-gray-100' />
+              ))}
+            </div>
           </div>
         )}
 
@@ -155,7 +160,7 @@ export const StudentSelectionModal = ({
               <thead>
                 <tr>
                   <th className='w-[50px]'>
-                    <input type="radio" disabled />
+                    <input type='radio' disabled />
                   </th>
                   <th>Name</th>
                   <th>Reg-No</th>
@@ -170,7 +175,7 @@ export const StudentSelectionModal = ({
                   >
                     <td>
                       <input
-                        type="radio"
+                        type='radio'
                         checked={selectedStudentId === student.id}
                         onChange={() => handleStudentSelect(student.id)}
                       />
@@ -187,17 +192,17 @@ export const StudentSelectionModal = ({
         {!isLoading && !error && students.length > 0 && (
           <div className={styles.actions}>
             <Button
-              color="gray"
-              size="medium"
-              variant="outline"
+              color='gray'
+              size='medium'
+              variant='outline'
               onClick={onClose}
             >
               Cancel
             </Button>
             <Button
-              color="primary"
-              size="medium"
-              variant="solid"
+              color='primary'
+              size='medium'
+              variant='solid'
               onClick={handleConfirm}
               disabled={!selectedStudentId}
             >

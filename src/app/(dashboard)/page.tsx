@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/breadcrumb';
 // import { DashboardLanding } from '@/components/sections/dashboard-landing';
 import { cookies } from 'next/headers';
-import { DashboardLanding } from '@/components/landing-page';
 
 export const dynamic = 'force-dynamic';
 

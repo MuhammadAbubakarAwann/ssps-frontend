@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ContentLayout } from '@/components/sections/content-layout';
 import {
   Breadcrumb,
@@ -10,105 +12,486 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
-import { PredictionHistoryTimeline } from '@/components/report-comparison/prediction-history-timeline';
-import { ComparisonPanels } from '@/components/report-comparison/comparison-panels';
-import { PerformanceChange } from '@/components/report-comparison/performance-change';
-import { useEffect, useState } from 'react';
+import { ReportHistoryTable } from '@/components/report-history/report-history-table';
+import {
+  ReportPdfGenerator,
+  type ReportPdfPayload
+} from '@/components/report-history/report-pdf-generator';
+import { showToast } from '@/components/ui/toaster';
+import { Input } from '@/components/ui/input';
+import { Search, ChevronDown } from 'lucide-react';
 
-export default function ReportComparisonPage() {
+type ClassOption = {
+  id: string;
+  name: string;
+};
+
+type ReportTableItem = {
+  predictionId: string;
+  reportCode: string;
+  type: string;
+  classId: string;
+  className: string;
+  summary: string;
+  riskLevel: string;
+  date: string;
+  actions: {
+    view: boolean;
+    download: boolean;
+  };
+};
+
+type ReportsApiResponse = {
+  success?: boolean;
+  message?: string;
+  data?: {
+    reports?: Array<Record<string, unknown>>;
+  };
+};
+
+type ClassesApiResponse = {
+  success?: boolean;
+  message?: string;
+  data?: {
+    classes?: Array<{
+      id: string | number;
+      name: string;
+    }>;
+  };
+};
+
+function toStringSafe(value: unknown, fallback = ''): string {
+  if (value == null)
+    return fallback;
+
+  return String(value);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toDisplayText(value: unknown, fallback = '-'): string {
+  if (value == null)
+    return fallback;
+
+  if (typeof value === 'string')
+    return value.trim() || fallback;
+
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value);
+
+  if (Array.isArray(value)) {
+    const normalized = value
+      .map((item) => toDisplayText(item, ''))
+      .filter(Boolean);
+
+    return normalized.length > 0 ? normalized.join(', ') : fallback;
+  }
+
+  if (isRecord(value)) {
+    const priorityKeys = ['name', 'title', 'summary', 'description', 'label', 'text'];
+    for (const key of priorityKeys) {
+      const candidate = value[key];
+      const normalized = toDisplayText(candidate, '');
+      if (normalized)
+        return normalized;
+    }
+
+    const primitiveParts = Object.values(value)
+      .filter((entry) => typeof entry === 'string' || typeof entry === 'number' || typeof entry === 'boolean')
+      .map((entry) => String(entry))
+      .filter(Boolean);
+
+    return primitiveParts.length > 0 ? primitiveParts.join(' - ') : fallback;
+  }
+
+  return fallback;
+}
+
+function deriveClassOrStudentLabel(report: Record<string, unknown>): string {
+  const classNode = report.class;
+  if (isRecord(classNode)) {
+    const className = toDisplayText(classNode.name ?? classNode.title ?? classNode.className, '');
+    if (className)
+      return className;
+  }
+
+  const studentNode = report.student;
+  if (isRecord(studentNode)) {
+    const studentName = toDisplayText(studentNode.name ?? studentNode.studentName, '');
+    const regNo = toDisplayText(studentNode.regNo ?? studentNode.registrationNo, '');
+    if (studentName && regNo)
+      return `${studentName} (${regNo})`;
+    if (studentName)
+      return studentName;
+  }
+
+  return toDisplayText(report.className ?? report.class_name ?? report.studentName ?? report.student_name, 'Unknown Class');
+}
+
+function deriveClassId(report: Record<string, unknown>): string {
+  const direct = report.classId ?? report.class_id;
+  if (direct != null && !isRecord(direct) && !Array.isArray(direct)) {
+    const normalized = String(direct).trim();
+    if (normalized)
+      return normalized;
+  }
+
+  const classNode = report.class;
+  if (isRecord(classNode)) {
+    const nestedId = classNode.id ?? classNode.classId ?? classNode.class_id;
+    if (nestedId != null && !isRecord(nestedId) && !Array.isArray(nestedId)) {
+      const normalized = String(nestedId).trim();
+      if (normalized)
+        return normalized;
+    }
+  }
+
+  return '';
+}
+
+function deriveSummaryText(report: Record<string, unknown>): string {
+  return toDisplayText(report.summary ?? report.description ?? report.title, '-');
+}
+
+function toDateSafe(value: unknown): string {
+  if (!value)
+    return '-';
+
+  const parsed = new Date(String(value));
+  if (Number.isNaN(parsed.getTime()))
+    return String(value);
+
+  return parsed.toLocaleDateString('en-GB');
+}
+
+function deriveRiskLevel(report: Record<string, unknown>): string {
+  const explicit = report.riskLevel || report.risk_level || report.risk;
+  if (explicit)
+    return toStringSafe(explicit, 'Mid');
+
+  const avgScore = Number(report.avgScore ?? report.averageScore ?? report.avg_score ?? NaN);
+  if (!Number.isFinite(avgScore))
+    return 'Mid';
+
+  if (avgScore >= 80)
+    return 'Low';
+
+  if (avgScore >= 60)
+    return 'Mid';
+
+  return 'High';
+}
+
+export default function ReportHistoryPage() {
+  const router = useRouter();
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedClass, setSelectedClass] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState('');
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [isLoadingReports, setIsLoadingReports] = useState(false);
+  const [reports, setReports] = useState<ReportTableItem[]>([]);
+  const [classes, setClasses] = useState<ClassOption[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedClass, setSelectedClass] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
+  const [selectedRisk, setSelectedRisk] = useState('all');
+  const [error, setError] = useState<string | null>(null);
+  const [pdfPayload, setPdfPayload] = useState<ReportPdfPayload | null>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('user_data');
-    if (userData) {
+    if (userData)
       try {
         setUser(JSON.parse(userData));
       } catch (e) {
         console.error('Failed to parse user data:', e);
       }
-    }
-    setIsLoading(false);
+
+    setIsLoadingUser(false);
   }, []);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    if (isLoadingUser)
+      return;
+
+    const fetchClasses = async () => {
+      try {
+        const response = await fetch('/api/teacher/classes/names', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const payload: ClassesApiResponse = await response.json();
+        if (!response.ok || !payload.success)
+          throw new Error(payload.message || 'Failed to fetch classes');
+
+        const classList = (payload.data?.classes || []).map((cls) => ({
+          id: String(cls.id),
+          name: cls.name
+        }));
+
+        setClasses(classList);
+      } catch (fetchError) {
+        console.error('Error fetching classes:', fetchError);
+      }
+    };
+
+    void fetchClasses();
+  }, [isLoadingUser]);
+
+  useEffect(() => {
+    if (isLoadingUser)
+      return;
+
+    const fetchReports = async () => {
+      try {
+        setIsLoadingReports(true);
+        setError(null);
+
+        const response = await fetch('/api/teacher/predictions/reports', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const payload: ReportsApiResponse = await response.json();
+        if (!response.ok || !payload.success)
+          throw new Error(payload.message || 'Failed to fetch reports');
+
+        const mapped = (payload.data?.reports || []).map((report, index): ReportTableItem => {
+          const predictionId = toStringSafe(
+            report.predictionId ?? report.prediction_id ?? report.id,
+            `${index + 1}`
+          );
+
+          const className = deriveClassOrStudentLabel(report);
+
+          const summary = deriveSummaryText(report);
+
+          return {
+            predictionId,
+            reportCode: toStringSafe(report.reportCode ?? report.report_code, `RPT-${predictionId}`),
+            type: toStringSafe(report.type ?? report.scope, 'Class'),
+            classId: deriveClassId(report),
+            className,
+            summary,
+            riskLevel: deriveRiskLevel(report),
+            date: toDateSafe(report.date ?? report.createdAt ?? report.created_at),
+            actions: {
+              view: true,
+              download: true
+            }
+          };
+        });
+
+        setReports(mapped);
+      } catch (fetchError) {
+        const message = fetchError instanceof Error ? fetchError.message : 'Failed to fetch reports';
+        setError(message);
+        setReports([]);
+      } finally {
+        setIsLoadingReports(false);
+      }
+    };
+
+    void fetchReports();
+  }, [isLoadingUser]);
+
+  const selectedClassName = useMemo(() => {
+    if (selectedClass === 'all')
+      return 'All Classes';
+
+    return classes.find((cls) => cls.id === selectedClass)?.name || 'Selected Class';
+  }, [classes, selectedClass]);
+
+  const classOptions = useMemo(() => {
+    return [
+      { value: 'all', label: 'Class' },
+      ...classes.map((cls) => ({ value: cls.id, label: cls.name }))
+    ];
+  }, [classes]);
+
+  const predictionTypeOptions = [
+    { value: 'all', label: 'Prediction Type' },
+    { value: 'CLASS', label: 'Class' },
+    { value: 'SELECTED', label: 'Selected' }
+  ];
+
+  const riskLevelOptions = [
+    { value: 'all', label: 'Risk Level' },
+    { value: 'Low', label: 'Low' },
+    { value: 'Mid', label: 'Mid' },
+    { value: 'High', label: 'High' }
+  ];
+
+  const filteredReports = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const selectedClassLabel = classes.find((cls) => cls.id === selectedClass)?.name || '';
+
+    return reports.filter((report) => {
+      const matchesSearch = !query || [
+        report.reportCode,
+        report.className,
+        report.summary,
+        report.type,
+        report.riskLevel
+      ].some((value) => value.toLowerCase().includes(query));
+
+      const matchesClass = selectedClass === 'all'
+        || report.classId === selectedClass
+        || (selectedClassLabel && report.className.toLowerCase() === selectedClassLabel.toLowerCase());
+      const matchesType = selectedType === 'all' || report.type.toUpperCase() === selectedType;
+      const matchesRisk = selectedRisk === 'all' || report.riskLevel.toLowerCase() === selectedRisk.toLowerCase();
+
+      return matchesSearch && matchesClass && matchesType && matchesRisk;
+    });
+  }, [reports, searchQuery, selectedClass, selectedType, selectedRisk, classes]);
+
+  const handleViewReport = (report: ReportTableItem) => {
+    router.push(`/predictions?predictionId=${encodeURIComponent(report.predictionId)}`);
+  };
+
+  const handleDownloadReport = (report: ReportTableItem) => {
+    setPdfPayload({
+      reportCode: report.reportCode,
+      className: report.className,
+      type: report.type,
+      date: report.date,
+      results: []
+    });
+  };
+
+  if (isLoadingUser)
+    return (
+      <ContentLayout userInfo={user} title='Report History'>
+        <div className='mt-8 space-y-6 animate-pulse'>
+          <div className='h-8 w-2/3 rounded-full bg-gray-200' />
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+            <div className='h-10 rounded-md bg-gray-200' />
+            <div className='h-10 rounded-md bg-gray-200' />
+          </div>
+          <div className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'>
+            {[0, 1, 2].map((index) => (
+              <div key={index} className='h-16 rounded-md bg-gray-100' />
+            ))}
+          </div>
+        </div>
+      </ContentLayout>
+    );
 
   return (
-    <ContentLayout userInfo={user} title='Report Comparison'>
+    <ContentLayout userInfo={user} title='Report History'>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/' style={{ color: '#000000' }}>Dashboard</Link>
+              <Link href='/dashboard' className='text-black'>Dashboard</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage style={{ color: '#000000' }}>Prediction Comparison</BreadcrumbPage>
+            <BreadcrumbPage className='text-black'>Report History</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div style={{ marginTop: '32px' }}>
+      <div className='mt-8'>
         {/* Page Title */}
-        <h1 className="text-2xl font-semibold mb-6" style={{ color: '#000000' }}>
-          Compare student predictions over time
+        <h1 className='mb-8 text-2xl font-semibold text-black'>
+          See the student/class report history
         </h1>
 
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
-          <select
-            value={selectedClass}
-            onChange={(e) => setSelectedClass(e.target.value)}
-            style={{
-              padding: '10px',
-              borderRadius: '7px',
-              border: '1px solid rgba(0, 0, 0, 0.43)',
-              fontSize: '16px',
-              color: 'rgba(0, 0, 0, 0.5)',
-              cursor: 'pointer',
-              backgroundColor: '#FFFFFF'
-            }}
-          >
-            <option value="">Select Class</option>
-            <option value="8th-a">8th Semester (Section-A)</option>
-            <option value="8th-b">8th Semester (Section-B)</option>
-            <option value="7th-a">7th Semester (Section-A)</option>
-          </select>
+        {/* Filters Section */}
+        <div className='mb-8 flex items-center gap-4'>
+          {/* Search Bar */}
+          <div className='relative flex-1'>
+            <Input
+              type='text'
+              placeholder='Search by Report ID, Class, or Student Name'
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className='h-[44px] w-full rounded-[7px] border border-black/40 pr-10 text-base text-black/60 placeholder:text-black/50'
+            />
+            <Search
+              size={20}
+              className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50'
+            />
+          </div>
 
-          <select
-            value={selectedStudent}
-            onChange={(e) => setSelectedStudent(e.target.value)}
-            style={{
-              padding: '10px',
-              borderRadius: '7px',
-              border: '1px solid rgba(0, 0, 0, 0.43)',
-              fontSize: '16px',
-              color: 'rgba(0, 0, 0, 0.5)',
-              cursor: 'pointer',
-              backgroundColor: '#FFFFFF'
-            }}
-          >
-            <option value="">Select Student</option>
-            <option value="hanzola-rehman">Hanzola Rehman</option>
-            <option value="shahab-khan">Shahab Khan</option>
-            <option value="ali-hassan">Ali Hassan</option>
-          </select>
+          {/* Class Filter */}
+          <div className='relative h-[44px] rounded-[7px] border border-black/30 shadow-sm'>
+            <select
+              value={selectedClass}
+              onChange={(event) => setSelectedClass(event.target.value)}
+              className='h-full w-auto cursor-pointer appearance-none bg-transparent px-3 pr-9 text-[15px] text-black/70 outline-none whitespace-nowrap'
+            >
+              {classOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+            <ChevronDown size={16} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50' />
+          </div>
+
+          {/* Prediction Type Filter */}
+          <div className='relative h-[44px] rounded-[7px] border border-black/30 shadow-sm'>
+            <select
+              value={selectedType}
+              onChange={(event) => setSelectedType(event.target.value)}
+              className='h-full w-auto cursor-pointer appearance-none bg-transparent px-3 pr-9 text-[15px] text-black/70 outline-none whitespace-nowrap'
+            >
+              {predictionTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+            <ChevronDown size={16} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50' />
+          </div>
+
+          {/* Risk Level Filter */}
+          <div className='relative h-[44px] rounded-[7px] border border-black/30 shadow-sm'>
+            <select
+              value={selectedRisk}
+              onChange={(event) => setSelectedRisk(event.target.value)}
+              className='h-full w-auto cursor-pointer appearance-none bg-transparent px-3 pr-9 text-[15px] text-black/70 outline-none whitespace-nowrap'
+            >
+              {riskLevelOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+            <ChevronDown size={16} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50' />
+          </div>
         </div>
 
-        {/* Prediction History Timeline */}
-        <PredictionHistoryTimeline />
+        {error && (
+          <div className='mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700'>
+            {error}
+          </div>
+        )}
 
-        {/* Comparison Panels */}
-        <ComparisonPanels />
-
-        {/* Performance Change */}
-        <PerformanceChange />
+        {isLoadingReports ? (
+          <div className='rounded-xl border border-gray-200 bg-white p-5 animate-pulse space-y-3'>
+            {[0, 1, 2, 3].map((index) => (
+              <div key={index} className='h-12 rounded-md bg-gray-100' />
+            ))}
+          </div>
+        ) : (
+          <ReportHistoryTable
+            reports={filteredReports}
+            onViewReport={handleViewReport}
+            onDownloadReport={handleDownloadReport}
+          />
+        )}
       </div>
+
+      <ReportPdfGenerator
+        payload={pdfPayload}
+        onComplete={() => {
+          showToast.success(`Report exported${selectedClassName ? ` for ${selectedClassName}` : ''}`);
+          setPdfPayload(null);
+        }}
+        onError={(pdfError) => {
+          showToast.error(pdfError.message || 'Failed to export report');
+          setPdfPayload(null);
+        }}
+      />
     </ContentLayout>
   );
 }

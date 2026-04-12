@@ -221,7 +221,16 @@ export default function ClassManagementPage() {
           </div>
 
           {isLoading ? (
-            <div className='py-8 text-center text-slate-600'>Loading classes...</div>
+              <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 animate-pulse'>
+                {[0, 1, 2, 3].map((index) => (
+                  <div key={index} className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'>
+                    <div className='h-5 w-40 rounded-full bg-gray-200' />
+                    <div className='h-4 w-32 rounded-full bg-gray-200' />
+                    <div className='h-3 w-full rounded-full bg-gray-200' />
+                    <div className='h-3 w-5/6 rounded-full bg-gray-200' />
+                  </div>
+                ))}
+              </div>
           ) : errorMessage ? (
             <div className='py-8 text-center text-red-500'>{errorMessage}</div>
           ) : classes.length === 0 ? (

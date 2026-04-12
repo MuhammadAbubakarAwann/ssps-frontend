@@ -31,7 +31,25 @@ export default function NewClassPage() {
   }, []);
 
   if (isLoading) 
-    return <div>Loading...</div>;
+    return (
+      <ContentLayout userInfo={user} title='New Class'>
+        <div className='mt-8 space-y-6 animate-pulse'>
+          <div className='h-7 w-2/3 rounded-full bg-gray-200' />
+          <div className='rounded-[10px] border border-gray-200 bg-white p-6 space-y-5'>
+            <div className='h-5 w-36 rounded-full bg-gray-200' />
+            <div className='grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4'>
+              {[0, 1, 2, 3].map((index) => (
+                <div key={index} className='space-y-2'>
+                  <div className='h-4 w-24 rounded-full bg-gray-200' />
+                  <div className='h-10 rounded-md bg-gray-200' />
+                </div>
+              ))}
+            </div>
+            <div className='h-48 rounded-md bg-gray-100' />
+          </div>
+        </div>
+      </ContentLayout>
+    );
   
 
   return (

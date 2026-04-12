@@ -160,9 +160,9 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
 
         const payload: ClassesApiResponse = await response.json();
 
-        if (!response.ok || !payload.success) {
+        if (!response.ok || !payload.success) 
           throw new Error(payload.message || 'Failed to fetch class names');
-        }
+        
 
         const fetchedClasses = (payload.data?.classes || []).map((cls) => ({
           id: String(cls.id),
@@ -179,7 +179,7 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
       }
     };
 
-    fetchClasses();
+    void fetchClasses();
   }, [isOpen]);
 
   useEffect(() => {
@@ -198,9 +198,9 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
 
         const payload: ClassStudentsApiResponse = await response.json();
 
-        if (!response.ok || !payload.success) {
+        if (!response.ok || !payload.success) 
           throw new Error(payload.message || 'Failed to fetch class students');
-        }
+        
 
         const fetchedStudents: Student[] = (payload.data?.students || []).map((student, index) => {
           const rawId = student.id ?? student.studentId ?? student.userId;
@@ -227,7 +227,7 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
       }
     };
 
-    fetchStudents();
+    void fetchStudents();
   }, [isOpen, selectedClass]);
 
   useEffect(() => {
@@ -310,9 +310,9 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
       })
     };
 
-    if (scope === 'SELECTED') {
+    if (scope === 'SELECTED') 
       payload.predictionName = `${className} - Selected Students Prediction`;
-    }
+    
 
     setIsSubmitting(true);
     setShowGeneratingOverlay(true);
@@ -329,9 +329,9 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
 
       const responseData: PredictionSaveResponse = await response.json();
 
-      if (!response.ok || !responseData.success) {
+      if (!response.ok || !responseData.success) 
         throw new Error(responseData.message || 'Failed to save prediction');
-      }
+      
 
       const elapsed = Date.now() - startedAt;
       const remaining = Math.max(0, 2000 - elapsed);
@@ -510,8 +510,12 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
             <div className=''>
               <h3 className='text-[18px] font-semibold mb-4' style={{ color: '#000000' }}>Select Students</h3>
               {isLoadingStudents ? (
-                <div className='rounded-[10px] border border-[rgba(0,0,0,0.18)] px-4 py-6 text-center text-[14px] text-[rgba(0,0,0,0.5)]'>
-                  Loading students...
+                <div className='rounded-[10px] border border-[rgba(0,0,0,0.18)] px-4 py-6'>
+                  <div className='animate-pulse space-y-3'>
+                    {[0, 1, 2, 3].map((index) => (
+                      <div key={index} className='h-9 rounded-md bg-gray-100' />
+                    ))}
+                  </div>
                 </div>
               ) : students.length === 0 ? (
                 <div className='rounded-[10px] border border-[rgba(0,0,0,0.18)] px-4 py-6 text-center text-[14px] text-[rgba(0,0,0,0.5)]'>

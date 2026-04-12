@@ -109,9 +109,18 @@ export function PredictedResultsModal({
 
         <div className='flex-1 overflow-y-auto px-6 py-6'>
           {isLoading ? (
-            <div className='flex h-[280px] flex-col items-center justify-center gap-3'>
-              <div className='h-9 w-9 animate-spin rounded-full border-4 border-black/20 border-t-black' />
-              <div className='text-[14px] font-semibold text-black/70'>Loading results...</div>
+            <div className='animate-pulse space-y-3'>
+              {[0, 1, 2, 3].map((index) => (
+                <div key={index} className='rounded border border-gray-200 bg-gray-50 p-4'>
+                  <div className='flex items-center justify-between gap-4'>
+                    <div className='space-y-2'>
+                      <div className='h-4 w-32 rounded-full bg-gray-200' />
+                      <div className='h-3 w-24 rounded-full bg-gray-200' />
+                    </div>
+                    <div className='h-7 w-16 rounded-full bg-gray-200' />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : displayResults.length === 0 ? (
             <div className='py-10 text-center text-[14px] text-black/60'>No prediction results available</div>
