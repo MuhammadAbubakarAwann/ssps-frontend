@@ -1,17 +1,24 @@
 import { prisma } from './prisma';
 
+type AppRole = 'STUDENT' | 'TEACHER' | 'ADMIN';
+
+function toPersistableRole(role?: AppRole): 'ADMIN' | undefined {
+  // Current generated Prisma types only allow ADMIN for User.role.
+  return role === 'ADMIN' ? 'ADMIN' : undefined;
+}
+
 // User management functions
 export async function createUser(data: {
   email?: string
   name?: string
-  role?: 'STUDENT' | 'TEACHER' | 'ADMIN'
+  role?: AppRole
 }) {
   try {
     const user = await prisma.user.create({
       data: {
         email: data.email || undefined,
         name: data.name || undefined,
-        role: data.role
+        role: toPersistableRole(data.role)
       }
     });
     return { success: true, data: user };
@@ -78,13 +85,17 @@ export async function updateUser(id: string, data: {
   email?: string
   emailVerified?: Date
   image?: string
-  role?: 'STUDENT' | 'TEACHER' | 'ADMIN'
+  role?: AppRole
 }) {
   try {
+    const { role, ...rest } = data;
+    const persistableRole = toPersistableRole(role);
+
     const user = await prisma.user.update({
       where: { id },
       data: {
-        ...data
+        ...rest,
+        ...(persistableRole ? { role: persistableRole } : {})
       }
     });
     return { success: true, data: user };

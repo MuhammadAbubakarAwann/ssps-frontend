@@ -182,7 +182,7 @@ export function PredictionHistoryCard({ prediction }: PredictionHistoryCardProps
       <PredictedResultsModal
         isOpen={showResults}
         onClose={() => setShowResults(false)}
-        className=""
+        className=''
         date={resultsDate}
         results={results}
         isLoading={isLoadingResults}

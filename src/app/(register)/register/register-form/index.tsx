@@ -21,13 +21,13 @@ export default function RegisterForm() {
 
     setLoading(true);
 
-    const formData = new FormData(event.currentTarget);
+    // const formData = new FormData(event.currentTarget);
     
     try {
       // Add your registration logic here
-      const email = formData.get('email') as string;
-      const password = formData.get('password') as string;
-      const name = formData.get('name') as string;
+      // const email = formData.get('email') as string;
+      // const password = formData.get('password') as string;
+      // const name = formData.get('name') as string;
 
       // Example: Call your registration endpoint
       // const response = await fetch('/api/auth/register', {

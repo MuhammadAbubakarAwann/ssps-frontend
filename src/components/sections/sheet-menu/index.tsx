@@ -14,7 +14,7 @@ import { UserInfo } from '@/@types';
 import { Role } from '@prisma/client';
 
 export function SheetMenu({ userInfo }: { userInfo: UserInfo | null }) {
-  const activeRole: Role = userInfo?.role ?? 'TEACHER';
+  const activeRole: Role = userInfo?.role ?? 'ADMIN';
 
   return (
     <Sheet>

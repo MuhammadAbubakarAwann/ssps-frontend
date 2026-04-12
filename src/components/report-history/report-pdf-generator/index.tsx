@@ -124,7 +124,7 @@ export function ReportPdfGenerator({ payload, onComplete, onError }: ReportPdfGe
       }
     };
 
-    run();
+    void run();
   }, [payload, onComplete, onError]);
 
   return null;

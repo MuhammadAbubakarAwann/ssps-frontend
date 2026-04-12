@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { ArrowRight, Mail, Eye, EyeOff, Lock } from 'lucide-react';
-import Image from 'next/image';
+// import Image from 'next/image';
 import { login } from '@/lib/auth-client';
 
 const LoginForm = () => {

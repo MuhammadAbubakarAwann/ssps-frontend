@@ -88,9 +88,9 @@ export async function refreshAccessToken(): Promise<string | null> {
     if (!response.ok) {
       console.error('Token refresh failed with status:', response.status);
       // Clear invalid tokens
-      cookieStore.delete('access_token', { path: '/' });
-      cookieStore.delete('refresh_token', { path: '/' });
-      cookieStore.delete('user_data', { path: '/' });
+      cookieStore.delete({ name: 'access_token', path: '/' });
+      cookieStore.delete({ name: 'refresh_token', path: '/' });
+      cookieStore.delete({ name: 'user_data', path: '/' });
       return null;
     }
 
