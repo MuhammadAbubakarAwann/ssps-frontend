@@ -33,35 +33,34 @@ interface ReportHistoryTableProps {
   onDownloadReport?: (report: Report) => void;
 }
 
-const getTypeBadgeColor = (type: string) => {
+const getTypeDotColor = (type: string) => {
   const normalizedType = type.toLowerCase();
 
-  if (normalizedType === 'class') {
-    return {
-      bg: 'rgba(17, 139, 255, 0.37)',
-      border: '#0083FF',
-      text: '#0064C3'
-    };
-  }
+  if (normalizedType === 'class')
+    return '#0083FF';
 
-  return {
-    bg: 'rgba(139, 92, 246, 0.22)',
-    border: '#8B5CF6',
-    text: '#6D28D9'
-  };
+  return '#8B5CF6';
+};
+
+const formatTypeLabel = (type: string) => {
+  const normalized = type.trim().toLowerCase();
+  if (normalized === 'selected')
+    return 'Selected';
+  if (normalized === 'class')
+    return 'Class';
+  return type;
 };
 
 export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: ReportHistoryTableProps) {
-  const getRiskLevelColor = (riskLevel: string) => {
+  const getRiskLevelDotColor = (riskLevel: string) => {
     const level = riskLevel.toLowerCase();
-    if (level === 'low') {
-      return { bg: 'rgba(178, 229, 39, 0.37)', border: '#B2E527', text: '#62A510' };
-    } else if (level === 'medium') {
-      return { bg: 'rgba(255, 192, 17, 0.37)', border: '#FFA600', text: '#C37200' };
-    } else if (level === 'high') {
-      return { bg: 'rgba(255, 39, 39, 0.37)', border: '#FF2727', text: '#C30000' };
-    }
-    return { bg: 'rgba(255, 192, 17, 0.37)', border: '#FFA600', text: '#C37200' };
+    if (level === 'low')
+      return '#62A510';
+    if (level === 'medium' || level === 'mid' || level === 'avg')
+      return '#C37200';
+    if (level === 'high')
+      return '#C30000';
+    return '#C37200';
   };
 
   return (
@@ -89,8 +88,8 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
         <TableBody>
           {reports.length > 0 ? (
             reports.map((report, index) => {
-              const riskColors = getRiskLevelColor(report.riskLevel);
-              const typeColors = getTypeBadgeColor(report.type);
+              const riskDotColor = getRiskLevelDotColor(report.riskLevel);
+              const typeDotColor = getTypeDotColor(report.type);
 
               return (
                 <TableRow
@@ -102,22 +101,12 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
                   </TableCell>
 
                   <TableCell className='h-[52px] border-r border-black px-4'>
-                    <div
-                      style={{
-                        backgroundColor: typeColors.bg,
-                        border: `1px solid ${typeColors.border}`,
-                        borderRadius: '11px',
-                        padding: '1px 13px',
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: typeColors.text,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '26px'
-                      }}
-                    >
-                      {report.type}
+                    <div className='inline-flex items-center gap-2 text-[16px] font-medium text-black/80'>
+                      <span
+                        className='inline-block h-2.5 w-2.5 rounded-full'
+                        style={{ backgroundColor: typeDotColor }}
+                      />
+                      <span>{formatTypeLabel(report.type)}</span>
                     </div>
                   </TableCell>
 
@@ -130,22 +119,12 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
                   </TableCell>
 
                   <TableCell className='h-[52px] border-r border-black px-4'>
-                    <div
-                      style={{
-                        backgroundColor: riskColors.bg,
-                        border: `1px solid ${riskColors.border}`,
-                        borderRadius: '11px',
-                        padding: '1px 13px',
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: riskColors.text,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '26px'
-                      }}
-                    >
-                      {report.riskLevel}
+                    <div className='inline-flex items-center gap-2 text-[16px] font-medium text-black/80'>
+                      <span
+                        className='inline-block h-2.5 w-2.5 rounded-full'
+                        style={{ backgroundColor: riskDotColor }}
+                      />
+                      <span>{report.riskLevel.toUpperCase()}</span>
                     </div>
                   </TableCell>
 

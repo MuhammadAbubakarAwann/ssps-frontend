@@ -17,6 +17,7 @@ import {
   ReportPdfGenerator,
   type ReportPdfPayload
 } from '@/components/report-history/report-pdf-generator';
+import { PredictedResultsModal } from '@/components/predictions/predicted-results-modal';
 import { showToast } from '@/components/ui/toaster';
 import { Input } from '@/components/ui/input';
 import { Search, ChevronDown } from 'lucide-react';
@@ -38,6 +39,58 @@ type ReportTableItem = {
   actions: {
     view: boolean;
     download: boolean;
+  };
+};
+
+type StudentResult = {
+  id: string;
+  name: string;
+  regNo: string;
+  predictedScore: number;
+  passProbability: number;
+  performanceCategory: string;
+  modelConfidence: number;
+  riskLevel: 'Low' | 'Mid' | 'High';
+  suggestions: string[];
+};
+
+type PredictionDetailsResponse = {
+  success?: boolean;
+  message?: string;
+  data?: {
+    class?: {
+      id?: string | number;
+      name?: string;
+    };
+    prediction?: {
+      date?: string;
+      generatedAt?: string;
+    };
+    entries?: Array<{
+      id?: number | string;
+      studentId?: number | string;
+      name?: string;
+      regNo?: string;
+      predictedScore?: number;
+      performance?: string;
+      performanceCategory?: string;
+      passProbability?: number;
+      modelConfidence?: number;
+      riskLevel?: 'LOW' | 'MID' | 'HIGH' | string;
+      suggestions?: string[] | string;
+    }>;
+    students?: Array<{
+      id: number | string;
+      studentId?: number | string;
+      name: string;
+      registrationNum: string;
+      predictedScore: number;
+      performanceCategory: string;
+      passProbability: number;
+      modelConfidence: number;
+      riskLevel: 'LOW' | 'MID' | 'HIGH';
+      suggestions: string[] | string;
+    }>;
   };
 };
 
@@ -151,8 +204,133 @@ function deriveClassId(report: Record<string, unknown>): string {
   return '';
 }
 
+function derivePredictionId(report: Record<string, unknown>): string {
+  const directCandidates = [
+    report.predictionId,
+    report.prediction_id,
+    report.id
+  ];
+
+  for (const candidate of directCandidates) {
+    if (candidate != null && !isRecord(candidate) && !Array.isArray(candidate)) {
+      const normalized = String(candidate).trim();
+      if (normalized)
+        return normalized;
+    }
+  }
+
+  const predictionNode = report.prediction;
+  if (isRecord(predictionNode)) {
+    const nestedCandidates = [
+      predictionNode.id,
+      predictionNode.predictionId,
+      predictionNode.prediction_id
+    ];
+
+    for (const candidate of nestedCandidates) {
+      if (candidate != null && !isRecord(candidate) && !Array.isArray(candidate)) {
+        const normalized = String(candidate).trim();
+        if (normalized)
+          return normalized;
+      }
+    }
+  }
+
+  return '';
+}
+
+const normalizeRiskLevel = (risk: 'LOW' | 'MID' | 'HIGH'): 'Low' | 'Mid' | 'High' => {
+  if (risk === 'HIGH')
+    return 'High';
+
+  if (risk === 'MID')
+    return 'Mid';
+
+  return 'Low';
+};
+
+const mapPredictionResults = (payload: PredictionDetailsResponse): StudentResult[] => {
+  if (Array.isArray(payload.data?.entries) && payload.data.entries.length > 0) {
+    return payload.data.entries.map((entry, index) => ({
+      id: String(entry.studentId ?? entry.id ?? index),
+      name: String(entry.name || ''),
+      regNo: String(entry.regNo || ''),
+      predictedScore: Number(entry.predictedScore || 0),
+      passProbability: Number(entry.passProbability || 0),
+      performanceCategory: String(entry.performanceCategory || entry.performance || 'N/A'),
+      modelConfidence: Number(entry.modelConfidence || 0),
+      riskLevel: normalizeRiskLevel(String(entry.riskLevel || 'LOW') as 'LOW' | 'MID' | 'HIGH'),
+      suggestions: Array.isArray(entry.suggestions)
+        ? entry.suggestions.map((suggestion) => String(suggestion)).filter(Boolean)
+        : String(entry.suggestions || '').split('\n').filter(Boolean)
+    }));
+  }
+
+  return (payload.data?.students || []).map((student) => ({
+    id: String(student.studentId ?? student.id),
+    name: student.name,
+    regNo: student.registrationNum,
+    predictedScore: student.predictedScore,
+    passProbability: student.passProbability,
+    performanceCategory: student.performanceCategory,
+    modelConfidence: student.modelConfidence,
+    riskLevel: normalizeRiskLevel(student.riskLevel),
+    suggestions: Array.isArray(student.suggestions)
+      ? student.suggestions
+      : String(student.suggestions || '').split('\n').filter(Boolean)
+  }));
+};
+
 function deriveSummaryText(report: Record<string, unknown>): string {
-  return toDisplayText(report.summary ?? report.description ?? report.title, '-');
+  const parseCount = (value: unknown): number | null => {
+    if (value == null)
+      return null;
+
+    const numeric = Number(value);
+    if (Number.isFinite(numeric))
+      return numeric;
+
+    if (typeof value === 'string') {
+      const match = value.match(/\d+/);
+      if (match)
+        return Number(match[0]);
+    }
+
+    return null;
+  };
+
+  const high = parseCount(
+    report.highCount
+    ?? report.high
+    ?? report.highRiskCount
+    ?? report.high_risk_count
+  );
+  const avg = parseCount(
+    report.avgCount
+    ?? report.averageCount
+    ?? report.midCount
+    ?? report.mediumCount
+    ?? report.avg
+    ?? report.mid
+    ?? report.medium
+  );
+  const low = parseCount(
+    report.lowCount
+    ?? report.low
+    ?? report.lowRiskCount
+    ?? report.low_risk_count
+  );
+
+  if (high !== null || avg !== null || low !== null)
+    return `High:${high ?? 0} | Avg:${avg ?? 0} | Low:${low ?? 0}`;
+
+  const rawSummary = toDisplayText(report.summary ?? report.description ?? report.title, '-');
+  const compactMatch = rawSummary.match(/^(\d+)\s*[-|/]\s*(\d+)\s*[-|/]\s*(\d+)$/);
+
+  if (compactMatch)
+    return `High:${compactMatch[1]} | Avg:${compactMatch[2]} | Low:${compactMatch[3]}`;
+
+  return rawSummary;
 }
 
 function toDateSafe(value: unknown): string {
@@ -197,6 +375,11 @@ export default function ReportHistoryPage() {
   const [selectedRisk, setSelectedRisk] = useState('all');
   const [error, setError] = useState<string | null>(null);
   const [pdfPayload, setPdfPayload] = useState<ReportPdfPayload | null>(null);
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [results, setResults] = useState<StudentResult[]>([]);
+  const [resultsDate, setResultsDate] = useState('');
+  const [resultsClassTitle, setResultsClassTitle] = useState('');
 
   useEffect(() => {
     const userData = localStorage.getItem('user_data');
@@ -257,11 +440,8 @@ export default function ReportHistoryPage() {
         if (!response.ok || !payload.success)
           throw new Error(payload.message || 'Failed to fetch reports');
 
-        const mapped = (payload.data?.reports || []).map((report, index): ReportTableItem => {
-          const predictionId = toStringSafe(
-            report.predictionId ?? report.prediction_id ?? report.id,
-            `${index + 1}`
-          );
+        const mapped = (payload.data?.reports || []).map((report): ReportTableItem => {
+          const predictionId = derivePredictionId(report);
 
           const className = deriveClassOrStudentLabel(report);
 
@@ -269,7 +449,7 @@ export default function ReportHistoryPage() {
 
           return {
             predictionId,
-            reportCode: toStringSafe(report.reportCode ?? report.report_code, `RPT-${predictionId}`),
+            reportCode: toStringSafe(report.reportCode ?? report.report_code, predictionId ? `RPT-${predictionId}` : 'RPT-UNKNOWN'),
             type: toStringSafe(report.type ?? report.scope, 'Class'),
             classId: deriveClassId(report),
             className,
@@ -346,8 +526,48 @@ export default function ReportHistoryPage() {
     });
   }, [reports, searchQuery, selectedClass, selectedType, selectedRisk, classes]);
 
-  const handleViewReport = (report: ReportTableItem) => {
-    router.push(`/predictions?predictionId=${encodeURIComponent(report.predictionId)}`);
+  const handleViewReport = async (report: ReportTableItem) => {
+    if (!report.predictionId) {
+      showToast.error('Prediction ID is missing for this report.');
+      return;
+    }
+
+    if (!report.classId) {
+      showToast.error('Class information is missing for this report.');
+      return;
+    }
+
+    setShowResultsModal(true);
+    setIsLoadingResults(true);
+    setResults([]);
+    setResultsClassTitle(report.className);
+    setResultsDate(report.date);
+
+    try {
+      const response = await fetch(`/api/teacher/classes/${report.classId}/predictions/${report.predictionId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const payload: PredictionDetailsResponse = await response.json();
+      if (!response.ok || !payload.success)
+        throw new Error(payload.message || 'Failed to fetch prediction results');
+
+      setResults(mapPredictionResults(payload));
+      setResultsClassTitle(String(payload.data?.class?.name || report.className));
+
+      if (payload.data?.prediction?.generatedAt || payload.data?.prediction?.date) {
+        setResultsDate(
+          new Date(payload.data.prediction.generatedAt || payload.data.prediction.date || report.date).toLocaleDateString('en-GB')
+        );
+      }
+    } catch (fetchError) {
+      console.error('Error fetching report details:', fetchError);
+      showToast.error(fetchError instanceof Error ? fetchError.message : 'Failed to fetch prediction results');
+      setShowResultsModal(false);
+    } finally {
+      setIsLoadingResults(false);
+    }
   };
 
   const handleDownloadReport = (report: ReportTableItem) => {
@@ -491,6 +711,16 @@ export default function ReportHistoryPage() {
           showToast.error(pdfError.message || 'Failed to export report');
           setPdfPayload(null);
         }}
+      />
+
+      <PredictedResultsModal
+        isOpen={showResultsModal}
+        onClose={() => setShowResultsModal(false)}
+        className=''
+        classTitle={resultsClassTitle}
+        date={resultsDate}
+        results={results}
+        isLoading={isLoadingResults}
       />
     </ContentLayout>
   );

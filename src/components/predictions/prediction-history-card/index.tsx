@@ -19,6 +19,10 @@ interface PredictionDetailsResponse {
   success?: boolean;
   message?: string;
   data?: {
+    class?: {
+      id?: string | number;
+      name?: string;
+    };
     prediction?: {
       date?: string;
       generatedAt?: string;
@@ -113,6 +117,7 @@ export function PredictionHistoryCard({ prediction, shouldAutoOpen = false, onAu
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [results, setResults] = useState<StudentResult[]>([]);
   const [resultsDate, setResultsDate] = useState(prediction.date);
+  const [resultsClassTitle, setResultsClassTitle] = useState(prediction.className);
 
   const handleOpenResults = async () => {
     setShowResults(true);
@@ -120,6 +125,7 @@ export function PredictionHistoryCard({ prediction, shouldAutoOpen = false, onAu
     if (prediction.preloadedResults && prediction.preloadedResults.length > 0) {
       setResults(prediction.preloadedResults);
       setResultsDate(prediction.date);
+      setResultsClassTitle(prediction.className);
       setIsLoadingResults(false);
       return;
     }
@@ -140,6 +146,7 @@ export function PredictionHistoryCard({ prediction, shouldAutoOpen = false, onAu
       const mappedResults: StudentResult[] = mapPredictionResults(payload);
 
       setResults(mappedResults);
+      setResultsClassTitle(String(payload.data?.class?.name || prediction.className));
 
       if (payload.data?.prediction?.generatedAt || payload.data?.prediction?.date)
         setResultsDate(
@@ -238,6 +245,7 @@ export function PredictionHistoryCard({ prediction, shouldAutoOpen = false, onAu
         isOpen={showResults}
         onClose={() => setShowResults(false)}
         className=''
+        classTitle={resultsClassTitle}
         date={resultsDate}
         results={results}
         isLoading={isLoadingResults}

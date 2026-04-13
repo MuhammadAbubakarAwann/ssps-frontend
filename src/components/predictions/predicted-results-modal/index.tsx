@@ -19,6 +19,7 @@ interface PredictedResultsModalProps {
   isOpen: boolean;
   onClose: () => void;
   className: string;
+  classTitle?: string;
   date: string;
   results: StudentResult[];
   isLoading?: boolean;
@@ -80,6 +81,7 @@ export function PredictedResultsModal({
   isOpen,
   onClose,
   className,
+  classTitle,
   date,
   results,
   isLoading = false
@@ -99,18 +101,25 @@ export function PredictedResultsModal({
       >
         <div className='flex items-center justify-between border-b border-black/[0.18] px-6 py-6'>
           <div className='flex items-center gap-4'>
-            <h2 className='text-[28px] font-bold text-black'>Predicted Results</h2>
-            <span className='text-[14px] font-bold text-[#9D9D9D]'>{date}</span>
+            <div>
+              <h2 className='text-[28px] font-bold text-black'>Predicted Results</h2>
+              {classTitle && (
+                <p className='text-[16px] font-semibold text-black/75'>{classTitle}</p>
+              )}
+            </div>
           </div>
-          <Button
-            color='gray'
-            size='icon'
-            variant='ghost'
-            className='h-8 w-8 p-0 text-black'
-            onClick={onClose}
-          >
-            <X className='h-5 w-5' />
-          </Button>
+          <div className='flex items-center gap-3'>
+            <span className='text-[14px] font-bold text-[#9D9D9D]'>{date}</span>
+            <Button
+              color='gray'
+              size='icon'
+              variant='ghost'
+              className='h-8 w-8 p-0 text-black'
+              onClick={onClose}
+            >
+              <X className='h-5 w-5' />
+            </Button>
+          </div>
         </div>
 
         <div className='flex-1 overflow-y-auto px-6 py-6'>
