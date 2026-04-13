@@ -146,7 +146,7 @@ export function PredictedResultsModal({
                 key={result.id}
                 className={`relative rounded px-5 py-4 ${getRiskLevelColorClass(result.riskLevel)}`}
               >
-                <div className='flex items-start gap-[30px]'>
+                <div className='flex items-center gap-[30px]'>
                   <div className='flex w-[160px] shrink-0 self-center items-center gap-4'>
                     <div className={`text-[28px] font-bold leading-[42px] ${getRiskLevelNumberClass(result.riskLevel)}`}>
                       {index + 1}
@@ -158,7 +158,7 @@ export function PredictedResultsModal({
                   </div>
 
                   <div className='flex flex-1 self-center gap-[30px]'>
-                    <div className='flex flex-col items-end gap-3'>
+                    <div className='flex flex-col  self-center items-end gap-3'>
                       <div className='flex items-center gap-3'>
                         <span className='min-w-[97px] text-[12px] text-right font-bold text-black'>
                           Predicted Score
@@ -181,7 +181,7 @@ export function PredictedResultsModal({
                       </div>
                     </div>
 
-                    <div className='flex flex-col items-end gap-3'>
+                    <div className='flex flex-col  self-center items-end gap-3'>
                       <div className='flex items-center gap-3'>
                         <span className='min-w-[100px] text-[12px] text-right font-bold text-black'>
                           Pass Probability

@@ -65,6 +65,7 @@ type PredictionDetailsResponse = {
     prediction?: {
       date?: string;
       generatedAt?: string;
+      scope?: string;
     };
     entries?: Array<{
       id?: number | string;
@@ -570,14 +571,44 @@ export default function ReportHistoryPage() {
     }
   };
 
-  const handleDownloadReport = (report: ReportTableItem) => {
-    setPdfPayload({
-      reportCode: report.reportCode,
-      className: report.className,
-      type: report.type,
-      date: report.date,
-      results: []
-    });
+  const handleDownloadReport = async (report: ReportTableItem) => {
+    if (!report.predictionId) {
+      showToast.error('Prediction ID is missing for this report.');
+      return;
+    }
+
+    if (!report.classId) {
+      showToast.error('Class information is missing for this report.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/teacher/classes/${report.classId}/predictions/${report.predictionId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const payload: PredictionDetailsResponse = await response.json();
+      if (!response.ok || !payload.success)
+        throw new Error(payload.message || 'Failed to fetch prediction results');
+
+      const resultsForPdf = mapPredictionResults(payload);
+      const resolvedDate = payload.data?.prediction?.generatedAt || payload.data?.prediction?.date
+        ? new Date(payload.data.prediction.generatedAt || payload.data.prediction.date || report.date).toLocaleDateString('en-GB')
+        : report.date;
+      const resolvedType = String(payload.data?.prediction?.scope || report.type || '').toUpperCase() || report.type;
+
+      setPdfPayload({
+        reportCode: report.reportCode,
+        className: String(payload.data?.class?.name || report.className),
+        type: resolvedType,
+        date: resolvedDate,
+        results: resultsForPdf
+      });
+    } catch (fetchError) {
+      console.error('Error fetching report download details:', fetchError);
+      showToast.error(fetchError instanceof Error ? fetchError.message : 'Failed to download report');
+    }
   };
 
   if (isLoadingUser)

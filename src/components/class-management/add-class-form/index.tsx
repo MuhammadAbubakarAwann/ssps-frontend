@@ -41,6 +41,15 @@ function normalizeStudentId(value: unknown): Student['id'] {
   return undefined;
 }
 
+function deriveProgramCode(value: unknown): string {
+  const raw = String(value || '').trim();
+  if (!raw)
+    return '';
+
+  const firstToken = raw.split('-')[0]?.trim() || '';
+  return firstToken || raw;
+}
+
 export function AddClassForm({ editClassId }: AddClassFormProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -162,13 +171,13 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
             : [];
 
           setClassData({
-            name: String(classInfo.programCode || classInfo.name || ''),
-            semester: String(classInfo.semesterNumber || classInfo.semester || ''),
+            name: deriveProgramCode(classInfo.programCode || classInfo.name),
+            semester: parseSemesterNumber(String(classInfo.semesterNumber || classInfo.semester || '')),
             subject: String(classInfo.subject || courseInfo?.label || courseInfo?.name || ''),
             section: String(classInfo.section || ''),
             courseCode: String(classInfo.courseCode || courseInfo?.courseCode || courseInfo?.code || ''),
             courseName: String(classInfo.courseName || courseInfo?.courseName || courseInfo?.title || ''),
-            courseCatalogId: String(classInfo.courseCatalogId || courseInfo?.id || '')
+            courseCatalogId: String(classInfo.courseCatalogId || courseInfo?.id || classInfo.courseCode || courseInfo?.courseCode || '')
           });
 
           setStudents(
@@ -224,6 +233,24 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
     return semesterNumber ? `Semester ${semesterNumber}` : '';
   };
 
+  const resolveCourseCatalogIdForSave = () => {
+    if (!classData.courseCatalogId)
+      return '';
+
+    const directMatch = subjectOptions.find((option) => option.id === classData.courseCatalogId);
+    if (directMatch?.id)
+      return directMatch.id;
+
+    const inferredMatch = subjectOptions.find((option) => {
+      const byCode = classData.courseCode && option.courseCode === classData.courseCode;
+      const byName = classData.courseName && option.courseName === classData.courseName;
+      const bySubject = classData.subject && option.subject === classData.subject;
+      return Boolean(byCode || byName || bySubject);
+    });
+
+    return inferredMatch?.id || '';
+  };
+
   const handleClassInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === 'name') {
@@ -251,14 +278,17 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
     }
 
     if (name === 'subject') {
-      const selectedSubject = subjectOptions.find((option) => option.id === value);
+      const selectedSubject = subjectOptions.find((option) => {
+        const optionValue = option.id || option.courseCode || option.subject;
+        return optionValue === value;
+      });
 
       setClassData((prev) => ({
         ...prev,
         subject: selectedSubject?.subject || '',
         courseCode: selectedSubject?.courseCode || '',
         courseName: selectedSubject?.courseName || '',
-        courseCatalogId: selectedSubject?.id || ''
+        courseCatalogId: selectedSubject?.id || selectedSubject?.courseCode || ''
       }));
       return;
     }
@@ -315,7 +345,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
             );
 
             return {
-              id: String(subject.id || ''),
+              id: String(subject.id || subject.courseCode || subject.code || ''),
               courseCode,
               courseName,
               subject: subjectText
@@ -324,6 +354,32 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
           .filter((subject) => subject.subject.length > 0);
 
         setSubjectOptions(mappedSubjects);
+
+        setClassData((prev) => {
+          const hasMatchedCatalogId = prev.courseCatalogId
+            && mappedSubjects.some((subject) => (subject.id || subject.courseCode || subject.subject) === prev.courseCatalogId);
+
+          if (hasMatchedCatalogId)
+            return prev;
+
+          const matchedSubject = mappedSubjects.find((subject) => {
+            const sameCode = prev.courseCode && subject.courseCode === prev.courseCode;
+            const sameName = prev.courseName && subject.courseName === prev.courseName;
+            const sameLabel = prev.subject && subject.subject === prev.subject;
+            return Boolean(sameCode || sameName || sameLabel);
+          });
+
+          if (!matchedSubject)
+            return prev;
+
+          return {
+            ...prev,
+            courseCatalogId: matchedSubject.id,
+            subject: matchedSubject.subject,
+            courseCode: matchedSubject.courseCode,
+            courseName: matchedSubject.courseName
+          };
+        });
       } catch (error) {
         console.error('Failed to fetch subjects:', error);
         setSubjectOptions([]);
@@ -446,8 +502,14 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
     }
 
     const programName = getProgramName(classData.name);
+    const resolvedCourseCatalogId = resolveCourseCatalogIdForSave();
     const semesterNumber = toNumber(parseSemesterNumber(classData.semester));
     const semester = getSemesterLabel(classData.semester);
+
+    if (!resolvedCourseCatalogId) {
+      showToast.error('Please reselect subject and wait for subjects to finish loading before saving.');
+      return;
+    }
 
     if (students.length === 0) {
       showToast.error('Please add at least one student before saving.');
@@ -456,16 +518,16 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
 
     const payload = {
       class: {
-        name: programName,
+        name: programName || classData.name,
         programCode: classData.name,
-        programName,
+        programName: programName || classData.name,
         courseCode: classData.courseCode,
         courseName: classData.courseName,
         subject: classData.subject,
         section: classData.section,
         semester,
         semesterNumber,
-        courseCatalogId: classData.courseCatalogId
+        courseCatalogId: resolvedCourseCatalogId
       },
       students: students.map((student) => ({
         name: student.name,
@@ -561,9 +623,11 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
               >
                 <option value=''>Select class</option>
                 {classNameOptions?.length > 0 ? (
-                  classNameOptions.map((option) => (
-                    <option key={option.code} value={option.code}>{option.code}</option>
+                  withExistingValue(classNameOptions.map((option) => option.code), classData.name).map((code) => (
+                    <option key={code} value={code}>{code}</option>
                   ))
+                ) : classData.name ? (
+                  <option value={classData.name}>{classData.name}</option>
                 ) : (
                   <option disabled>Loading classes...</option>
                 )}
@@ -580,9 +644,14 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                 className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30'
               >
                 <option value=''>Select semester</option>
-                {semesterOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
+                {withExistingValue(semesterOptions.map((option) => option.value), classData.semester).map((semesterValue) => {
+                  const matched = semesterOptions.find((option) => option.value === semesterValue);
+                  const label = matched?.label || `Semester ${semesterValue}`;
+
+                  return (
+                    <option key={semesterValue} value={semesterValue}>{label}</option>
+                  );
+                })}
               </select>
             </div>
 
@@ -599,8 +668,16 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                 <option value=''>
                   {loadingSubjects ? 'Loading subjects...' : 'Select subject'}
                 </option>
+                {classData.courseCatalogId
+                  && !subjectOptions.some((option) => (option.id || option.courseCode || option.subject) === classData.courseCatalogId)
+                  && classData.subject && (
+                    <option value={classData.courseCatalogId}>{classData.subject}</option>
+                )}
                 {subjectOptions.map((option) => (
-                  <option key={option.id || option.courseCode || option.subject} value={option.id}>
+                  <option
+                    key={option.id || option.courseCode || option.subject}
+                    value={option.id || option.courseCode || option.subject}
+                  >
                     {option.subject}
                   </option>
                 ))}
@@ -617,7 +694,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                 className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30'
               >
                 <option value=''>Select section</option>
-                {sectionOptions.map((option) => (
+                {withExistingValue(sectionOptions, classData.section).map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>

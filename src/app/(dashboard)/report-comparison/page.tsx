@@ -72,6 +72,22 @@ interface PredictionComparisonApiResponse {
   };
 }
 
+interface PredictionTitleApiResponse {
+  success?: boolean;
+  message?: string;
+  data?: {
+    prediction?: {
+      title?: string;
+      reportCode?: string;
+    };
+  };
+}
+
+function normalizeComparisonTitle(title: string): string {
+  const cleaned = title.replace(/\s*-\s*selected students\s*$/i, '').trim();
+  return cleaned || 'Prediction';
+}
+
 export default function ReportComparisonPage() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,7 +103,7 @@ export default function ReportComparisonPage() {
   const [comparisonError, setComparisonError] = useState<string | null>(null);
   const [classesLoading, setClassesLoading] = useState(false);
 
-  const mapComparisonData = (payload: PredictionComparisonApiResponse): ComparisonPanelData => {
+  const mapComparisonData = (payload: PredictionComparisonApiResponse, titleOverride?: string): ComparisonPanelData => {
     const predictedScore = Number(payload.data?.details?.predictedScore ?? 0);
     const passProbability = Number(payload.data?.details?.passProbability ?? 0);
     const confidence = Number(payload.data?.details?.confidence ?? 0);
@@ -108,8 +124,15 @@ export default function ReportComparisonPage() {
       return acc;
     }, []);
 
+    const rawTitle = String(
+      titleOverride
+      || payload.data?.prediction?.title
+      || payload.data?.prediction?.reportCode
+      || 'Prediction'
+    );
+
     return {
-      title: String(payload.data?.prediction?.title || payload.data?.prediction?.reportCode || 'Prediction'),
+      title: normalizeComparisonTitle(rawTitle),
       date: String(payload.data?.prediction?.date || new Date().toISOString()),
       predictedScore: Number.isFinite(predictedScore) ? predictedScore : 0,
       passProbability: Number.isFinite(passProbability) ? passProbability : 0,
@@ -236,7 +259,29 @@ export default function ReportComparisonPage() {
       if (!response.ok || !payload.success)
         throw new Error(payload.message || 'Failed to fetch comparison data');
 
-      return mapComparisonData(payload);
+      let titleOverride = '';
+
+      if (selectedClassId) {
+        try {
+          const titleResponse = await fetch(`/api/teacher/classes/${selectedClassId}/predictions/${predictionId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+
+          const titlePayload: PredictionTitleApiResponse = await titleResponse.json();
+          if (titleResponse.ok && titlePayload.success) {
+            titleOverride = String(
+              titlePayload.data?.prediction?.title
+              || titlePayload.data?.prediction?.reportCode
+              || ''
+            ).trim();
+          }
+        } catch {
+          // Keep comparison payload title when title endpoint is unavailable.
+        }
+      }
+
+      return mapComparisonData(payload, titleOverride);
     };
 
     let cancelled = false;
@@ -270,7 +315,7 @@ export default function ReportComparisonPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedStudent?.apiStudentId, selectedFirstHistory, selectedSecondHistory]);
+  }, [selectedClassId, selectedStudent?.apiStudentId, selectedFirstHistory, selectedSecondHistory]);
 
   if (isLoading) 
     return (

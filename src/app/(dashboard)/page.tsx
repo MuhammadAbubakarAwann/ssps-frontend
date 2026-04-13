@@ -24,7 +24,6 @@ export default async function DashboardPage() {
 
   return (
     <ContentLayout userInfo={user} title='Dashboard'>
-      <div className='space-y-6 py-6'>
         {/* Breadcrumb */}
         <Breadcrumb>
           <BreadcrumbList>
@@ -52,7 +51,6 @@ export default async function DashboardPage() {
           <ClassOverview />
           <RecentActivity />
         </div>
-      </div>
     </ContentLayout>
   );
 }

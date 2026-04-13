@@ -15,9 +15,26 @@ interface StudentDetailsResponse {
       address: string;
       semester: string;
       overallRiskLevel: string;
-      expectedCgpa: number;
-      classRank: number;
-      averageScore: number;
+      expectedCgpa?: number | string;
+      classRank?: number | string;
+      averageScore?: number | string;
+    };
+    class?: {
+      id?: string;
+      name?: string;
+      programCode?: string;
+      semesterNumber?: number;
+      section?: string;
+      semester?: string;
+    };
+    metrics?: {
+      riskLevel?: string;
+      riskLevelAverage?: number;
+      expectedGpa?: number;
+      attendanceAverage?: number;
+      classRankAverage?: number;
+      averageScore?: number;
+      enrollmentsCount?: number;
     };
     attendanceBySubject: Array<{
       classId: string;
@@ -52,7 +69,7 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
 
         const baseUrl = role === 'STUDENT'
           ? '/api/student/details'
-          : `/api/teacher/students/${studentId}/details`;
+          : `/api/teacher/students/${studentId}/overall-metrics`;
         const url = `${baseUrl}${params.toString() ? `?${params.toString()}` : ''}`;
         const response = await fetch(url, {
           method: 'GET',
@@ -68,14 +85,35 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
         if (!payload.success)
           throw new Error(payload.data ? 'Failed to fetch student details' : 'Invalid response format');
 
-        setStudentData(payload.data.student);
+        const normalizedStudent = {
+          ...payload.data.student,
+          overallRiskLevel:
+            payload.data.metrics?.riskLevel
+            || payload.data.student.overallRiskLevel
+            || 'MID',
+          expectedCgpa:
+            payload.data.metrics?.expectedGpa
+            ?? payload.data.student.expectedCgpa,
+          classRank:
+            payload.data.metrics?.classRankAverage
+            ?? payload.data.student.classRank,
+          averageScore:
+            payload.data.metrics?.averageScore
+            ?? payload.data.student.averageScore
+        };
 
-        // Calculate average attendance from all subjects
-        if (payload.data.attendanceBySubject && payload.data.attendanceBySubject.length > 0) {
+        setStudentData(normalizedStudent);
+
+        if (typeof payload.data.metrics?.attendanceAverage === 'number') {
+          setAttendance(Math.round(payload.data.metrics.attendanceAverage));
+        } else if (payload.data.attendanceBySubject && payload.data.attendanceBySubject.length > 0) {
+          // Backward compatibility for legacy details endpoint shape.
           const avgAttendance =
             payload.data.attendanceBySubject.reduce((sum, item) => sum + item.attendancePercentage, 0) /
             payload.data.attendanceBySubject.length;
           setAttendance(Math.round(avgAttendance));
+        } else {
+          setAttendance(0);
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to fetch student details';
@@ -138,6 +176,10 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
     .join('')
     .toUpperCase();
 
+  const expectedCgpa = Number(studentData.expectedCgpa ?? 0);
+  const averageScore = Number(studentData.averageScore ?? 0);
+  const classRank = Number(studentData.classRank ?? 0);
+
   return (
     <div className='relative rounded-[20px] border  bg-white p-9 border-gray-300'>
       {/* Student Avatar and Info */}
@@ -169,7 +211,7 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
             </p>
             <div className='flex items-baseline justify-center gap-2'>
               <span className='text-[32px] font-semibold text-black'>
-                {studentData.expectedCgpa.toFixed(2)}
+                {Number.isFinite(expectedCgpa) ? expectedCgpa.toFixed(2) : '0.00'}
               </span>
             </div>
           </div>
@@ -190,7 +232,7 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
               AVERAGE SCORE
             </p>
             <p className='text-[32px] font-semibold text-black'>
-              {studentData.averageScore.toFixed(1)}
+              {Number.isFinite(averageScore) ? averageScore.toFixed(1) : '0.0'}
             </p>
           </div>
 
@@ -200,7 +242,7 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
               CLASS RANK
             </p>
             <p className='text-[32px] font-semibold text-black'>
-              {studentData.classRank}
+              {Number.isFinite(classRank) ? classRank : 0}
             </p>
           </div>
         </div>
