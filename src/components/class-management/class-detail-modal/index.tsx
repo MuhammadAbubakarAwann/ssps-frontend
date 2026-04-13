@@ -26,6 +26,11 @@ interface Student {
 interface ClassItem {
   id: string;
   name: string;
+  programCode?: string;
+  programName?: string;
+  subject?: string;
+  courseCode?: string;
+  courseName?: string;
   code?: string;
   semester: string;
   section: string;
@@ -46,6 +51,15 @@ export function ClassDetailModal({ classItem, onClose, onDelete }: ClassDetailMo
   const [classDetails, setClassDetails] = useState<ClassItem>(classItem);
 
   const displayClass = useMemo(() => classDetails || classItem, [classDetails, classItem]);
+  const normalizedSemester = /^semester\s+/i.test(displayClass.semester)
+    ? displayClass.semester
+    : displayClass.semester
+      ? `Semester ${displayClass.semester}`
+      : 'Semester N/A';
+  const displayTitle = `${displayClass.programCode || displayClass.name || 'N/A'}-${normalizedSemester}-${displayClass.section || 'N/A'}`;
+  const displaySubject = displayClass.subject
+    || [displayClass.courseCode, displayClass.courseName].filter(Boolean).join(' ')
+    || '';
 
   useEffect(() => {
     const loadDetails = async () => {
@@ -82,6 +96,11 @@ export function ClassDetailModal({ classItem, onClose, onDelete }: ClassDetailMo
         setClassDetails({
           id: String(classData.id ?? classItem.id),
           name: String(classData.name || classItem.name || 'Unnamed Class'),
+          programCode: String(classData.programCode || classItem.programCode || classData.name || ''),
+          programName: String(classData.programName || classItem.programName || ''),
+          subject: String(classData.subject || classItem.subject || ''),
+          courseCode: String(classData.courseCode || ''),
+          courseName: String(classData.courseName || ''),
           code: typeof classData.code === 'string' ? classData.code : classItem.code,
           semester: String(classData.semester || classItem.semester || ''),
           section: String(classData.section || classItem.section || ''),
@@ -142,15 +161,13 @@ export function ClassDetailModal({ classItem, onClose, onDelete }: ClassDetailMo
         >
           <div>
             <h2
-              className='font-semibold text-[24px] leading-[32px]'
+              className='font-bold text-[24px] leading-[32px]'
               style={{ color: '#000000' }}
             >
-              {displayClass.name}
+              {displayTitle}
             </h2>
-            <div className='text-[12px] mt-1 space-y-0.5' style={{ color: 'rgba(0, 0, 0, 0.5)' }}>
-              <p>{displayClass.code ? `Code: ${displayClass.code}` : ''}</p>
-              <p>{displayClass.semester ? `Semester: ${displayClass.semester}` : ''}</p>
-              <p>{displayClass.section ? `Section: ${displayClass.section}` : ''}</p>
+            <div className='text-[12px] mt-1 space-y-0.5' style={{ color: 'rgba(0, 0, 0, 0.6)' }}>
+              {displaySubject && <p className='font-semibold'>{displaySubject}</p>}
               <p>{(displayClass.totalStudents ?? displayClass.students.length) || 0} students enrolled</p>
             </div>
           </div>

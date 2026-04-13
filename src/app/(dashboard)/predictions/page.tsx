@@ -32,13 +32,32 @@ interface FilterStudent {
 }
 
 interface PredictionHistoryCardItem {
-  id: number;
+  id: string;
   classId: string;
   status: string;
   date: string;
   className: string;
   studentsAnalyzed: number;
   avgScore: string;
+  reportId?: string;
+  classMetadata?: {
+    programCode: string;
+    semesterNumber: number;
+    section: string;
+    courseCode: string;
+    courseName: string;
+  };
+  preloadedResults?: Array<{
+    id: string;
+    name: string;
+    regNo: string;
+    predictedScore: number;
+    passProbability: number;
+    performanceCategory: string;
+    modelConfidence: number;
+    riskLevel: 'Low' | 'Mid' | 'High';
+    suggestions: string[];
+  }>;
 }
 
 interface ClassesApiResponse {
@@ -73,9 +92,19 @@ interface PredictionHistoryApiResponse {
   data?: {
     totalCount?: number;
     predictions?: Array<{
-      id: number;
+      id: number | string;
+      reportId?: string;
       name?: string;
       title?: string;
+      className?: string;
+      generatedAt?: string;
+      classMetadata?: {
+        programCode?: string;
+        semesterNumber?: number;
+        section?: string;
+        courseCode?: string;
+        courseName?: string;
+      };
       class?: {
         id: number | string;
         name: string;
@@ -118,6 +147,21 @@ interface PredictionMetricsViewModel {
   improvementChange: string;
 }
 
+interface SavedPredictionMetricsSnapshot {
+  totalPredictions?: {
+    value?: number;
+    increasePercentage?: number;
+  };
+  activeClasses?: {
+    value?: number;
+    increaseNumber?: number;
+  };
+  averageImprovement?: {
+    value?: number;
+    increasePercentage?: number;
+  };
+}
+
 const DEFAULT_METRICS: PredictionMetricsViewModel = {
   totalPredictions: '0',
   predictionsChange: '+0%',
@@ -127,11 +171,32 @@ const DEFAULT_METRICS: PredictionMetricsViewModel = {
   improvementChange: '+0%'
 };
 
+function mapMetricsSnapshotToViewModel(snapshot?: SavedPredictionMetricsSnapshot): PredictionMetricsViewModel | null {
+  if (!snapshot)
+    return null;
+
+  const totalPredictionsValue = Number(snapshot.totalPredictions?.value ?? 0);
+  const totalPredictionsIncrease = Number(snapshot.totalPredictions?.increasePercentage ?? 0);
+  const activeClassesValue = Number(snapshot.activeClasses?.value ?? 0);
+  const activeClassesIncrease = Number(snapshot.activeClasses?.increaseNumber ?? 0);
+  const averageImprovementValue = Number(snapshot.averageImprovement?.value ?? 0);
+  const averageImprovementIncrease = Number(snapshot.averageImprovement?.increasePercentage ?? 0);
+
+  return {
+    totalPredictions: `${Number.isFinite(totalPredictionsValue) ? totalPredictionsValue : 0}`,
+    predictionsChange: `${totalPredictionsIncrease >= 0 ? '+' : ''}${Number.isFinite(totalPredictionsIncrease) ? totalPredictionsIncrease.toFixed(2) : '0.00'}%`,
+    activeClasses: `${Number.isFinite(activeClassesValue) ? activeClassesValue : 0}`,
+    classesChange: `${activeClassesIncrease >= 0 ? '+' : ''}${Number.isFinite(activeClassesIncrease) ? activeClassesIncrease : 0}`,
+    averageImprovement: `${Number.isFinite(averageImprovementValue) ? averageImprovementValue.toFixed(2) : '0.00'}%`,
+    improvementChange: `${averageImprovementIncrease >= 0 ? '+' : ''}${Number.isFinite(averageImprovementIncrease) ? averageImprovementIncrease.toFixed(2) : '0.00'}%`
+  };
+}
+
 export default function PredictionsPage() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPredictionModal, setShowPredictionModal] = useState(false);
-  const [_classes, setClasses] = useState<PredictionClass[]>([]);
+  const [classes, setClasses] = useState<PredictionClass[]>([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [scope, setScope] = useState<'CLASS' | 'SELECTED'>('CLASS');
   const [_students, setStudents] = useState<FilterStudent[]>([]);
@@ -143,6 +208,9 @@ export default function PredictionsPage() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [metricsData, setMetricsData] =
     useState<PredictionMetricsViewModel>(DEFAULT_METRICS);
+  const [metricsRefreshKey, setMetricsRefreshKey] = useState(0);
+  const [autoOpenPredictionId, setAutoOpenPredictionId] = useState('');
+  const [cardsTransitioning, setCardsTransitioning] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user_data');
@@ -189,7 +257,7 @@ export default function PredictionsPage() {
     };
 
     void fetchClasses();
-  }, [isLoading]);
+  }, [isLoading, metricsRefreshKey]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -248,6 +316,19 @@ export default function PredictionsPage() {
 
     void fetchPredictionMetrics();
   }, [isLoading]);
+
+  useEffect(() => {
+    if (isLoadingHistory)
+      return;
+
+    setCardsTransitioning(true);
+
+    const frameId = window.requestAnimationFrame(() => {
+      setCardsTransitioning(false);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [predictionHistory, isLoadingHistory]);
 
   useEffect(() => {
     if (!selectedClass) {
@@ -338,18 +419,32 @@ export default function PredictionsPage() {
           );
 
         const mappedHistory = (payload.data?.predictions || []).map((item) => ({
-          id: item.id,
+          id: String(item.id),
           classId: String(item.class?.id ?? selectedClass),
           status: item.status || 'completed',
-          date: new Date(item.date).toLocaleDateString('en-GB'),
+          date: new Date(item.generatedAt || item.date).toLocaleDateString('en-GB'),
           className:
-            item.title || item.name || item.class?.name || 'Prediction',
+            item.name || item.title || item.className || item.class?.name || 'Prediction',
           studentsAnalyzed: item.studentsAnalyzed,
-          avgScore: `${Number(item.avgScore).toFixed(1)}%`
+          avgScore: `${Number(item.avgScore).toFixed(1)}%`,
+          reportId: item.reportId,
+          classMetadata: item.classMetadata
+            ? {
+              programCode: String(item.classMetadata.programCode || ''),
+              semesterNumber: Number(item.classMetadata.semesterNumber || 0),
+              section: String(item.classMetadata.section || ''),
+              courseCode: String(item.classMetadata.courseCode || ''),
+              courseName: String(item.classMetadata.courseName || '')
+            }
+            : undefined
         }));
 
-        setPredictionHistory(mappedHistory);
-        setTotalPredictionCount(payload.data?.totalCount || 0);
+        const filteredHistory = selectedClass
+          ? mappedHistory.filter((item) => item.classId === selectedClass)
+          : mappedHistory;
+
+        setPredictionHistory(filteredHistory);
+        setTotalPredictionCount(selectedClass ? filteredHistory.length : (payload.data?.totalCount || 0));
       } catch (error) {
         console.error('Error fetching prediction history:', error);
         showToast.error(
@@ -368,6 +463,15 @@ export default function PredictionsPage() {
   }, [scope, selectedClass]);
 
   const handlePredictionSaved = (newPrediction: SavedPredictionSummary) => {
+    // Update metric cards from save response when available; fallback to API refresh.
+    const liveMetrics = mapMetricsSnapshotToViewModel(newPrediction.metricsSnapshot);
+    if (liveMetrics)
+      setMetricsData(liveMetrics);
+    else
+      setMetricsRefreshKey((prev) => prev + 1);
+
+    setAutoOpenPredictionId(newPrediction.id);
+
     if (newPrediction.scope === 'SELECTED') {
       setScope('SELECTED');
       setPredictionHistory([newPrediction]);
@@ -509,6 +613,19 @@ export default function PredictionsPage() {
               <option value='SELECTED'>Selected Prediction</option>
             </select>
 
+            <select
+              className='h-10 rounded-[5px] border border-black/20 bg-white px-3 text-[14px]'
+              value={selectedClass}
+              onChange={(event) => setSelectedClass(event.target.value)}
+            >
+              <option value=''>All Classes</option>
+              {classes.map((classItem) => (
+                <option key={classItem.id} value={classItem.id}>
+                  {classItem.name}
+                </option>
+              ))}
+            </select>
+
             <Button
               size='medium'
               color='primary'
@@ -538,15 +655,19 @@ export default function PredictionsPage() {
             ))}
           </div>
         ) : predictionHistory.length === 0 ? (
-          <div className='py-12 text-center text-[14px] text-black/60'>
+          <div className={`py-12 text-center text-[14px] text-black/60 transition-opacity duration-300 ease-out ${cardsTransitioning ? 'opacity-50' : 'opacity-100'}`}>
             No prediction history found
           </div>
         ) : (
-          <div className='grid grid-cols-3 gap-6'>
+          <div className={`grid grid-cols-3 gap-6 transition-opacity duration-300 ease-out ${cardsTransitioning ? 'opacity-50' : 'opacity-100'}`}>
             {predictionHistory.map((prediction) => (
               <PredictionHistoryCard
                 key={prediction.id}
                 prediction={prediction}
+                shouldAutoOpen={prediction.id === autoOpenPredictionId}
+                onAutoOpenHandled={() => {
+                  setAutoOpenPredictionId((prev) => prev === prediction.id ? '' : prev);
+                }}
               />
             ))}
           </div>

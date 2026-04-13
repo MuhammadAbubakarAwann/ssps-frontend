@@ -1,5 +1,9 @@
-import Link from 'next/link';
 import { ContentLayout } from '@/components/sections/content-layout';
+import { DashboardHero } from '@/components/dashboard/dashboard-hero';
+import { OverviewStats } from '@/components/dashboard/overview-stats';
+import { ClassOverview } from '@/components/dashboard/class-overview';
+import { RecentActivity } from '@/components/dashboard/recent-activity';
+import { PerformanceTrendChart } from '@/components/dashboard/performance-trend-chart';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,7 +12,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
-// import { DashboardLanding } from '@/components/sections/dashboard-landing';
 import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
@@ -21,20 +24,35 @@ export default async function DashboardPage() {
 
   return (
     <ContentLayout userInfo={user} title='Dashboard'>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href='/'>Home</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Dashboard</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <p>dashboard content</p>
+      <div className='space-y-6 py-6'>
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href='/'>Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className='font-semibold text-black'>Dashboard</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        {/* Hero Section */}
+        {/* <DashboardHero /> */}
+
+        {/* Stats Grid */}
+        <OverviewStats />
+
+        {/* Trend Graph */}
+        <PerformanceTrendChart />
+
+        {/* Main Content Grid */}
+        <div className='grid grid-cols-1 gap-6 xl:grid-cols-3'>
+          <ClassOverview />
+          <RecentActivity />
+        </div>
+      </div>
     </ContentLayout>
   );
 }

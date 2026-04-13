@@ -1,23 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession, refreshAccessToken } from '@/lib/auth-service';
 
-const API_BASE_URL = process.env.BACKEND_API_URL || 'https://api.domlii.com/api';
+const API_BASE_URL = process.env.BACKEND_API_URL
+  || (process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5000/api'
+    : 'https://api.domlii.com/api');
 
 function getEndpointCandidates(baseUrl: string): string[] {
   const normalizedBase = baseUrl.replace(/\/+$/, '');
+  const localBase = 'http://localhost:5000/api';
 
   const endpoints = [
-    '/teacher/classes',
     '/teacher/new-class-with-students',
+    '/teacher/new-class-with-student',
     '/teacher/class-with-students',
     '/teacher/create-class-with-students'
   ];
 
-  const baseCandidates = [
+  const normalizedCandidates = [
     normalizedBase.replace(/\/api\/v1\/teacher$/i, '/api/teacher'),
     normalizedBase.replace(/\/api\/v1$/i, '/api'),
     normalizedBase
   ];
+
+  const localCandidates = [
+    localBase,
+    localBase.replace(/\/api$/i, '/api/teacher')
+  ];
+
+  const baseCandidates = process.env.NODE_ENV === 'development'
+    ? [...localCandidates, ...normalizedCandidates]
+    : [...normalizedCandidates, ...localCandidates];
 
   const candidates = endpoints.flatMap((endpoint) => {
     const teacherPath = endpoint.replace(/^\/teacher/, '');
@@ -116,9 +129,17 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Don't keep trying if authentication failed and refresh was not possible.
-      if (response.status === 401 || response.status === 403)
-        break;
+      // Do not mask real backend failures (e.g., 400 validation, 401 auth) with later endpoint 404s.
+      // Only continue probing aliases when endpoint is not found/method-not-allowed.
+      if (response.status !== 404 && response.status !== 405) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: lastMessage
+          },
+          { status: response.status }
+        );
+      }
     }
 
     return NextResponse.json(

@@ -38,8 +38,11 @@ type Student = {
 type ClassItem = {
   id: string;
   name: string;
+  programCode: string;
   semester: string;
   section: string;
+  subject: string;
+  programName: string;
   students: Student[];
   totalStudents?: number;
 };
@@ -94,11 +97,25 @@ function mapClass(raw: Record<string, unknown>): ClassItem {
   const totalStudents =
     Number(raw.totalStudents ?? raw.totalStudentsCount ?? raw.studentsCount ?? raw.studentCount);
 
+  const course = raw.course && typeof raw.course === 'object'
+    ? (raw.course as Record<string, unknown>)
+    : null;
+
+  const courseCode = course?.code ? String(course.code) : '';
+  const courseTitle = course?.title ? String(course.title) : '';
+  const subjectFromCourse = [courseCode, courseTitle].filter(Boolean).join(' ');
+  const subject = String(raw.subject || subjectFromCourse || '');
+  const programCode = String(raw.programCode || raw.name || '');
+  const programName = String(raw.programName || '');
+
   return {
     id: resolveClassId(raw),
     name: String(raw.name || 'Unnamed Class'),
+    programCode,
     semester: String(raw.semester || ''),
     section: String(raw.section || ''),
+    subject,
+    programName,
     students: topStudents
       .filter((student): student is Record<string, unknown> => typeof student === 'object' && student !== null)
       .map(mapStudent),

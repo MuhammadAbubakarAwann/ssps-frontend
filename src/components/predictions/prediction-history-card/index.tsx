@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiTrendingUp } from 'react-icons/fi';
 import { PredictedResultsModal } from '../predicted-results-modal/index';
 import { showToast } from '@/components/ui/toaster';
@@ -21,7 +21,21 @@ interface PredictionDetailsResponse {
   data?: {
     prediction?: {
       date?: string;
+      generatedAt?: string;
     };
+    entries?: Array<{
+      id?: number | string;
+      studentId?: number | string;
+      name?: string;
+      regNo?: string;
+      predictedScore?: number;
+      performance?: string;
+      performanceCategory?: string;
+      passProbability?: number;
+      modelConfidence?: number;
+      riskLevel?: 'LOW' | 'MID' | 'HIGH' | string;
+      suggestions?: string[] | string;
+    }>;
     students?: Array<{
       id: number | string;
       studentId?: number | string;
@@ -49,17 +63,52 @@ const normalizeRiskLevel = (risk: 'LOW' | 'MID' | 'HIGH'): 'Low' | 'Mid' | 'High
 
 interface PredictionHistoryCardProps {
   prediction: {
-    id: number;
+    id: string;
     classId: string;
     status: string;
     date: string;
     className: string;
     studentsAnalyzed: number;
     avgScore: string;
+    preloadedResults?: StudentResult[];
   };
+  shouldAutoOpen?: boolean;
+  onAutoOpenHandled?: () => void;
 }
 
-export function PredictionHistoryCard({ prediction }: PredictionHistoryCardProps) {
+const mapPredictionResults = (payload: PredictionDetailsResponse): StudentResult[] => {
+  if (Array.isArray(payload.data?.entries) && payload.data?.entries.length > 0) {
+    return payload.data.entries.map((entry, index) => ({
+      id: String(entry.studentId ?? entry.id ?? index),
+      name: String(entry.name || ''),
+      regNo: String(entry.regNo || ''),
+      predictedScore: Number(entry.predictedScore || 0),
+      passProbability: Number(entry.passProbability || 0),
+      performanceCategory: String(entry.performanceCategory || entry.performance || 'N/A'),
+      modelConfidence: Number(entry.modelConfidence || 0),
+      riskLevel: normalizeRiskLevel(String(entry.riskLevel || 'LOW') as 'LOW' | 'MID' | 'HIGH'),
+      suggestions: Array.isArray(entry.suggestions)
+        ? entry.suggestions.map((suggestion) => String(suggestion)).filter(Boolean)
+        : String(entry.suggestions || '').split('\n').filter(Boolean)
+    }));
+  }
+
+  return (payload.data?.students || []).map((student) => ({
+    id: String(student.studentId ?? student.id),
+    name: student.name,
+    regNo: student.registrationNum,
+    predictedScore: student.predictedScore,
+    passProbability: student.passProbability,
+    performanceCategory: student.performanceCategory,
+    modelConfidence: student.modelConfidence,
+    riskLevel: normalizeRiskLevel(student.riskLevel),
+    suggestions: Array.isArray(student.suggestions)
+      ? student.suggestions
+      : String(student.suggestions || '').split('\n').filter(Boolean)
+  }));
+};
+
+export function PredictionHistoryCard({ prediction, shouldAutoOpen = false, onAutoOpenHandled }: PredictionHistoryCardProps) {
   const [showResults, setShowResults] = useState(false);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [results, setResults] = useState<StudentResult[]>([]);
@@ -67,6 +116,14 @@ export function PredictionHistoryCard({ prediction }: PredictionHistoryCardProps
 
   const handleOpenResults = async () => {
     setShowResults(true);
+
+    if (prediction.preloadedResults && prediction.preloadedResults.length > 0) {
+      setResults(prediction.preloadedResults);
+      setResultsDate(prediction.date);
+      setIsLoadingResults(false);
+      return;
+    }
+
     setIsLoadingResults(true);
 
     try {
@@ -80,24 +137,14 @@ export function PredictionHistoryCard({ prediction }: PredictionHistoryCardProps
       if (!response.ok || !payload.success)
         throw new Error(payload.message || 'Failed to fetch prediction results');
 
-      const mappedResults: StudentResult[] = (payload.data?.students || []).map((student) => ({
-        id: String(student.studentId ?? student.id),
-        name: student.name,
-        regNo: student.registrationNum,
-        predictedScore: student.predictedScore,
-        passProbability: student.passProbability,
-        performanceCategory: student.performanceCategory,
-        modelConfidence: student.modelConfidence,
-        riskLevel: normalizeRiskLevel(student.riskLevel),
-        suggestions: Array.isArray(student.suggestions)
-          ? student.suggestions
-          : String(student.suggestions || '').split('\n').filter(Boolean)
-      }));
+      const mappedResults: StudentResult[] = mapPredictionResults(payload);
 
       setResults(mappedResults);
 
-      if (payload.data?.prediction?.date)
-        setResultsDate(new Date(payload.data.prediction.date).toLocaleDateString('en-GB'));
+      if (payload.data?.prediction?.generatedAt || payload.data?.prediction?.date)
+        setResultsDate(
+          new Date(payload.data.prediction.generatedAt || payload.data.prediction.date || prediction.date).toLocaleDateString('en-GB')
+        );
 
     } catch (error) {
       console.error('Error fetching prediction details:', error);
@@ -106,6 +153,14 @@ export function PredictionHistoryCard({ prediction }: PredictionHistoryCardProps
       setIsLoadingResults(false);
     }
   };
+
+  useEffect(() => {
+    if (!shouldAutoOpen || showResults)
+      return;
+
+    void handleOpenResults();
+    onAutoOpenHandled?.();
+  }, [shouldAutoOpen, showResults]);
 
   return (
     <>

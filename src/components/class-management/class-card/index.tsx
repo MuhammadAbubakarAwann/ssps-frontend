@@ -26,8 +26,11 @@ interface Student {
 interface ClassItem {
   id: string;
   name: string;
+  programCode?: string;
   semester: string;
   section: string;
+  subject?: string;
+  programName?: string;
   students: Student[];
   totalStudents?: number;
 }
@@ -40,6 +43,12 @@ interface ClassCardProps {
 
 export function ClassCard({ classItem, onView, onDelete }: ClassCardProps) {
   const router = useRouter();
+  const normalizedSemester = /^semester\s+/i.test(classItem.semester)
+    ? classItem.semester
+    : classItem.semester
+      ? `Semester ${classItem.semester}`
+      : 'Semester N/A';
+  const titleText = `${classItem.programCode || classItem.name || 'N/A'}-${normalizedSemester}-${classItem.section || 'N/A'}`;
   // Display only first 5 students in the mini view
   const displayedStudents = classItem.students.slice(0, 5);
   const totalStudents = Number.isFinite(classItem.totalStudents)
@@ -55,7 +64,10 @@ export function ClassCard({ classItem, onView, onDelete }: ClassCardProps) {
       {/* Header */}
       <div className='flex items-start justify-between bg-white px-4 py-4'>
         <div>
-          <h3 className='text-[20px] font-semibold leading-[30px] text-black'>{classItem.name}</h3>
+          <h3 className='text-[20px] font-bold leading-[30px] text-black'>{titleText}</h3>
+          <div className='mt-1 space-y-0.5 text-[12px] leading-[18px] text-black/75'>
+            {classItem.subject && <p className='font-semibold'>{classItem.subject}</p>}
+          </div>
         </div>
         <div className='flex gap-2'>
           <Button

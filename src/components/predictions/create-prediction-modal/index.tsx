@@ -10,7 +10,7 @@ import { showToast } from '@/components/ui/toaster';
 
 interface Student {
   id: string;
-  apiStudentId?: number;
+  apiStudentId?: string;
   name: string;
   regNo: string;
   hasPrediction: boolean;
@@ -20,6 +20,11 @@ interface Student {
 interface PredictionClass {
   id: string;
   name: string;
+  programCode?: string;
+  semesterNumber?: number;
+  section?: string;
+  courseCode?: string;
+  courseName?: string;
 }
 
 interface ClassesApiResponse {
@@ -29,8 +34,26 @@ interface ClassesApiResponse {
     classes?: Array<{
       id: number | string;
       name: string;
+      subject?: string;
+      programCode?: string;
+      semester?: string;
+      semesterNumber?: number | string;
+      section?: string;
+      courseCode?: string;
+      courseName?: string;
     }>;
   };
+  classes?: Array<{
+    id: number | string;
+    name: string;
+    subject?: string;
+    programCode?: string;
+    semester?: string;
+    semesterNumber?: number | string;
+    section?: string;
+    courseCode?: string;
+    courseName?: string;
+  }>;
 }
 
 interface ClassStudentsApiResponse {
@@ -49,7 +72,7 @@ interface ClassStudentsApiResponse {
 }
 
 interface PredictionEntryPayload {
-  studentId?: number;
+  studentId?: string;
   name: string;
   regNo: string;
   predictedScore: number;
@@ -65,25 +88,78 @@ interface PredictionSaveResponse {
   message?: string;
   data?: {
     count?: number;
+    entries?: Array<{
+      id?: number | string;
+      studentId?: number | string;
+      name?: string;
+      regNo?: string;
+      predictedScore?: number;
+      passProbability?: number;
+      performance?: string;
+      performanceCategory?: string;
+      modelConfidence?: number;
+      riskLevel?: 'LOW' | 'MID' | 'HIGH' | string;
+      suggestions?: string[] | string;
+    }>;
     prediction?: {
-      id?: number;
+      id?: number | string;
+      reportId?: string;
       name?: string;
       title?: string;
+      scope?: 'CLASS' | 'SELECTED';
+      generatedAt?: string;
       date?: string;
       createdAt?: string;
+      updatedAt?: string;
       status?: string;
       studentsAnalyzed?: number;
       avgScore?: number;
+      classMetadata?: {
+        programCode?: string;
+        semesterNumber?: number;
+        section?: string;
+        courseCode?: string;
+        courseName?: string;
+      };
       class?: {
         id?: number | string;
         name?: string;
       };
     };
+    metrics?: {
+      totalPredictions?: {
+        value?: number;
+        increasePercentage?: number;
+      };
+      activeClasses?: {
+        value?: number;
+        increaseNumber?: number;
+      };
+      averageImprovement?: {
+        value?: number;
+        increasePercentage?: number;
+      };
+    };
+  };
+}
+
+export interface SavedPredictionMetricsSnapshot {
+  totalPredictions?: {
+    value?: number;
+    increasePercentage?: number;
+  };
+  activeClasses?: {
+    value?: number;
+    increaseNumber?: number;
+  };
+  averageImprovement?: {
+    value?: number;
+    increasePercentage?: number;
   };
 }
 
 export interface SavedPredictionSummary {
-  id: number;
+  id: string;
   scope: 'CLASS' | 'SELECTED';
   classId: string;
   className: string;
@@ -91,6 +167,71 @@ export interface SavedPredictionSummary {
   status: string;
   studentsAnalyzed: number;
   avgScore: string;
+  reportId?: string;
+  classMetadata?: {
+    programCode: string;
+    semesterNumber: number;
+    section: string;
+    courseCode: string;
+    courseName: string;
+  };
+  preloadedResults?: Array<{
+    id: string;
+    name: string;
+    regNo: string;
+    predictedScore: number;
+    passProbability: number;
+    performanceCategory: string;
+    modelConfidence: number;
+    riskLevel: 'Low' | 'Mid' | 'High';
+    suggestions: string[];
+  }>;
+  metricsSnapshot?: SavedPredictionMetricsSnapshot;
+}
+
+function parseSemesterNumber(input?: string | number): number {
+  const value = String(input ?? '').trim();
+  if (!value)
+    return 0;
+
+  const matched = value.match(/\d+/);
+  const parsed = Number(matched ? matched[0] : value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function parseClassMetadataFromName(className: string) {
+  const normalized = String(className || '').trim();
+  const [prefix, ...rest] = normalized.split(' ');
+  const suffix = rest.join(' ').trim();
+  const prefixParts = prefix ? prefix.split('-') : [];
+  const programCode = prefixParts[0] || '';
+  const semesterNumber = parseSemesterNumber(prefixParts[1]);
+  const section = prefixParts[2] || '';
+  const [courseCode = '', ...courseNameParts] = suffix.split(' ');
+  const courseName = courseNameParts.join(' ').trim();
+
+  return {
+    programCode,
+    semesterNumber,
+    section,
+    courseCode,
+    courseName
+  };
+}
+
+function normalizeRiskLevel(risk?: string): 'Low' | 'Mid' | 'High' {
+  const normalized = String(risk || '').trim().toUpperCase();
+  if (normalized === 'HIGH')
+    return 'High';
+
+  if (normalized === 'MID')
+    return 'Mid';
+
+  return 'Low';
+}
+
+function extractClasses(payload: ClassesApiResponse) {
+  return payload.data?.classes || payload.classes || [];
 }
 
 const DUMMY_PREDICTION_TEMPLATES = [
@@ -164,9 +305,18 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
           throw new Error(payload.message || 'Failed to fetch class names');
         
 
-        const fetchedClasses = (payload.data?.classes || []).map((cls) => ({
+        const fetchedClasses = extractClasses(payload).map((cls) => ({
           id: String(cls.id),
-          name: cls.name
+          name: cls.name,
+          programCode: cls.programCode ? String(cls.programCode) : undefined,
+          semesterNumber: parseSemesterNumber(cls.semesterNumber ?? cls.semester),
+          section: cls.section ? String(cls.section) : undefined,
+          courseCode: cls.courseCode ? String(cls.courseCode) : undefined,
+          courseName: cls.courseName
+            ? String(cls.courseName)
+            : cls.subject
+              ? String(cls.subject).replace(/^\s*([A-Za-z]{2,}-\d+)\s+/, '').trim()
+              : undefined
         }));
 
         setClasses(fetchedClasses);
@@ -204,12 +354,14 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
 
         const fetchedStudents: Student[] = (payload.data?.students || []).map((student, index) => {
           const rawId = student.id ?? student.studentId ?? student.userId;
-          const numericStudentId = Number(rawId);
+          const normalizedStudentId = rawId !== undefined && rawId !== null
+            ? String(rawId).trim()
+            : '';
 
           return {
             // Keep row selection key unique even if backend IDs are missing/duplicated.
             id: rawId !== undefined && rawId !== null ? `${String(rawId)}-${index}` : `student-${index}`,
-            apiStudentId: Number.isFinite(numericStudentId) ? numericStudentId : undefined,
+            apiStudentId: normalizedStudentId || undefined,
             name: student.name,
             regNo: student.regNo,
             hasPrediction: Boolean(student.hasPredictionHistory),
@@ -276,7 +428,21 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
       return;
     }
 
-    const className = classes.find((cls) => cls.id === selectedClass)?.name || 'Selected Class';
+    const selectedClassInfo = classes.find((cls) => cls.id === selectedClass);
+    const className = selectedClassInfo?.name || 'Selected Class';
+    const parsedContext = parseClassMetadataFromName(className);
+    const classContext = {
+      programCode: selectedClassInfo?.programCode || parsedContext.programCode,
+      semesterNumber: selectedClassInfo?.semesterNumber || parsedContext.semesterNumber,
+      section: selectedClassInfo?.section || parsedContext.section,
+      courseCode: selectedClassInfo?.courseCode || parsedContext.courseCode,
+      courseName: selectedClassInfo?.courseName || parsedContext.courseName
+    };
+
+    if (!classContext.programCode || !classContext.semesterNumber || !classContext.section || !classContext.courseCode || !classContext.courseName) {
+      showToast.error('Selected class is missing program/semester/section/course metadata. Please refresh classes and try again.');
+      return;
+    }
     const targetStudents = predictionType === 'fullClass'
       ? students
       : students.filter((student) => student.selected);
@@ -289,15 +455,23 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
     const scope = predictionType === 'fullClass' ? 'CLASS' : 'SELECTED';
     const payload: {
       scope: 'CLASS' | 'SELECTED';
+      classContext: {
+        programCode: string;
+        semesterNumber: number;
+        section: string;
+        courseCode: string;
+        courseName: string;
+      };
       predictionName?: string;
       predictions: PredictionEntryPayload[];
     } = {
       scope,
+      classContext,
       predictions: targetStudents.map((student, index) => {
         const template = DUMMY_PREDICTION_TEMPLATES[index % DUMMY_PREDICTION_TEMPLATES.length];
 
         return {
-          ...(typeof student.apiStudentId === 'number' ? { studentId: student.apiStudentId } : {}),
+          ...(student.apiStudentId ? { studentId: student.apiStudentId } : {}),
           name: student.name,
           regNo: student.regNo,
           predictedScore: template.predictedScore,
@@ -310,8 +484,23 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
       })
     };
 
+    const classPrefix = [
+      classContext.programCode,
+      classContext.semesterNumber ? String(classContext.semesterNumber) : '',
+      classContext.section
+    ].filter(Boolean).join('-');
+
+    payload.predictionName = [
+      classPrefix,
+      classContext.courseCode,
+      classContext.courseName
+    ].filter(Boolean).join(' ').replace(/\s{2,}/g, ' ').trim();
+
+    if (!payload.predictionName)
+      payload.predictionName = className;
+
     if (scope === 'SELECTED') 
-      payload.predictionName = `${className} - Selected Students Prediction`;
+      payload.predictionName = `${payload.predictionName || className} - Selected Students`;
     
 
     setIsSubmitting(true);
@@ -339,22 +528,51 @@ export function CreatePredictionModal({ isOpen, onClose, onPredictionSaved }: Cr
         await new Promise((resolve) => setTimeout(resolve, remaining));
 
       const savedPrediction = responseData.data?.prediction;
-      const fallbackId = Date.now();
-      const savedDate = savedPrediction?.date || savedPrediction?.createdAt || new Date().toISOString();
+      const fallbackId = `local-${Date.now()}`;
+      const savedDate = savedPrediction?.generatedAt || savedPrediction?.date || savedPrediction?.createdAt || new Date().toISOString();
       const savedClassName = savedPrediction?.title || savedPrediction?.name || className;
-      const savedStudentsAnalyzed = Number(savedPrediction?.studentsAnalyzed ?? targetStudents.length);
-      const savedAvgScore = Number(savedPrediction?.avgScore ?? 0);
+      const savedStudentsAnalyzed = Number(responseData.data?.count ?? savedPrediction?.studentsAnalyzed ?? targetStudents.length);
+      const avgFromEntries = (responseData.data?.entries || []).reduce((acc, entry) => acc + Number(entry.predictedScore || 0), 0);
+      const savedAvgScore = (responseData.data?.entries || []).length > 0
+        ? avgFromEntries / (responseData.data?.entries || []).length
+        : Number(savedPrediction?.avgScore ?? 0);
+      const effectiveClassMetadata = savedPrediction?.classMetadata
+        ? {
+          programCode: String(savedPrediction.classMetadata.programCode || classContext.programCode),
+          semesterNumber: Number(savedPrediction.classMetadata.semesterNumber || classContext.semesterNumber || 0),
+          section: String(savedPrediction.classMetadata.section || classContext.section),
+          courseCode: String(savedPrediction.classMetadata.courseCode || classContext.courseCode),
+          courseName: String(savedPrediction.classMetadata.courseName || classContext.courseName)
+        }
+        : classContext;
+      const preloadedResults = (responseData.data?.entries || []).map((entry, index) => ({
+        id: String(entry.id ?? entry.studentId ?? index),
+        name: String(entry.name || ''),
+        regNo: String(entry.regNo || ''),
+        predictedScore: Number(entry.predictedScore || 0),
+        passProbability: Number(entry.passProbability || 0),
+        performanceCategory: String(entry.performanceCategory || entry.performance || 'N/A'),
+        modelConfidence: Number(entry.modelConfidence || 0),
+        riskLevel: normalizeRiskLevel(entry.riskLevel),
+        suggestions: Array.isArray(entry.suggestions)
+          ? entry.suggestions.map((suggestion) => String(suggestion)).filter(Boolean)
+          : String(entry.suggestions || '').split('\n').map((suggestion) => suggestion.trim()).filter(Boolean)
+      }));
 
       showToast.success(responseData.message || 'Prediction saved successfully');
       onPredictionSaved?.({
-        id: Number(savedPrediction?.id ?? fallbackId),
-        scope,
+        id: String(savedPrediction?.id ?? fallbackId),
+        scope: (savedPrediction?.scope || scope) as 'CLASS' | 'SELECTED',
         classId: String(savedPrediction?.class?.id ?? selectedClass),
         className: savedClassName,
         date: new Date(savedDate).toLocaleDateString('en-GB'),
         status: savedPrediction?.status || 'completed',
         studentsAnalyzed: Number.isFinite(savedStudentsAnalyzed) ? savedStudentsAnalyzed : targetStudents.length,
-        avgScore: `${Number.isFinite(savedAvgScore) ? savedAvgScore.toFixed(1) : '0.0'}%`
+        avgScore: `${Number.isFinite(savedAvgScore) ? savedAvgScore.toFixed(1) : '0.0'}%`,
+        reportId: savedPrediction?.reportId,
+        classMetadata: effectiveClassMetadata,
+        preloadedResults,
+        metricsSnapshot: responseData.data?.metrics
       });
       onClose();
     } catch (error) {

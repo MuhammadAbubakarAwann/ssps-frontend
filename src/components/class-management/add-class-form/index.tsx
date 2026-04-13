@@ -45,12 +45,18 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!!editClassId);
+  const [classNameOptions, setClassNameOptions] = useState<Array<{ code: string; name: string }>>([]);
+  const [subjectOptions, setSubjectOptions] = useState<Array<{ id: string; courseCode: string; courseName: string; subject: string }>>([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(false);
   const [editingRowId, setEditingRowId] = useState<string | number | null>(null);
   const [classData, setClassData] = useState({
     name: '',
+    semester: '',
     subject: '',
     section: '',
-    semester: ''
+    courseCode: '',
+    courseName: '',
+    courseCatalogId: ''
   });
   const [students, setStudents] = useState<Student[]>([]);
   const [formData, setFormData] = useState({
@@ -70,6 +76,61 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
     mids: '',
     att: ''
   });
+
+  const sectionOptions = ['A', 'B', 'C', 'D'];
+
+  const semesterOptions = [
+    { label: 'Semester 1', value: '1' },
+    { label: 'Semester 2', value: '2' },
+    { label: 'Semester 3', value: '3' },
+    { label: 'Semester 4', value: '4' },
+    { label: 'Semester 5', value: '5' },
+    { label: 'Semester 6', value: '6' },
+    { label: 'Semester 7', value: '7' },
+    { label: 'Semester 8', value: '8' }
+  ];
+
+  // Fetch class/program codes from API
+  useEffect(() => {
+    const fetchClassNames = async () => {
+      try {
+        const response = await fetch('/api/catalog/class-names');
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const payload: Record<string, unknown> = await response.json();
+        console.log('API Response:', payload);
+
+        const data = payload.data && typeof payload.data === 'object'
+          ? (payload.data as Record<string, unknown>)
+          : {};
+
+        const programs = Array.isArray(data.programs)
+          ? data.programs
+          : [];
+
+        console.log('Programs:', programs);
+
+        const codes = programs
+          .filter((prog): prog is Record<string, unknown> => typeof prog === 'object' && prog !== null)
+          .map((prog) => ({
+            code: String(prog.code || ''),
+            name: String(prog.name || '')
+          }))
+          .filter((program) => program.code.length > 0);
+
+        console.log('Extracted codes:', codes);
+        setClassNameOptions(codes);
+      } catch (error) {
+        console.error('Failed to fetch class names:', error);
+        showToast.error(`Failed to load class list: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    };
+
+    fetchClassNames();
+  }, []);
 
   useEffect(() => {
     if (editClassId) {
@@ -92,15 +153,22 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
             ? (responseData.class as Record<string, unknown>)
             : responseData;
 
+          const courseInfo = classInfo.course && typeof classInfo.course === 'object'
+            ? (classInfo.course as Record<string, unknown>)
+            : null;
+
           const studentsList = Array.isArray(responseData.students)
             ? responseData.students
             : [];
 
           setClassData({
-            name: String(classInfo.name || ''),
-            subject: String(classInfo.subject || classInfo.code || ''),
+            name: String(classInfo.programCode || classInfo.name || ''),
+            semester: String(classInfo.semesterNumber || classInfo.semester || ''),
+            subject: String(classInfo.subject || courseInfo?.label || courseInfo?.name || ''),
             section: String(classInfo.section || ''),
-            semester: String(classInfo.semester || '')
+            courseCode: String(classInfo.courseCode || courseInfo?.courseCode || courseInfo?.code || ''),
+            courseName: String(classInfo.courseName || courseInfo?.courseName || courseInfo?.title || ''),
+            courseCatalogId: String(classInfo.courseCatalogId || courseInfo?.id || '')
           });
 
           setStudents(
@@ -142,13 +210,130 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
     return Number.isFinite(parsed) ? parsed : 0;
   };
 
-  const handleClassInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const getProgramName = (programCode: string) => {
+    return classNameOptions.find((option) => option.code === programCode)?.name || '';
+  };
+
+  const parseSemesterNumber = (semesterValue: string) => {
+    const match = semesterValue.match(/\d+/);
+    return match ? match[0] : semesterValue;
+  };
+
+  const getSemesterLabel = (semesterValue: string) => {
+    const semesterNumber = parseSemesterNumber(semesterValue);
+    return semesterNumber ? `Semester ${semesterNumber}` : '';
+  };
+
+  const handleClassInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (name === 'name') {
+      setClassData((prev) => ({
+        ...prev,
+        name: value,
+        subject: '',
+        courseCode: '',
+        courseName: '',
+        courseCatalogId: ''
+      }));
+      return;
+    }
+
+    if (name === 'semester') {
+      setClassData((prev) => ({
+        ...prev,
+        semester: value,
+        subject: '',
+        courseCode: '',
+        courseName: '',
+        courseCatalogId: ''
+      }));
+      return;
+    }
+
+    if (name === 'subject') {
+      const selectedSubject = subjectOptions.find((option) => option.id === value);
+
+      setClassData((prev) => ({
+        ...prev,
+        subject: selectedSubject?.subject || '',
+        courseCode: selectedSubject?.courseCode || '',
+        courseName: selectedSubject?.courseName || '',
+        courseCatalogId: selectedSubject?.id || ''
+      }));
+      return;
+    }
+
     setClassData((prev) => ({
       ...prev,
       [name]: value
     }));
   };
+
+  const withExistingValue = (options: string[], currentValue: string) => {
+    if (!currentValue)
+      return options;
+
+    return options.includes(currentValue) ? options : [currentValue, ...options];
+  };
+
+  useEffect(() => {
+    if (!classData.name || !classData.semester) {
+      setSubjectOptions([]);
+      return;
+    }
+
+    const fetchSubjects = async () => {
+      setLoadingSubjects(true);
+
+      try {
+        const response = await fetch(
+          `/api/catalog/subjects?programCode=${classData.name}&semesterNumber=${parseSemesterNumber(classData.semester)}`
+        );
+
+        if (!response.ok)
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+        const payload: Record<string, unknown> = await response.json();
+        const data = payload.data && typeof payload.data === 'object'
+          ? (payload.data as Record<string, unknown>)
+          : {};
+
+        const subjects = Array.isArray(data.subjects)
+          ? data.subjects
+          : [];
+
+        const mappedSubjects = subjects
+          .filter((subject): subject is Record<string, unknown> => typeof subject === 'object' && subject !== null)
+          .map((subject) => {
+            const courseCode = String(subject.courseCode || subject.code || '');
+            const courseName = String(subject.courseName || subject.title || '');
+            const subjectText = String(
+              subject.subject ||
+              subject.label ||
+              subject.name ||
+              [courseCode, courseName].filter(Boolean).join(' ')
+            );
+
+            return {
+              id: String(subject.id || ''),
+              courseCode,
+              courseName,
+              subject: subjectText
+            };
+          })
+          .filter((subject) => subject.subject.length > 0);
+
+        setSubjectOptions(mappedSubjects);
+      } catch (error) {
+        console.error('Failed to fetch subjects:', error);
+        setSubjectOptions([]);
+      } finally {
+        setLoadingSubjects(false);
+      }
+    };
+
+    void fetchSubjects();
+  }, [classData.name, classData.semester]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -255,10 +440,14 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
       showToast.error('Please finish editing the current row first');
       return;
     }
-    if (!classData.name || !classData.subject || !classData.section || !classData.semester) {
+    if (!classData.name || !classData.subject || !classData.section || !classData.semester || !classData.courseCatalogId) {
       showToast.error('Please fill all class fields first.');
       return;
     }
+
+    const programName = getProgramName(classData.name);
+    const semesterNumber = toNumber(parseSemesterNumber(classData.semester));
+    const semester = getSemesterLabel(classData.semester);
 
     if (students.length === 0) {
       showToast.error('Please add at least one student before saving.');
@@ -267,10 +456,16 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
 
     const payload = {
       class: {
-        name: classData.name,
+        name: programName,
+        programCode: classData.name,
+        programName,
+        courseCode: classData.courseCode,
+        courseName: classData.courseName,
         subject: classData.subject,
         section: classData.section,
-        semester: classData.semester
+        semester,
+        semesterNumber,
+        courseCatalogId: classData.courseCatalogId
       },
       students: students.map((student) => ({
         name: student.name,
@@ -355,56 +550,77 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
             Class Details
           </p>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3'>
+            {/* Class Name */}
             <div className='flex flex-col gap-1.5'>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Class Name</label>
-              <Input
-                type='text'
+              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Class (Program)</label>
+              <select
                 name='name'
-                placeholder='BSCS-6A'
                 value={classData.name}
                 onChange={handleClassInputChange}
-                className='h-10 w-full bg-white placeholder:text-gray-300 focus-visible:ring-1 focus-visible:ring-black/30 focus-visible:ring-offset-0'
-                style={{ borderRadius: '5px', border: '1px solid rgba(0, 0, 0, 0.2)', fontSize: '14px' }}
-              />
+                className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30'
+              >
+                <option value=''>Select class</option>
+                {classNameOptions?.length > 0 ? (
+                  classNameOptions.map((option) => (
+                    <option key={option.code} value={option.code}>{option.code}</option>
+                  ))
+                ) : (
+                  <option disabled>Loading classes...</option>
+                )}
+              </select>
             </div>
 
-            <div className='flex flex-col gap-1.5'>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Subject</label>
-              <Input
-                type='text'
-                name='subject'
-                placeholder='CS-601'
-                value={classData.subject}
-                onChange={handleClassInputChange}
-                className='h-10 w-full bg-white placeholder:text-gray-300 focus-visible:ring-1 focus-visible:ring-black/30 focus-visible:ring-offset-0'
-                style={{ borderRadius: '5px', border: '1px solid rgba(0, 0, 0, 0.2)', fontSize: '14px' }}
-              />
-            </div>
-
-            <div className='flex flex-col gap-1.5'>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Section</label>
-              <Input
-                type='text'
-                name='section'
-                placeholder='A'
-                value={classData.section}
-                onChange={handleClassInputChange}
-                className='h-10 w-full bg-white placeholder:text-gray-300 focus-visible:ring-1 focus-visible:ring-black/30 focus-visible:ring-offset-0'
-                style={{ borderRadius: '5px', border: '1px solid rgba(0, 0, 0, 0.2)', fontSize: '14px' }}
-              />
-            </div>
-
+            {/* Semester */}
             <div className='flex flex-col gap-1.5'>
               <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Semester</label>
-              <Input
-                type='text'
+              <select
                 name='semester'
-                placeholder='Spring 2026'
                 value={classData.semester}
                 onChange={handleClassInputChange}
-                className='h-10 w-full bg-white placeholder:text-gray-300 focus-visible:ring-1 focus-visible:ring-black/30 focus-visible:ring-offset-0'
-                style={{ borderRadius: '5px', border: '1px solid rgba(0, 0, 0, 0.2)', fontSize: '14px' }}
-              />
+                className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30'
+              >
+                <option value=''>Select semester</option>
+                {semesterOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Subject */}
+            <div className='flex flex-col gap-1.5'>
+              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Subject (Course)</label>
+              <select
+                name='subject'
+                value={classData.courseCatalogId}
+                onChange={handleClassInputChange}
+                disabled={!classData.name || !classData.semester || loadingSubjects}
+                className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30 disabled:bg-gray-100 disabled:text-gray-400'
+              >
+                <option value=''>
+                  {loadingSubjects ? 'Loading subjects...' : 'Select subject'}
+                </option>
+                {subjectOptions.map((option) => (
+                  <option key={option.id || option.courseCode || option.subject} value={option.id}>
+                    {option.subject}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Section */}
+            <div className='flex flex-col gap-1.5'>
+              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Section</label>
+              <select
+                name='section'
+                value={classData.section}
+                onChange={handleClassInputChange}
+                className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30'
+              >
+                <option value=''>Select section</option>
+                {sectionOptions.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
             </div>
           </div>
         </div>

@@ -89,8 +89,14 @@ export function PredictedResultsModal({
   const displayResults = results;
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
-      <div className={`flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl ${className}`}>
+    <div
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'
+      onClick={onClose}
+    >
+      <div
+        className={`flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl ${className}`}
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className='flex items-center justify-between border-b border-black/[0.18] px-6 py-6'>
           <div className='flex items-center gap-4'>
             <h2 className='text-[28px] font-bold text-black'>Predicted Results</h2>
