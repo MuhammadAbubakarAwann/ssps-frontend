@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, Suspense } from 'react';
 import Image from 'next/image';
-import domliiLogo from '../../../../public/images/logo/domlii-logo.png';
+import sppsLogoBlack from '../../../../public/images/logo/SPPS-logo-black.png';
 
 function AuthErrorContent() {
   const searchParams = useSearchParams();
@@ -55,11 +55,11 @@ function AuthErrorContent() {
             {/* Logo */}
             <div className='flex justify-center'>
               <Image
-                src={domliiLogo}
-                alt='Domlii Logo'
-                width={120}
-                height={74}
-                style={{ width: '120', height: '74' }}
+                src={sppsLogoBlack}
+                alt='SPPS Logo'
+                width={160}
+                height={124}
+                style={{ width: '160', height: '124' }}
               />
             </div>
 
