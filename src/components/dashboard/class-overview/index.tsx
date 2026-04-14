@@ -1,61 +1,69 @@
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
-export function ClassOverview() {
-  const classes = [
-    {
-      name: '8th Semester (Section A)',
-      students: 42,
-      avgScore: 78.5,
-      atRisk: 4,
-    },
-    {
-      name: '8th Semester (Section B)',
-      students: 38,
-      avgScore: 75.2,
-      atRisk: 6,
-    },
-    {
-      name: '7th Semester (Section A)',
-      students: 45,
-      avgScore: 81.3,
-      atRisk: 3,
-    },
-  ];
+type ClassOverviewItem = {
+  id: string;
+  name: string;
+  students: number;
+  avgScore: number;
+  atRisk: number;
+};
+
+interface ClassOverviewProps {
+  classes?: ClassOverviewItem[];
+}
+
+export function ClassOverview({ classes = [] }: ClassOverviewProps) {
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm xl:col-span-2">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-900">Class Overview</h2>
-        <Link href="/class-management" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
-          View All
-          <ChevronRight size={16} />
-        </Link>
-      </div>
+    <div className="group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white p-6 shadow-sm transition-all duration-300 hover:border-blue-200 hover:shadow-2xl">
+      <div className="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-gradient-to-br from-blue-100 to-transparent opacity-20 blur-3xl"></div>
 
-      <div className="space-y-3">
-        {classes.map((cls, idx) => (
-          <div
-            key={idx}
-            className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-b-0"
-          >
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">{cls.name}</p>
-              <p className="text-sm text-gray-500">{cls.students} students</p>
-            </div>
-
-            <div className="flex gap-8">
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Avg Score</p>
-                <p className="text-lg font-semibold text-gray-900">{cls.avgScore}%</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-600">At Risk</p>
-                <p className="text-lg font-semibold text-red-600">{cls.atRisk}</p>
-              </div>
-            </div>
+      <div className="relative z-10">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Class Overview</h2>
+            <p className="mt-1 text-xs text-gray-500">Monitor performance across your classes</p>
           </div>
-        ))}
+          <Link href="/predictions" className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700">
+            View All
+            <ChevronRight size={18} />
+          </Link>
+        </div>
+
+        <div className="space-y-4">
+          {classes.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center text-sm text-gray-500">
+              No class overview data available.
+            </div>
+          ) : (
+            classes.map((cls) => (
+              <Link key={cls.id} href="/predictions" className="block">
+                <div className="group relative overflow-hidden rounded-xl border border-gray-200/50 bg-gradient-to-br from-white to-gray-50/30 p-6 transition-all duration-300 hover:border-blue-300 hover:shadow-md">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-lg font-bold text-gray-900">{cls.name}</p>
+                      <p className="mt-1 text-sm text-gray-500">{cls.students} students enrolled</p>
+                    </div>
+
+                    <div className="ml-6 flex gap-8">
+                      <div className="text-right">
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Avg Score</p>
+                        <p className="mt-1 text-3xl font-bold text-blue-600">{cls.avgScore}%</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-500">At Risk</p>
+                        <p className="mt-1 text-3xl font-bold text-red-500">{cls.atRisk}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

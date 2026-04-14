@@ -36,7 +36,7 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
   };
   return (
     <ScrollArea className='[&>div>div[style]]:!block bg-bg-bg-subtle'>
-      <nav className='mt-8 h-full w-full'>
+      <nav className='mt-4 h-full w-full'>
         <ul className='flex flex-col min-h-[calc(100vh-48px-36px-16px-32px)] lg:min-h-[calc(100vh-32px-40px-32px)] items-start space-y-1 px-2'>
           {/* Main Menu Groups */}
           {menuList.map(({ groupLabel, menus, role }, index) => (

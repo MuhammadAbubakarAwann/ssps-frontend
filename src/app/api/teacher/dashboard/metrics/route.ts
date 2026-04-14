@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSession, refreshAccessToken } from '@/lib/auth-service';
 
 const API_BASE_URL = process.env.BACKEND_API_URL || '';
 
-function getEndpointCandidates(baseUrl: string, studentId: string): string[] {
+function getEndpointCandidates(baseUrl: string): string[] {
   const normalizedBase = baseUrl.replace(/\/+$/, '');
-  const endpoint = `/teacher/students/${studentId}/subject-performance`;
+  const endpoint = '/teacher/dashboard/metrics';
   const teacherPath = endpoint.replace(/^\/teacher/, '');
   const baseCandidates = [
     normalizedBase.replace(/\/api\/v1\/teacher$/i, '/api/teacher'),
@@ -14,11 +14,12 @@ function getEndpointCandidates(baseUrl: string, studentId: string): string[] {
   ];
 
   const candidates: string[] = [];
-  for (const base of baseCandidates)
+  for (const base of baseCandidates) {
     if (/\/api\/teacher$/i.test(base))
       candidates.push(`${base}${teacherPath}`);
     else
       candidates.push(`${base}${endpoint}`);
+  }
 
   return [...new Set(candidates.filter(Boolean))];
 }
@@ -35,42 +36,21 @@ function safeJsonParse(raw: string): Record<string, unknown> | null {
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ studentId: string }> }
-) {
+export async function GET() {
   try {
     const session = await getSession();
 
     if (!session)
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-    const { studentId } = await params;
-
-    if (!studentId)
-      return NextResponse.json(
-        { success: false, message: 'Student id is required' },
-        { status: 400 }
-      );
-
-    const semester = request.nextUrl.searchParams.get('semester');
-
-    const endpoints = getEndpointCandidates(API_BASE_URL, studentId);
+    const endpoints = getEndpointCandidates(API_BASE_URL);
     let lastStatus = 502;
-    let lastMessage = 'Failed to fetch student subject performance';
+    let lastMessage = 'Failed to fetch dashboard metrics';
     let activeToken = session.accessToken;
     let didRefreshToken = false;
 
     for (let i = 0; i < endpoints.length; i += 1) {
-      const endpoint = endpoints[i];
-      const targetUrl = semester
-        ? `${endpoint}${endpoint.includes('?') ? '&' : '?'}semester=${encodeURIComponent(semester)}`
-        : endpoint;
-
-      const response = await fetch(targetUrl, {
+      const response = await fetch(endpoints[i], {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${activeToken}`,
@@ -84,7 +64,7 @@ export async function GET(
       if (response.ok && data) {
         const nextResponse = NextResponse.json(data, { status: response.status });
 
-        if (didRefreshToken && activeToken)
+        if (didRefreshToken && activeToken) {
           nextResponse.cookies.set('access_token', activeToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -92,6 +72,7 @@ export async function GET(
             maxAge: 2 * 60 * 60,
             path: '/'
           });
+        }
 
         return nextResponse;
       }
@@ -115,18 +96,9 @@ export async function GET(
         break;
     }
 
-    return NextResponse.json(
-      {
-        success: false,
-        message: lastMessage
-      },
-      { status: lastStatus >= 400 ? lastStatus : 502 }
-    );
+    return NextResponse.json({ success: false, message: lastMessage }, { status: lastStatus >= 400 ? lastStatus : 502 });
   } catch (error) {
-    console.error('Error fetching teacher student subject performance:', error);
-    return NextResponse.json(
-      { success: false, message: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error fetching teacher dashboard metrics:', error);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }

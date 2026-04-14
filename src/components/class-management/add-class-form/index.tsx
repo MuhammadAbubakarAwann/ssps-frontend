@@ -991,8 +991,8 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                           {isEditing ? (
                             <>
                               <Button
-                                color='gray'
-                                size='small'
+                                color='primary'
+                                size='icon'
                                 variant='ghost'
                                 className='w-6 h-6 p-0 rounded'
                                 style={{ 
@@ -1004,8 +1004,8 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                                 <Check className='w-3.5 h-3.5' style={{ color: '#4CAF50' }} />
                               </Button>
                               <Button
-                                color='gray'
-                                size='small'
+                                color='primary'
+                                size='icon'
                                 variant='ghost'
                                 className='w-6 h-6 p-0 rounded'
                                 style={{ 
@@ -1020,8 +1020,8 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                           ) : (
                             <>
                               <Button
-                                color='gray'
-                                size='small'
+                                color='primary'
+                                size='icon'
                                 variant='ghost'
                                 className='w-6 h-6 p-0 rounded'
                                 style={{ 
@@ -1033,8 +1033,8 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                                 <Edit2 className='w-3.5 h-3.5' style={{ color: '#000000' }} />
                               </Button>
                               <Button
-                                color='gray'
-                                size='small'
+                                color='primary'
+                                size='icon'
                                 variant='ghost'
                                 className='w-6 h-6 p-0 rounded'
                                 style={{ 

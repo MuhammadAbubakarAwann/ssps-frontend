@@ -1,26 +1,60 @@
-'use client';
+import Link from "next/link";
+import { cookies } from "next/headers";
+import type { UserInfo } from "@/@types";
+import { AddClassForm } from "@/components/class-management/add-class-form";
+import { ContentLayout } from "@/components/sections/content-layout";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
-import { AddClassForm } from '@/components/class-management/add-class-form';
-import { ContentLayout } from '@/components/sections/content-layout';
+export const dynamic = "force-dynamic";
 
 export default function EditClassPage({
-  params
+  params,
 }: {
   params: { classId: string };
 }) {
-  return (
-    <ContentLayout userInfo={null} title='Edit Class'>
-      <div className='min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6'>
-        <div className='max-w-7xl mx-auto'>
-          <div className='mb-8'>
-            <h1 className='text-3xl font-bold text-slate-900 mb-2'>
-              Edit Class & Students
-            </h1>
-            <p className='text-slate-600'>Update class details and student information</p>
-          </div>
+  const cookieStore = cookies();
+  const userData = cookieStore.get("user_data")?.value;
+  const user = userData ? (JSON.parse(userData) as UserInfo) : null;
 
-          <AddClassForm editClassId={params.classId} />
-        </div>
+  return (
+    <ContentLayout userInfo={user} title="Edit Class">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/dashboard" className="text-black">
+                Dashboard
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/class-management" className="text-black">
+                All Classes
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="text-black">Edit Class</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <div className="mt-4">
+        <h1 className="mb-6 text-2xl font-semibold text-black">
+          Update class details and student information
+        </h1>
+
+        <AddClassForm editClassId={params.classId} />
       </div>
     </ContentLayout>
   );

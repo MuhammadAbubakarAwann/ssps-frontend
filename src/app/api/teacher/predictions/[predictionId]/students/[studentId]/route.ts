@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession, refreshAccessToken } from '@/lib/auth-service';
 
-const API_BASE_URL = process.env.BACKEND_API_URL || 'https://api.domlii.com/api';
+const API_BASE_URL = process.env.BACKEND_API_URL || '';
 
 interface PredictionHistoryItem {
   id?: string;
