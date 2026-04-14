@@ -8,7 +8,7 @@ import { Menu } from '@/components/sections/menu';
 import { useSidebarToggle } from '@/lib/hooks/use-sidebar-toggle';
 import { SidebarToggle } from '@/components/sections/side-bar-toggle';
 import { Role } from '@prisma/client';
-import sppsLogo from '../../../../public/images/logo/spps-logo.png';
+import sppsLogoWhite from '../../../../public/images/logo/SPPS-logo-white.png';
 
 export function Sidebar({ activeRole }: { activeRole: Role; }) {
   const sidebar = useStore(useSidebarToggle, (state) => state);
@@ -35,7 +35,7 @@ export function Sidebar({ activeRole }: { activeRole: Role; }) {
           <Link href='/' className='flex items-center gap-2 w-full  !justify-start'>
             <div className={cn('flex items-center self-start', sidebar?.isOpen === false ? 'pl-0' : 'pl-0')}>
               <Image
-                src={sppsLogo}
+                src={sppsLogoWhite}
                 alt='SPPS Logo'
                 width={sidebar?.isOpen === false ? 40 : 100}
                 height={sidebar?.isOpen === false ? 25 : 62}

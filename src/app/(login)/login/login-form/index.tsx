@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { ArrowRight, Mail, Eye, EyeOff, Lock } from 'lucide-react';
-// import Image from 'next/image';
+import authbg from '../../../../../public/images/auth-bg.png';
+import sppsLogoBlack from '../../../../../public/images/logo/SPPS-logo-black.png';
 import { login } from '@/lib/auth-client';
+import Image from 'next/image';
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
@@ -17,7 +19,6 @@ const LoginForm = () => {
   const redirectUrl = searchParams.get('redirectUrl');
 
   const safeRedirectUrl = redirectUrl && redirectUrl.startsWith('/') ? redirectUrl : '/';
-  const registerLink = redirectUrl ? `/register?redirectUrl=${redirectUrl}` : '/register';
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -57,7 +58,7 @@ const LoginForm = () => {
       <div className='w-full lg:w-2/5 flex flex-col items-center justify-center px-6 md:px-12 lg:px-20'>
         <div className='w-full max-w-[419px] flex flex-col gap-12'>
           <div className='flex justify-center'>
-            <div className='text-2xl font-bold text-gray-900'>Your Logo</div>
+            <Image src={sppsLogoBlack} alt='SPPS Logo' width={160} height={124} style={{ width: '160', height: '124' }} />
           </div>
 
           <div className='flex flex-col gap-2.5 text-center'>
@@ -134,20 +135,25 @@ const LoginForm = () => {
           </form>
 
           <div className='text-center text-lg'>
-            Don&apos;t have an account?{' '}
-            <Link href={registerLink} className='font-semibold text-black hover:text-black/70'>
-              Register here
-            </Link>
+            Need an account?{' '}
+            <span className='font-semibold text-black/70'>Contact your administrator</span>
           </div>
         </div>
       </div>
 
       <div className='hidden lg:block lg:w-3/5 relative bg-gray-900'>
-        <div className='absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black' />
+         <Image
+          src={authbg || '/placeholder.svg'}
+          alt='Background'
+          fill
+          priority
+          className='object-cover'
+          style={{ filter: 'brightness(0.7)' }}
+        />
         <div className='absolute bottom-20 left-10 text-white max-w-[474px] flex flex-col gap-5 z-10'>
-          <h2 className='text-[28px] font-semibold tracking-[0.05em]'>Your Company</h2>
+          <h2 className='text-[28px] font-semibold tracking-[0.05em]'>Student Performance Prediction System</h2>
           <p className='text-xl font-normal leading-[180%] tracking-[-0.02em]'>
-            From vision to reality — we empower your digital journey with purpose and precision.
+            Predict the future grading to improve student Performance
           </p>
         </div>
       </div>

@@ -102,10 +102,10 @@ function AuthErrorContent() {
               </Link>
               
               <Link
-                href='/register'
+                href='mailto:support@domlii.com'
                 className='h-10 w-full bg-white border border-[#DDE5EC] rounded-lg flex items-center justify-center gap-3 shadow-sm hover:bg-gray-50 transition-colors text-sm font-medium text-[#1F2937]'
               >
-                Create New Account
+                Contact Support
               </Link>
             </div>
 

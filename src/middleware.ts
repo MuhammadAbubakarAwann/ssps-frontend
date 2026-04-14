@@ -4,8 +4,13 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const allowedDashboardRoles = ['ADMIN', 'TEACHER', 'STUDENT'];
 
+  // Temporarily disable self-registration route without removing page files.
+  if (pathname.startsWith('/register')) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
   // Public paths that don't require authentication
-  const publicPaths = ['/login', '/register', '/auth/error', '/unauthorized'];
+  const publicPaths = ['/login', '/auth/error', '/unauthorized'];
   
   // Check if the current path is public
   if (publicPaths.some(path => pathname.startsWith(path))) {
