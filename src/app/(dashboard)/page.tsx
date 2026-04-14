@@ -1,18 +1,18 @@
-import { refreshAccessToken } from "@/lib/auth-service";
-import { cookies } from "next/headers";
-import type { UserInfo } from "@/@types";
-import { ContentLayout } from "@/components/sections/content-layout";
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
-import { OverviewStats } from "@/components/dashboard/overview-stats";
-import { ClassOverview } from "@/components/dashboard/class-overview/index";
-import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { PerformanceTrendChart } from "@/components/dashboard/performance-trend-chart";
+import { refreshAccessToken } from '@/lib/auth-service';
+import { cookies } from 'next/headers';
+import type { UserInfo } from '@/@types';
+import { ContentLayout } from '@/components/sections/content-layout';
+import { DashboardHero } from '@/components/dashboard/dashboard-hero';
+import { OverviewStats } from '@/components/dashboard/overview-stats';
+import { ClassOverview } from '@/components/dashboard/class-overview/index';
+import { RecentActivity } from '@/components/dashboard/recent-activity';
+import { PerformanceTrendChart } from '@/components/dashboard/performance-trend-chart';
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
+  BreadcrumbPage
+} from '@/components/ui/breadcrumb';
 
 type DashboardMetricsResponse = {
   success?: boolean;
@@ -132,12 +132,12 @@ function getEndpointCandidates(baseUrl: string, role: DashboardRole): string[] {
   ];
 
   const candidates: string[] = [];
-  for (const base of baseCandidates) {
+  for (const base of baseCandidates) 
     if (new RegExp(`/api/${roleSegment}$`, 'i').test(base))
       candidates.push(`${base}${rolePath}`);
     else
       candidates.push(`${base}${endpoint}`);
-  }
+  
 
   return [...new Set(candidates.filter(Boolean))];
 }
@@ -152,12 +152,12 @@ function getTeacherEndpointCandidates(baseUrl: string, endpoint: string): string
   ];
 
   const candidates: string[] = [];
-  for (const base of baseCandidates) {
+  for (const base of baseCandidates) 
     if (/\/api\/teacher$/i.test(base))
       candidates.push(`${base}${teacherPath}`);
     else
       candidates.push(`${base}${endpoint}`);
-  }
+  
 
   return [...new Set(candidates.filter(Boolean))];
 }
@@ -340,13 +340,13 @@ export default async function DashboardPage() {
   const userData = cookieStore.get('user_data')?.value;
 
   let user: UserInfo | null = null;
-  if (userData) {
+  if (userData) 
     try {
       user = JSON.parse(userData) as UserInfo;
     } catch {
       user = null;
     }
-  }
+  
 
   const metrics = user && accessToken
     ? await loadDashboardMetrics(user.role, accessToken)
@@ -357,16 +357,16 @@ export default async function DashboardPage() {
     : { classes: [], recentActivity: [] };
 
   return (
-    <ContentLayout userInfo={user} title="Dashboard">
+    <ContentLayout userInfo={user} title='Dashboard'>
       {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-semibold">Dashboard</BreadcrumbPage>
+            <BreadcrumbPage className='font-semibold'>Dashboard</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="space-y-6 py-4">
+      <div className='space-y-6 py-4'>
         {/* Hero Section */}
         <DashboardHero metrics={metrics?.predictionMetrics} />
 
@@ -374,16 +374,16 @@ export default async function DashboardPage() {
         <OverviewStats metrics={metrics?.classMetrics} />
 
         {/* Performance Trend Chart */}
-        <div className="w-full">
+        <div className='w-full'>
           <PerformanceTrendChart />
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-stretch">
-          <div className="h-full">
+        <div className='grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-stretch'>
+          <div className='h-full'>
             <ClassOverview classes={classesOverview.classes} />
           </div>
-          <div className="h-full">
+          <div className='h-full'>
             <RecentActivity activities={classesOverview.recentActivity} />
           </div>
         </div>

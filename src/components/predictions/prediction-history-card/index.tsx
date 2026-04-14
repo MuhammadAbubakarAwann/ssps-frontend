@@ -37,7 +37,7 @@ interface PredictionDetailsResponse {
       performanceCategory?: string;
       passProbability?: number;
       modelConfidence?: number;
-      riskLevel?: 'LOW' | 'MID' | 'HIGH' | string;
+       riskLevel: 'LOW' | 'MID' | 'HIGH';
       suggestions?: string[] | string;
     }>;
     students?: Array<{

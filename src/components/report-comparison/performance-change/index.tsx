@@ -46,7 +46,6 @@ export function PerformanceChange({ latestPanel, olderPanel, leftPanel, rightPan
 
   const scoreDiff = latest.predictedScore - older.predictedScore;
   const probabilityDiff = latest.passProbability - older.passProbability;
-  const riskTransition = `${formatRiskLabel(older.riskLevel)} → ${formatRiskLabel(latest.riskLevel)}`;
   const bestImprovement = latest.subject ?? latest.subjectPerformance ?? 'N/A';
   const riskDiff = getRiskValue(latest.riskLevel) - getRiskValue(older.riskLevel);
 

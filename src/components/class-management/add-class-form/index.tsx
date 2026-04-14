@@ -138,7 +138,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
       }
     };
 
-    fetchClassNames();
+    void fetchClassNames();
   }, []);
 
   useEffect(() => {

@@ -1,35 +1,35 @@
-import Link from "next/link";
-import { cookies } from "next/headers";
-import type { UserInfo } from "@/@types";
-import { AddClassForm } from "@/components/class-management/add-class-form";
-import { ContentLayout } from "@/components/sections/content-layout";
+import Link from 'next/link';
+import { cookies } from 'next/headers';
+import type { UserInfo } from '@/@types';
+import { AddClassForm } from '@/components/class-management/add-class-form';
+import { ContentLayout } from '@/components/sections/content-layout';
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default function EditClassPage({
-  params,
+  params
 }: {
   params: { classId: string };
 }) {
   const cookieStore = cookies();
-  const userData = cookieStore.get("user_data")?.value;
+  const userData = cookieStore.get('user_data')?.value;
   const user = userData ? (JSON.parse(userData) as UserInfo) : null;
 
   return (
-    <ContentLayout userInfo={user} title="Edit Class">
+    <ContentLayout userInfo={user} title='Edit Class'>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/dashboard" className="text-black">
+              <Link href='/dashboard' className='text-black'>
                 Dashboard
               </Link>
             </BreadcrumbLink>
@@ -37,20 +37,20 @@ export default function EditClassPage({
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/class-management" className="text-black">
+              <Link href='/class-management' className='text-black'>
                 All Classes
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="text-black">Edit Class</BreadcrumbPage>
+            <BreadcrumbPage className='text-black'>Edit Class</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="mt-4">
-        <h1 className="mb-6 text-2xl font-semibold text-black">
+      <div className='mt-4'>
+        <h1 className='mb-6 text-2xl font-semibold text-black'>
           Update class details and student information
         </h1>
 
