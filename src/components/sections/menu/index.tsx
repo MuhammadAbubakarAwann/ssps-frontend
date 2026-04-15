@@ -14,7 +14,7 @@ import {
   TooltipContent,
   TooltipProvider
 } from '@/components/ui/tooltip';
-import { signOut } from 'next-auth/react';
+// import { signOut } from 'next-auth/react';
 import { Role } from '@prisma/client';
 
 interface MenuProps {
@@ -29,10 +29,21 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
   const settingsMenu = getSettingsMenu(pathname);
 
 
-  const handleSignout = () => {
-    void signOut();
-    router.push('/login');
-
+  const handleSignout = async () => {
+    try {
+      // Optionally get refreshToken from cookies/localStorage if needed
+      const refreshToken = undefined; // Replace with actual retrieval if used
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(refreshToken ? { refreshToken } : {})
+      });
+      // Optionally clear local/session storage here
+      router.push('/login');
+    } catch (err) {
+      // fallback: still redirect
+      router.push('/login');
+    }
   };
   return (
     <ScrollArea className='[&>div>div[style]]:!block bg-bg-bg-subtle'>
@@ -140,7 +151,7 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
           {settingsMenu.role.includes(activeRole) && (
             <li className={cn('w-full', settingsMenu.groupLabel ? 'pt-5' : '')}>
               {(isOpen && settingsMenu.groupLabel) || isOpen === undefined ? (
-                <p className='text-sm font-medium text-muted-foreground px-4 pb-2 max-w-[248px] truncate'>
+                <p className='text-sm font-medium text-white px-4 pb-2 max-w-[248px] truncate'>
                   {settingsMenu.groupLabel}
                 </p>
               ) : !isOpen && isOpen !== undefined && settingsMenu.groupLabel ? (
@@ -239,7 +250,7 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                   <Button
                     onClick={handleSignout}
                     variant='outline'
-                    className='w-full justify-center h-10 mt-5'
+                    className='w-full justify-center h-10 mt-5 text-white border-white hover:text-white hover:border-white focus:text-white focus:border-white'
                   >
                     <span className={cn(isOpen === false ? '' : 'mr-4')}>
                       <MdOutlineLogout size={18} />
@@ -255,7 +266,7 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                   </Button>
                 </TooltipTrigger>
                 {isOpen === false && (
-                  <TooltipContent side='right' onClick={handleSignout}>Sign out</TooltipContent>
+                  <TooltipContent side='right'>Sign out</TooltipContent>
                 )}
               </Tooltip>
             </TooltipProvider>

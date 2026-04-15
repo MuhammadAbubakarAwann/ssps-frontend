@@ -45,7 +45,7 @@ export function getMenuList(pathname: string): Group[] {
           active: pathname === '/',
           icon: IoGrid,
           submenus: [],
-          role: TEACHER_AND_ADMIN_ROLES
+          role: ALL_DASHBOARD_ROLES
         },
         {
           href: '/class-management',
