@@ -61,7 +61,11 @@ export async function POST(
     const endpoints = getEndpointCandidates(API_BASE_URL, classId);
     let lastStatus = 502;
     let lastMessage = 'Failed to save prediction';
-    let activeToken = session.accessToken;
+
+    // Prefer token forwarded explicitly from the client; fall back to cookie-based session token
+    const incomingAuth = request.headers.get('Authorization') || request.headers.get('authorization') || '';
+    const incomingToken = incomingAuth.startsWith('Bearer ') ? incomingAuth.slice(7) : '';
+    let activeToken = incomingToken || session.accessToken;
     let didRefreshToken = false;
 
     for (let i = 0; i < endpoints.length; i += 1) {

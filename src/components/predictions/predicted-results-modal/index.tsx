@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
+import type { SuggestionsObject } from '@/components/predictions/create-prediction-modal';
 
 interface StudentResult {
   id: string;
@@ -12,7 +13,11 @@ interface StudentResult {
   performanceCategory: string;
   modelConfidence: number;
   riskLevel: 'Low' | 'Mid' | 'High';
-  suggestions: string[];
+  expectedCgpa?: number | null;
+  classRank?: number | null;
+  overallRiskLevel?: string;
+  semesterAvgScore?: number | null;
+  suggestions: SuggestionsObject | string[];
 }
 
 interface PredictedResultsModalProps {
@@ -76,6 +81,16 @@ const getValueBgColorClass = (riskLevel: 'Low' | 'Mid' | 'High') => {
       return 'bg-[rgba(157,211,91,0.56)]';
   }
 };
+
+// Extracts a flat string list from either the old string[] or the new SuggestionsObject
+function getSuggestionStrings(suggestions: SuggestionsObject | string[]): string[] {
+  if (Array.isArray(suggestions)) return suggestions;
+  return (
+    suggestions.suggestions ||
+    suggestions.nextSteps ||
+    []
+  );
+}
 
 export function PredictedResultsModal({
   isOpen,
@@ -217,9 +232,9 @@ export function PredictedResultsModal({
 
                     <div className='flex flex-1 flex-col gap-[2px]'>
                       <span className='text-[12px] font-bold text-black'>Suggestions:</span>
-                      <div className='flex flex-col gap-[2px]'>
-                        {result.suggestions.map((suggestion, idx) => (
-                          <div key={idx} className={`text-[13px] font-bold ${getValueColorClass(result.riskLevel)}`}>
+                      <div className='flex flex-col gap-[0px]'>
+                        {getSuggestionStrings(result.suggestions).map((suggestion, idx) => (
+                          <div key={idx} className={`text-[11px] font-bold ${getValueColorClass(result.riskLevel)}`}>
                             {suggestion}
                           </div>
                         ))}

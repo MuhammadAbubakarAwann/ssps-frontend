@@ -71,16 +71,16 @@ interface ClassStudentsApiResponse {
   };
 }
 
-interface PredictionEntryPayload {
-  studentId?: string;
-  name: string;
-  regNo: string;
-  predictedScore: number;
-  performance: 'LOW' | 'AVG' | 'HIGH';
-  passProbability: number;
-  modelConfidence: number;
-  riskLevel: 'LOW' | 'MID' | 'HIGH';
-  suggestions: string[] | string;
+export interface SuggestionsObject {
+  source?: string;
+  aiSummary?: string;
+  strengths?: string[];
+  areasForImprovement?: string[];
+  nextSteps?: string[];
+  suggestions?: string[];
+  featureBreakdown?: Record<string, number>;
+  history?: Record<string, unknown>;
+  recommendationSnapshot?: Record<string, unknown>;
 }
 
 interface PredictionSaveResponse {
@@ -94,12 +94,16 @@ interface PredictionSaveResponse {
       name?: string;
       regNo?: string;
       predictedScore?: number;
-      passProbability?: number;
       performance?: string;
       performanceCategory?: string;
+      passProbability?: number;
       modelConfidence?: number;
-      riskLevel: 'LOW' | 'MID' | 'HIGH';
-      suggestions?: string[] | string;
+      riskLevel?: 'LOW' | 'MID' | 'HIGH';
+      expectedCgpa?: number | null;
+      classRank?: number | null;
+      overallRiskLevel?: string;
+      semesterAvgScore?: number | null;
+      suggestions?: SuggestionsObject | string[] | string;
     }>;
     prediction?: {
       id?: number | string;
@@ -127,35 +131,17 @@ interface PredictionSaveResponse {
       };
     };
     metrics?: {
-      totalPredictions?: {
-        value?: number;
-        increasePercentage?: number;
-      };
-      activeClasses?: {
-        value?: number;
-        increaseNumber?: number;
-      };
-      averageImprovement?: {
-        value?: number;
-        increasePercentage?: number;
-      };
+      totalPredictions?: { value?: number; increasePercentage?: number };
+      activeClasses?: { value?: number; increaseNumber?: number };
+      averageImprovement?: { value?: number; increasePercentage?: number };
     };
   };
 }
 
 export interface SavedPredictionMetricsSnapshot {
-  totalPredictions?: {
-    value?: number;
-    increasePercentage?: number;
-  };
-  activeClasses?: {
-    value?: number;
-    increaseNumber?: number;
-  };
-  averageImprovement?: {
-    value?: number;
-    increasePercentage?: number;
-  };
+  totalPredictions?: { value?: number; increasePercentage?: number };
+  activeClasses?: { value?: number; increaseNumber?: number };
+  averageImprovement?: { value?: number; increasePercentage?: number };
 }
 
 export interface SavedPredictionSummary {
@@ -184,7 +170,11 @@ export interface SavedPredictionSummary {
     performanceCategory: string;
     modelConfidence: number;
     riskLevel: 'Low' | 'Mid' | 'High';
-    suggestions: string[];
+    expectedCgpa?: number | null;
+    classRank?: number | null;
+    overallRiskLevel?: string;
+    semesterAvgScore?: number | null;
+    suggestions: SuggestionsObject | string[];
   }>;
   metricsSnapshot?: SavedPredictionMetricsSnapshot;
 }
@@ -192,87 +182,21 @@ export interface SavedPredictionSummary {
 function parseSemesterNumber(input?: string | number): number {
   const value = String(input ?? '').trim();
   if (!value) return 0;
-
   const matched = value.match(/\d+/);
   const parsed = Number(matched ? matched[0] : value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function parseClassMetadataFromName(className: string) {
-  const normalized = String(className || '').trim();
-  const [prefix, ...rest] = normalized.split(' ');
-  const suffix = rest.join(' ').trim();
-  const prefixParts = prefix ? prefix.split('-') : [];
-  const programCode = prefixParts[0] || '';
-  const semesterNumber = parseSemesterNumber(prefixParts[1]);
-  const section = prefixParts[2] || '';
-  const [courseCode = '', ...courseNameParts] = suffix.split(' ');
-  const courseName = courseNameParts.join(' ').trim();
-
-  return {
-    programCode,
-    semesterNumber,
-    section,
-    courseCode,
-    courseName
-  };
-}
-
 function normalizeRiskLevel(risk?: string): 'Low' | 'Mid' | 'High' {
-  const normalized = String(risk || '')
-    .trim()
-    .toUpperCase();
+  const normalized = String(risk || '').trim().toUpperCase();
   if (normalized === 'HIGH') return 'High';
-
   if (normalized === 'MID') return 'Mid';
-
   return 'Low';
 }
 
 function extractClasses(payload: ClassesApiResponse) {
   return payload.data?.classes || payload.classes || [];
 }
-
-const DUMMY_PREDICTION_TEMPLATES = [
-  {
-    predictedScore: 72.4,
-    performance: 'AVG' as const,
-    passProbability: 0.86,
-    modelConfidence: 0.88,
-    riskLevel: 'LOW' as const,
-    suggestions: ['Improve quiz practice', 'Maintain attendance above 80%']
-  },
-  {
-    predictedScore: 61.2,
-    performance: 'LOW' as const,
-    passProbability: 0.54,
-    modelConfidence: 0.82,
-    riskLevel: 'HIGH' as const,
-    suggestions: [
-      'Increase assignment completion',
-      'Attend extra tutorial sessions'
-    ]
-  },
-  {
-    predictedScore: 84.1,
-    performance: 'HIGH' as const,
-    passProbability: 0.94,
-    modelConfidence: 0.91,
-    riskLevel: 'LOW' as const,
-    suggestions: [
-      'Keep up the strong performance',
-      'Take on advanced practice questions'
-    ]
-  },
-  {
-    predictedScore: 68.9,
-    performance: 'AVG' as const,
-    passProbability: 0.73,
-    modelConfidence: 0.85,
-    riskLevel: 'MID' as const,
-    suggestions: ['Review weekly quizzes', 'Focus on weak topics']
-  }
-];
 
 interface CreatePredictionModalProps {
   isOpen: boolean;
@@ -285,9 +209,7 @@ export function CreatePredictionModal({
   onClose,
   onPredictionSaved
 }: CreatePredictionModalProps) {
-  const [predictionType, setPredictionType] = useState<
-    'fullClass' | 'selectedStudents'
-  >('fullClass');
+  const [predictionType, setPredictionType] = useState<'fullClass' | 'selectedStudents'>('fullClass');
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [showClassDropdown, setShowClassDropdown] = useState(false);
   const classDropdownRef = useRef<HTMLDivElement | null>(null);
@@ -318,28 +240,20 @@ export function CreatePredictionModal({
           id: String(cls.id),
           name: cls.name,
           programCode: cls.programCode ? String(cls.programCode) : undefined,
-          semesterNumber: parseSemesterNumber(
-            cls.semesterNumber ?? cls.semester,
-          ),
+          semesterNumber: parseSemesterNumber(cls.semesterNumber ?? cls.semester),
           section: cls.section ? String(cls.section) : undefined,
           courseCode: cls.courseCode ? String(cls.courseCode) : undefined,
           courseName: cls.courseName
             ? String(cls.courseName)
             : cls.subject
-              ? String(cls.subject)
-                  .replace(/^\s*([A-Za-z]{2,}-\d+)\s+/, '')
-                  .trim()
+              ? String(cls.subject).replace(/^\s*([A-Za-z]{2,}-\d+)\s+/, '').trim()
               : undefined
         }));
 
         setClasses(fetchedClasses);
       } catch (error) {
         console.error('Error loading classes:', error);
-        showToast.error(
-          error instanceof Error
-            ? error.message
-            : 'Failed to fetch class names',
-        );
+        showToast.error(error instanceof Error ? error.message : 'Failed to fetch class names');
         setClasses([]);
       } finally {
         setIsLoadingClasses(false);
@@ -349,8 +263,9 @@ export function CreatePredictionModal({
     void fetchClasses();
   }, [isOpen]);
 
+  // Only fetch students when the teacher needs to pick individuals
   useEffect(() => {
-    if (!isOpen || !selectedClass) {
+    if (!isOpen || !selectedClass || predictionType !== 'selectedStudents') {
       setStudents([]);
       return;
     }
@@ -360,10 +275,7 @@ export function CreatePredictionModal({
       try {
         const response = await fetch(
           `/api/teacher/classes/${selectedClass}/students/prediction-status`,
-          {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          },
+          { method: 'GET', headers: { 'Content-Type': 'application/json' } }
         );
 
         const payload: ClassStudentsApiResponse = await response.json();
@@ -371,35 +283,24 @@ export function CreatePredictionModal({
         if (!response.ok || !payload.success)
           throw new Error(payload.message || 'Failed to fetch class students');
 
-        const fetchedStudents: Student[] = (payload.data?.students || []).map(
-          (student, index) => {
-            const rawId = student.id ?? student.studentId ?? student.userId;
-            const normalizedStudentId =
-              rawId !== undefined && rawId !== null ? String(rawId).trim() : '';
+        const fetchedStudents: Student[] = (payload.data?.students || []).map((student, index) => {
+          const rawId = student.id ?? student.studentId ?? student.userId;
+          const normalizedStudentId = rawId !== undefined && rawId !== null ? String(rawId).trim() : '';
 
-            return {
-              // Keep row selection key unique even if backend IDs are missing/duplicated.
-              id:
-                rawId !== undefined && rawId !== null
-                  ? `${String(rawId)}-${index}`
-                  : `student-${index}`,
-              apiStudentId: normalizedStudentId || undefined,
-              name: student.name,
-              regNo: student.regNo,
-              hasPrediction: Boolean(student.hasPredictionHistory),
-              selected: false
-            };
-          },
-        );
+          return {
+            id: rawId !== undefined && rawId !== null ? `${String(rawId)}-${index}` : `student-${index}`,
+            apiStudentId: normalizedStudentId || undefined,
+            name: student.name,
+            regNo: student.regNo,
+            hasPrediction: Boolean(student.hasPredictionHistory),
+            selected: false
+          };
+        });
 
         setStudents(fetchedStudents);
       } catch (error) {
         console.error('Error loading class students:', error);
-        showToast.error(
-          error instanceof Error
-            ? error.message
-            : 'Failed to fetch class students',
-        );
+        showToast.error(error instanceof Error ? error.message : 'Failed to fetch class students');
         setStudents([]);
       } finally {
         setIsLoadingStudents(false);
@@ -407,58 +308,41 @@ export function CreatePredictionModal({
     };
 
     void fetchStudents();
-  }, [isOpen, selectedClass]);
+  }, [isOpen, selectedClass, predictionType]);
 
   useEffect(() => {
     if (!showClassDropdown) return;
 
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node | null;
-
-      if (
-        target &&
-        classDropdownRef.current &&
-        !classDropdownRef.current.contains(target)
-      )
+      if (target && classDropdownRef.current && !classDropdownRef.current.contains(target))
         setShowClassDropdown(false);
     };
 
     document.addEventListener('pointerdown', handlePointerDown);
-
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-    };
+    return () => { document.removeEventListener('pointerdown', handlePointerDown); };
   }, [showClassDropdown]);
 
   const handleSelectStudent = (studentId: string) => {
-    setStudents(
-      students.map((s) =>
-        s.id === studentId ? { ...s, selected: !s.selected } : s,
-      ),
-    );
+    setStudents(students.map((s) => s.id === studentId ? { ...s, selected: !s.selected } : s));
   };
 
-  const allSelected =
-    students.length > 0 && students.every((student) => student.selected);
-  const someSelected = students.some((student) => student.selected);
-  const selectedStudentsCount = students.filter(
-    (student) => student.selected,
-  ).length;
+  const allSelected = students.length > 0 && students.every((s) => s.selected);
+  const someSelected = students.some((s) => s.selected);
+  const selectedStudentsCount = students.filter((s) => s.selected).length;
+
   const canGeneratePrediction = Boolean(
     selectedClass &&
     !isSubmitting &&
     !isLoadingClasses &&
-    !isLoadingStudents &&
     (predictionType === 'fullClass'
-      ? students.length > 0
-      : selectedStudentsCount > 0),
+      ? true  // backend fetches the whole class — just need a class selected
+      : selectedStudentsCount > 0 && !isLoadingStudents)
   );
 
   const handleSelectAllStudents = (checked: boolean | 'indeterminate') => {
     const shouldSelectAll = checked === true;
-    setStudents((prev) =>
-      prev.map((student) => ({ ...student, selected: shouldSelectAll })),
-    );
+    setStudents((prev) => prev.map((s) => ({ ...s, selected: shouldSelectAll })));
   };
 
   const handleGeneratePrediction = async () => {
@@ -469,113 +353,66 @@ export function CreatePredictionModal({
 
     const selectedClassInfo = classes.find((cls) => cls.id === selectedClass);
     const className = selectedClassInfo?.name || 'Selected Class';
-    const parsedContext = parseClassMetadataFromName(className);
-    const classContext = {
-      programCode: selectedClassInfo?.programCode || parsedContext.programCode,
-      semesterNumber:
-        selectedClassInfo?.semesterNumber || parsedContext.semesterNumber,
-      section: selectedClassInfo?.section || parsedContext.section,
-      courseCode: selectedClassInfo?.courseCode || parsedContext.courseCode,
-      courseName: selectedClassInfo?.courseName || parsedContext.courseName
-    };
-
-    if (
-      !classContext.programCode ||
-      !classContext.semesterNumber ||
-      !classContext.section ||
-      !classContext.courseCode ||
-      !classContext.courseName
-    ) {
-      showToast.error(
-        'Selected class is missing program/semester/section/course metadata. Please refresh classes and try again.',
-      );
-      return;
-    }
-    const targetStudents =
-      predictionType === 'fullClass'
-        ? students
-        : students.filter((student) => student.selected);
-
-    if (targetStudents.length === 0) {
-      showToast.error(
-        predictionType === 'selectedStudents'
-          ? 'Please select at least one student'
-          : 'No students found for this class',
-      );
-      return;
-    }
-
     const scope = predictionType === 'fullClass' ? 'CLASS' : 'SELECTED';
-    const payload: {
-      scope: 'CLASS' | 'SELECTED';
-      classContext: {
-        programCode: string;
-        semesterNumber: number;
-        section: string;
-        courseCode: string;
-        courseName: string;
+
+    type ClassPayload = { scope: 'CLASS' };
+    type SelectedPayload = { scope: 'SELECTED'; predictionName: string; studentIds: string[] };
+    let payload: ClassPayload | SelectedPayload;
+
+    if (scope === 'CLASS') {
+      payload = { scope: 'CLASS' };
+    } else {
+      const selectedStudents = students.filter((s) => s.selected);
+      if (selectedStudents.length === 0) {
+        showToast.error('Please select at least one student');
+        return;
+      }
+
+      const validStudentIds = selectedStudents
+        .map((s) => s.apiStudentId)
+        .filter((id): id is string => Boolean(id));
+
+      if (validStudentIds.length === 0) {
+        showToast.error('Selected students have no valid IDs. Please refresh and try again.');
+        return;
+      }
+
+      const classPrefix = [
+        selectedClassInfo?.programCode,
+        selectedClassInfo?.semesterNumber ? String(selectedClassInfo.semesterNumber) : '',
+        selectedClassInfo?.section
+      ].filter(Boolean).join('-');
+
+      const predictionName = [classPrefix, selectedClassInfo?.courseCode, selectedClassInfo?.courseName]
+        .filter(Boolean).join(' ').trim() || className;
+
+      payload = {
+        scope: 'SELECTED',
+        predictionName: `${predictionName} - Selected Students`,
+        studentIds: validStudentIds
       };
-      predictionName?: string;
-      predictions: PredictionEntryPayload[];
-    } = {
-      scope,
-      classContext,
-      predictions: targetStudents.map((student, index) => {
-        const template =
-          DUMMY_PREDICTION_TEMPLATES[index % DUMMY_PREDICTION_TEMPLATES.length];
-
-        return {
-          ...(student.apiStudentId ? { studentId: student.apiStudentId } : {}),
-          name: student.name,
-          regNo: student.regNo,
-          predictedScore: template.predictedScore,
-          performance: template.performance,
-          passProbability: template.passProbability,
-          modelConfidence: template.modelConfidence,
-          riskLevel: template.riskLevel,
-          suggestions: template.suggestions
-        };
-      })
-    };
-
-    const classPrefix = [
-      classContext.programCode,
-      classContext.semesterNumber ? String(classContext.semesterNumber) : '',
-      classContext.section
-    ]
-      .filter(Boolean)
-      .join('-');
-
-    payload.predictionName = [
-      classPrefix,
-      classContext.courseCode,
-      classContext.courseName
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
-
-    if (!payload.predictionName) payload.predictionName = className;
-
-    if (scope === 'SELECTED')
-      payload.predictionName = `${payload.predictionName || className} - Selected Students`;
+    }
 
     setIsSubmitting(true);
     setShowGeneratingOverlay(true);
     const startedAt = Date.now();
 
     try {
-      const response = await fetch(
-        `/api/teacher/classes/${selectedClass}/predictions`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
+      // Read the access token so we can attach it as a Bearer header
+      const tokenRes = await fetch('/api/auth/check-token', { method: 'GET' });
+      const tokenData: { status?: string; accessToken?: string } = tokenRes.ok
+        ? await tokenRes.json()
+        : {};
+      const accessToken = tokenData.accessToken || '';
+
+      const response = await fetch(`/api/teacher/classes/${selectedClass}/predictions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {})
         },
-      );
+        body: JSON.stringify(payload)
+      });
 
       const responseData: PredictionSaveResponse = await response.json();
 
@@ -594,71 +431,50 @@ export function CreatePredictionModal({
         savedPrediction?.date ||
         savedPrediction?.createdAt ||
         new Date().toISOString();
-      const savedClassName =
-        savedPrediction?.title || savedPrediction?.name || className;
+      const savedClassName = savedPrediction?.title || savedPrediction?.name || className;
       const savedStudentsAnalyzed = Number(
-        responseData.data?.count ??
-          savedPrediction?.studentsAnalyzed ??
-          targetStudents.length,
+        responseData.data?.count ?? savedPrediction?.studentsAnalyzed ?? 0
       );
-      const avgFromEntries = (responseData.data?.entries || []).reduce(
-        (acc, entry) => acc + Number(entry.predictedScore || 0),
-        0,
-      );
-      const savedAvgScore =
-        (responseData.data?.entries || []).length > 0
-          ? avgFromEntries / (responseData.data?.entries || []).length
-          : Number(savedPrediction?.avgScore ?? 0);
+      const entries = responseData.data?.entries || [];
+      const avgFromEntries = entries.reduce((acc, entry) => acc + Number(entry.predictedScore || 0), 0);
+      const savedAvgScore = entries.length > 0 ? avgFromEntries / entries.length : Number(savedPrediction?.avgScore ?? 0);
+
       const effectiveClassMetadata = savedPrediction?.classMetadata
         ? {
-            programCode: String(
-              savedPrediction.classMetadata.programCode ||
-                classContext.programCode,
-            ),
-            semesterNumber: Number(
-              savedPrediction.classMetadata.semesterNumber ||
-                classContext.semesterNumber ||
-                0,
-            ),
-            section: String(
-              savedPrediction.classMetadata.section || classContext.section,
-            ),
-            courseCode: String(
-              savedPrediction.classMetadata.courseCode ||
-                classContext.courseCode,
-            ),
-            courseName: String(
-              savedPrediction.classMetadata.courseName ||
-                classContext.courseName,
-            )
+            programCode: String(savedPrediction.classMetadata.programCode || ''),
+            semesterNumber: Number(savedPrediction.classMetadata.semesterNumber || 0),
+            section: String(savedPrediction.classMetadata.section || ''),
+            courseCode: String(savedPrediction.classMetadata.courseCode || ''),
+            courseName: String(savedPrediction.classMetadata.courseName || '')
           }
-        : classContext;
-      const preloadedResults = (responseData.data?.entries || []).map(
-        (entry, index) => ({
-          id: String(entry.id ?? entry.studentId ?? index),
-          name: String(entry.name || ''),
-          regNo: String(entry.regNo || ''),
-          predictedScore: Number(entry.predictedScore || 0),
-          passProbability: Number(entry.passProbability || 0),
-          performanceCategory: String(
-            entry.performanceCategory || entry.performance || 'N/A',
-          ),
-          modelConfidence: Number(entry.modelConfidence || 0),
-          riskLevel: normalizeRiskLevel(entry.riskLevel),
-          suggestions: Array.isArray(entry.suggestions)
-            ? entry.suggestions
-                .map((suggestion) => String(suggestion))
-                .filter(Boolean)
-            : String(entry.suggestions || '')
-                .split('\n')
-                .map((suggestion) => suggestion.trim())
-                .filter(Boolean)
-        }),
-      );
+        : undefined;
 
-      showToast.success(
-        responseData.message || 'Prediction saved successfully',
-      );
+      const preloadedResults = entries.map((entry, index) => ({
+        id: String(entry.id ?? entry.studentId ?? index),
+        name: String(entry.name || ''),
+        regNo: String(entry.regNo || ''),
+        predictedScore: Number(entry.predictedScore || 0),
+        passProbability: Number(entry.passProbability || 0),
+        performanceCategory: String(entry.performanceCategory || entry.performance || 'N/A'),
+        modelConfidence: Number(entry.modelConfidence || 0),
+        riskLevel: normalizeRiskLevel(entry.riskLevel),
+        expectedCgpa: entry.expectedCgpa ?? null,
+        classRank: entry.classRank ?? null,
+        overallRiskLevel: String(entry.overallRiskLevel || entry.riskLevel || 'LOW'),
+        semesterAvgScore: entry.semesterAvgScore ?? null,
+        suggestions: (
+          entry.suggestions !== null &&
+          entry.suggestions !== undefined &&
+          typeof entry.suggestions === 'object' &&
+          !Array.isArray(entry.suggestions)
+        )
+          ? entry.suggestions
+          : Array.isArray(entry.suggestions)
+            ? entry.suggestions.map(String).filter(Boolean)
+            : String(entry.suggestions || '').split('\n').map((s) => s.trim()).filter(Boolean)
+      }));
+
+      showToast.success(responseData.message || 'Prediction saved successfully');
       onPredictionSaved?.({
         id: String(savedPrediction?.id ?? fallbackId),
         scope: (savedPrediction?.scope || scope) as 'CLASS' | 'SELECTED',
@@ -666,9 +482,7 @@ export function CreatePredictionModal({
         className: savedClassName,
         date: new Date(savedDate).toLocaleDateString('en-GB'),
         status: savedPrediction?.status || 'completed',
-        studentsAnalyzed: Number.isFinite(savedStudentsAnalyzed)
-          ? savedStudentsAnalyzed
-          : targetStudents.length,
+        studentsAnalyzed: Number.isFinite(savedStudentsAnalyzed) ? savedStudentsAnalyzed : 0,
         avgScore: `${Number.isFinite(savedAvgScore) ? savedAvgScore.toFixed(1) : '0.0'}%`,
         reportId: savedPrediction?.reportId,
         classMetadata: effectiveClassMetadata,
@@ -678,9 +492,7 @@ export function CreatePredictionModal({
       onClose();
     } catch (error) {
       console.error('Error saving prediction:', error);
-      showToast.error(
-        error instanceof Error ? error.message : 'Failed to save prediction',
-      );
+      showToast.error(error instanceof Error ? error.message : 'Failed to save prediction');
     } finally {
       setIsSubmitting(false);
       setShowGeneratingOverlay(false);
@@ -704,27 +516,17 @@ export function CreatePredictionModal({
           </div>
         )}
 
-        {/* Header with Close Button */}
+        {/* Header */}
         <div className='px-8 pt-8 pb-6 border-b border-[rgba(0,0,0,0.3)] flex justify-between items-start'>
           <div>
-            <h2
-              className='text-[26px] font-semibold'
-              style={{ color: '#000000' }}
-            >
+            <h2 className='text-[26px] font-semibold' style={{ color: '#000000' }}>
               Create New Prediction
             </h2>
-            <p
-              className='text-[15px] mt-2'
-              style={{ color: 'rgba(0, 0, 0, 0.47)' }}
-            >
-              Select the type of prediction you want to make and choose your
-              class or student
+            <p className='text-[15px] mt-2' style={{ color: 'rgba(0, 0, 0, 0.47)' }}>
+              Select the type of prediction you want to make and choose your class or student
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className='text-gray-500 hover:text-gray-700 p-1'
-          >
+          <button onClick={onClose} className='text-gray-500 hover:text-gray-700 p-1'>
             <X size={24} />
           </button>
         </div>
@@ -733,55 +535,34 @@ export function CreatePredictionModal({
         <div className='px-8 py-8 overflow-y-auto flex-1'>
           {/* Prediction Type Selection */}
           <div className='mb-8'>
-            <h3
-              className='text-[18px] font-semibold mb-6'
-              style={{ color: '#000000' }}
-            >
+            <h3 className='text-[18px] font-semibold mb-6' style={{ color: '#000000' }}>
               Prediction Type
             </h3>
             <div className='grid grid-cols-2 gap-4'>
-              {/* Full Class Option */}
               <button
-                onClick={() => {
-                  setPredictionType('fullClass');
-                }}
+                onClick={() => setPredictionType('fullClass')}
                 className='p-6 rounded-[10px] text-left transition-all'
                 style={{
-                  backgroundColor:
-                    predictionType === 'fullClass'
-                      ? 'rgba(79, 166, 248, 0.15)'
-                      : '#FFFFFF',
-                  border:
-                    predictionType === 'fullClass'
-                      ? '2.5px solid #4FA6F8'
-                      : '2.5px solid rgba(0, 0, 0, 0.2)'
+                  backgroundColor: predictionType === 'fullClass' ? 'rgba(79, 166, 248, 0.15)' : '#FFFFFF',
+                  border: predictionType === 'fullClass' ? '2.5px solid #4FA6F8' : '2.5px solid rgba(0, 0, 0, 0.2)'
                 }}
               >
                 <div className='flex items-center gap-4 mb-3'>
                   <div className='w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center'>
-                    {predictionType === 'fullClass' && (
-                      <div className='w-3 h-3 rounded-full bg-black'></div>
-                    )}
+                    {predictionType === 'fullClass' && <div className='w-3 h-3 rounded-full bg-black' />}
                   </div>
                   <div className='flex items-center gap-2'>
                     <FaPeopleLine size={25} style={{ color: '#4FA6F8' }} />
-                    <span
-                      className='text-[18px] font-semibold'
-                      style={{ color: '#000000' }}
-                    >
+                    <span className='text-[18px] font-semibold' style={{ color: '#000000' }}>
                       Full Class
                     </span>
                   </div>
                 </div>
-                <p
-                  className='text-[15px]'
-                  style={{ color: 'rgba(0, 0, 0, 0.46)', marginLeft: '28px' }}
-                >
-                  Predict performance for all student in a class
+                <p className='text-[15px]' style={{ color: 'rgba(0, 0, 0, 0.46)', marginLeft: '28px' }}>
+                  Predict performance for all students in a class
                 </p>
               </button>
 
-              {/* Selected Students Option */}
               <button
                 onClick={() => {
                   setPredictionType('selectedStudents');
@@ -790,36 +571,22 @@ export function CreatePredictionModal({
                 }}
                 className='p-6 rounded-[10px] text-left transition-all'
                 style={{
-                  backgroundColor:
-                    predictionType === 'selectedStudents'
-                      ? 'rgba(79, 166, 248, 0.15)'
-                      : '#FFFFFF',
-                  border:
-                    predictionType === 'selectedStudents'
-                      ? '2.5px solid #4FA6F8'
-                      : '2.5px solid rgba(0, 0, 0, 0.2)'
+                  backgroundColor: predictionType === 'selectedStudents' ? 'rgba(79, 166, 248, 0.15)' : '#FFFFFF',
+                  border: predictionType === 'selectedStudents' ? '2.5px solid #4FA6F8' : '2.5px solid rgba(0, 0, 0, 0.2)'
                 }}
               >
                 <div className='flex items-center gap-4 mb-3'>
                   <div className='w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center'>
-                    {predictionType === 'selectedStudents' && (
-                      <div className='w-3 h-3 rounded-full bg-black'></div>
-                    )}
+                    {predictionType === 'selectedStudents' && <div className='w-3 h-3 rounded-full bg-black' />}
                   </div>
                   <div className='flex items-center gap-2'>
                     <BsPersonCheckFill size={20} style={{ color: '#8F008D' }} />
-                    <span
-                      className='text-[18px] font-semibold'
-                      style={{ color: '#000000' }}
-                    >
+                    <span className='text-[18px] font-semibold' style={{ color: '#000000' }}>
                       Selected Students
                     </span>
                   </div>
                 </div>
-                <p
-                  className='text-[15px]'
-                  style={{ color: 'rgba(0, 0, 0, 0.46)', marginLeft: '28px' }}
-                >
+                <p className='text-[15px]' style={{ color: 'rgba(0, 0, 0, 0.46)', marginLeft: '28px' }}>
                   Choose specific students from a class
                 </p>
               </button>
@@ -828,39 +595,24 @@ export function CreatePredictionModal({
 
           {/* Class Selection */}
           <div className='mb-8'>
-            <h3
-              className='text-[18px] font-semibold mb-4'
-              style={{ color: '#000000' }}
-            >
+            <h3 className='text-[18px] font-semibold mb-4' style={{ color: '#000000' }}>
               Select Class
             </h3>
             <div ref={classDropdownRef} className='relative w-48'>
               <button
                 onClick={() => setShowClassDropdown(!showClassDropdown)}
-                className='w-full px-4 py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.27)] flex items-center justify-between hover:bg-gray-50'
-                style={{
-                  backgroundColor: selectedClass ? '#FFFFFF' : '#FFFFFF'
-                }}
+                className='w-full px-4 py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.27)] flex items-center justify-between hover:bg-gray-50 bg-white'
               >
-                <span
-                  style={{
-                    color: selectedClass ? '#000000' : 'rgba(0, 0, 0, 0.44)',
-                    fontSize: '15px'
-                  }}
-                >
+                <span style={{ color: selectedClass ? '#000000' : 'rgba(0, 0, 0, 0.44)', fontSize: '15px' }}>
                   {selectedClass
                     ? classes.find((c) => c.id === selectedClass)?.name
                     : isLoadingClasses
                       ? 'Loading classes...'
                       : 'Choose a class'}
                 </span>
-                <ChevronDown
-                  size={18}
-                  style={{ color: 'rgba(0, 0, 0, 0.44)' }}
-                />
+                <ChevronDown size={18} style={{ color: 'rgba(0, 0, 0, 0.44)' }} />
               </button>
 
-              {/* Dropdown Menu */}
               {showClassDropdown && (
                 <div className='absolute top-full left-0 right-0 mt-2 bg-white border border-[rgba(0,0,0,0.2)] rounded-[10px] z-10 shadow-lg'>
                   {classes.map((cls) => (
@@ -876,24 +628,18 @@ export function CreatePredictionModal({
                       {cls.name}
                     </button>
                   ))}
-
                   {!isLoadingClasses && classes.length === 0 && (
-                    <div className='px-4 py-3 text-[14px] text-[rgba(0,0,0,0.5)]'>
-                      No classes found
-                    </div>
+                    <div className='px-4 py-3 text-[14px] text-[rgba(0,0,0,0.5)]'>No classes found</div>
                   )}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Students Selection Table (for Selected Students type) */}
+          {/* Students Selection Table (only for Selected Students mode) */}
           {predictionType === 'selectedStudents' && selectedClass && (
-            <div className=''>
-              <h3
-                className='text-[18px] font-semibold mb-4'
-                style={{ color: '#000000' }}
-              >
+            <div>
+              <h3 className='text-[18px] font-semibold mb-4' style={{ color: '#000000' }}>
                 Select Students
               </h3>
               {isLoadingStudents ? (
@@ -910,88 +656,40 @@ export function CreatePredictionModal({
                 </div>
               ) : (
                 <div className='overflow-x-auto border border-[rgba(0,0,0,0.18)] rounded-[10px]'>
-                  <table
-                    className='w-full text-sm'
-                    style={{ borderCollapse: 'collapse' }}
-                  >
-                    <thead
-                      style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.5)' }}
-                    >
+                  <table className='w-full text-sm' style={{ borderCollapse: 'collapse' }}>
+                    <thead style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.5)' }}>
                       <tr>
-                        <th
-                          className='px-4 py-3 text-left font-normal text-[14px]'
-                          style={{ color: '#000000', width: '50px' }}
-                        >
+                        <th className='px-4 py-3 text-left font-normal text-[14px]' style={{ color: '#000000', width: '50px' }}>
                           <Checkbox
-                            checked={
-                              allSelected
-                                ? true
-                                : someSelected
-                                  ? 'indeterminate'
-                                  : false
-                            }
+                            checked={allSelected ? true : someSelected ? 'indeterminate' : false}
                             onCheckedChange={handleSelectAllStudents}
                           />
                         </th>
-                        <th
-                          className='px-4 py-3 text-left font-normal text-[14px]'
-                          style={{ color: '#000000' }}
-                        >
-                          Name
-                        </th>
-                        <th
-                          className='px-4 py-3 text-left font-normal text-[14px]'
-                          style={{ color: '#000000' }}
-                        >
-                          Reg-No
-                        </th>
-                        <th
-                          className='px-3 py-3 text-center font-normal text-[14px]'
-                          style={{ color: '#000000', width: '36px' }}
-                        ></th>
+                        <th className='px-4 py-3 text-left font-normal text-[14px]' style={{ color: '#000000' }}>Name</th>
+                        <th className='px-4 py-3 text-left font-normal text-[14px]' style={{ color: '#000000' }}>Reg-No</th>
+                        <th className='px-3 py-3 text-center font-normal text-[14px]' style={{ color: '#000000', width: '36px' }} />
                       </tr>
                     </thead>
                     <tbody>
                       {students.map((student) => (
-                        <tr
-                          key={student.id}
-                          style={{
-                            borderBottom: '1px solid rgba(0, 0, 0, 0.17)'
-                          }}
-                        >
+                        <tr key={student.id} style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.17)' }}>
                           <td className='px-4 py-3'>
                             <Checkbox
                               checked={student.selected || false}
-                              onCheckedChange={() =>
-                                handleSelectStudent(student.id)
-                              }
+                              onCheckedChange={() => handleSelectStudent(student.id)}
                             />
                           </td>
-                          <td
-                            className='px-4 py-3 text-[14px]'
-                            style={{ color: 'rgba(0, 0, 0, 0.5)' }}
-                          >
+                          <td className='px-4 py-3 text-[14px]' style={{ color: 'rgba(0, 0, 0, 0.5)' }}>
                             {student.name}
                           </td>
-                          <td
-                            className='px-4 py-3 text-[14px]'
-                            style={{ color: 'rgba(0, 0, 0, 0.5)' }}
-                          >
+                          <td className='px-4 py-3 text-[14px]' style={{ color: 'rgba(0, 0, 0, 0.5)' }}>
                             {student.regNo}
                           </td>
                           <td className='px-3 py-3 text-center align-middle'>
                             <span
                               className='inline-block h-2.5 w-2.5 rounded-full'
-                              style={{
-                                backgroundColor: student.hasPrediction
-                                  ? '#10B981'
-                                  : '#EF4444'
-                              }}
-                              title={
-                                student.hasPrediction
-                                  ? 'Prediction exists'
-                                  : 'No prediction yet'
-                              }
+                              style={{ backgroundColor: student.hasPrediction ? '#10B981' : '#EF4444' }}
+                              title={student.hasPrediction ? 'Prediction exists' : 'No prediction yet'}
                             />
                           </td>
                         </tr>
@@ -1004,19 +702,15 @@ export function CreatePredictionModal({
           )}
         </div>
 
-        {/* Footer with Action Buttons */}
+        {/* Footer */}
         <div className='px-8 py-6 border-t border-[rgba(0,0,0,0.3)] flex justify-between gap-4'>
           <Button
             onClick={onClose}
             size='medium'
             color='primary'
             variant='outline'
-            className=' !rounded-[7px] '
-            style={{
-              backgroundColor: '#FFFFFF',
-              color: '#000000',
-              border: '1px solid rgba(0, 0, 0, 0.24)'
-            }}
+            className='!rounded-[7px]'
+            style={{ backgroundColor: '#FFFFFF', color: '#000000', border: '1px solid rgba(0, 0, 0, 0.24)' }}
           >
             Cancel
           </Button>
@@ -1027,10 +721,8 @@ export function CreatePredictionModal({
             size='medium'
             color='primary'
             variant='solid'
-            className='!rounded-[7px] text-[16px]  disabled:opacity-50 disabled:cursor-not-allowed'
-            style={{
-              backgroundColor: selectedClass ? '' : 'rgba(0, 0, 0, 0.15)'
-            }}
+            className='!rounded-[7px] text-[16px] disabled:opacity-50 disabled:cursor-not-allowed'
+            style={{ backgroundColor: selectedClass ? '' : 'rgba(0, 0, 0, 0.15)' }}
           >
             Generate Prediction
             <span>→</span>

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MetricCard } from '@/components/predictions/metric-card';
 import { PredictionHistoryCard } from '@/components/predictions/prediction-history-card';
 import { CreatePredictionModal } from '@/components/predictions/create-prediction-modal';
-import type { SavedPredictionSummary } from '@/components/predictions/create-prediction-modal';
+import type { SavedPredictionSummary, SuggestionsObject } from '@/components/predictions/create-prediction-modal';
 import { Plus } from 'lucide-react';
 import { FiBarChart2, FiUsers, FiTrendingUp } from 'react-icons/fi';
 import { useEffect, useState } from 'react';
@@ -46,7 +46,11 @@ interface PredictionHistoryCardItem {
     performanceCategory: string;
     modelConfidence: number;
     riskLevel: 'Low' | 'Mid' | 'High';
-    suggestions: string[];
+    expectedCgpa?: number | null;
+    classRank?: number | null;
+    overallRiskLevel?: string;
+    semesterAvgScore?: number | null;
+    suggestions: SuggestionsObject | string[];
   }>;
 }
 

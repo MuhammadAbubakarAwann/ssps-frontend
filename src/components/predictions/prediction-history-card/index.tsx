@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FiTrendingUp } from 'react-icons/fi';
 import { PredictedResultsModal } from '../predicted-results-modal/index';
 import { showToast } from '@/components/ui/toaster';
+import type { SuggestionsObject } from '@/components/predictions/create-prediction-modal';
 
 interface StudentResult {
   id: string;
@@ -12,7 +13,11 @@ interface StudentResult {
   performanceCategory: string;
   modelConfidence: number;
   riskLevel: 'Low' | 'Mid' | 'High';
-  suggestions: string[];
+  expectedCgpa?: number | null;
+  classRank?: number | null;
+  overallRiskLevel?: string;
+  semesterAvgScore?: number | null;
+  suggestions: SuggestionsObject | string[];
 }
 
 interface PredictionDetailsResponse {
@@ -37,20 +42,29 @@ interface PredictionDetailsResponse {
       performanceCategory?: string;
       passProbability?: number;
       modelConfidence?: number;
-       riskLevel: 'LOW' | 'MID' | 'HIGH';
-      suggestions?: string[] | string;
+      riskLevel?: 'LOW' | 'MID' | 'HIGH';
+      expectedCgpa?: number | null;
+      classRank?: number | null;
+      overallRiskLevel?: string;
+      semesterAvgScore?: number | null;
+      suggestions?: SuggestionsObject | string[] | string;
     }>;
     students?: Array<{
-      id: number | string;
+      id?: number | string;
       studentId?: number | string;
-      name: string;
-      registrationNum: string;
-      predictedScore: number;
-      performanceCategory: string;
-      passProbability: number;
-      modelConfidence: number;
-      riskLevel: 'LOW' | 'MID' | 'HIGH';
-      suggestions: string[] | string;
+      name?: string;
+      regNo?: string;
+      predictedScore?: number;
+      performance?: string;
+      performanceCategory?: string;
+      passProbability?: number;
+      modelConfidence?: number;
+      riskLevel?: 'LOW' | 'MID' | 'HIGH';
+      expectedCgpa?: number | null;
+      classRank?: number | null;
+      overallRiskLevel?: string;
+      semesterAvgScore?: number | null;
+      suggestions?: SuggestionsObject | string[] | string;
     }>;
   };
 }
@@ -80,6 +94,13 @@ interface PredictionHistoryCardProps {
   onAutoOpenHandled?: () => void;
 }
 
+function normalizeSuggestions(raw: SuggestionsObject | string[] | string | undefined): SuggestionsObject | string[] {
+  if (raw === null || raw === undefined) return [];
+  if (Array.isArray(raw)) return raw.map(String).filter(Boolean);
+  if (typeof raw === 'object') return raw;
+  return String(raw).split('\n').map((s) => s.trim()).filter(Boolean);
+}
+
 const mapPredictionResults = (payload: PredictionDetailsResponse): StudentResult[] => {
   if (Array.isArray(payload.data?.entries) && payload.data?.entries.length > 0) {
     return payload.data.entries.map((entry, index) => ({
@@ -91,24 +112,28 @@ const mapPredictionResults = (payload: PredictionDetailsResponse): StudentResult
       performanceCategory: String(entry.performanceCategory || entry.performance || 'N/A'),
       modelConfidence: Number(entry.modelConfidence || 0),
       riskLevel: normalizeRiskLevel(String(entry.riskLevel || 'LOW') as 'LOW' | 'MID' | 'HIGH'),
-      suggestions: Array.isArray(entry.suggestions)
-        ? entry.suggestions.map((suggestion) => String(suggestion)).filter(Boolean)
-        : String(entry.suggestions || '').split('\n').filter(Boolean)
+      expectedCgpa: entry.expectedCgpa ?? null,
+      classRank: entry.classRank ?? null,
+      overallRiskLevel: String(entry.overallRiskLevel || entry.riskLevel || 'LOW'),
+      semesterAvgScore: entry.semesterAvgScore ?? null,
+      suggestions: normalizeSuggestions(entry.suggestions)
     }));
   }
 
-  return (payload.data?.students || []).map((student) => ({
-    id: String(student.studentId ?? student.id),
-    name: student.name,
-    regNo: student.registrationNum,
-    predictedScore: student.predictedScore,
-    passProbability: student.passProbability,
-    performanceCategory: student.performanceCategory,
-    modelConfidence: student.modelConfidence,
-    riskLevel: normalizeRiskLevel(student.riskLevel),
-    suggestions: Array.isArray(student.suggestions)
-      ? student.suggestions
-      : String(student.suggestions || '').split('\n').filter(Boolean)
+  return (payload.data?.students || []).map((student, index) => ({
+    id: String(student.studentId ?? student.id ?? index),
+    name: String(student.name || ''),
+    regNo: String(student.regNo || ''),
+    predictedScore: Number(student.predictedScore || 0),
+    passProbability: Number(student.passProbability || 0),
+    performanceCategory: String(student.performanceCategory || student.performance || 'N/A'),
+    modelConfidence: Number(student.modelConfidence || 0),
+    riskLevel: normalizeRiskLevel(String(student.riskLevel || 'LOW') as 'LOW' | 'MID' | 'HIGH'),
+    expectedCgpa: student.expectedCgpa ?? null,
+    classRank: student.classRank ?? null,
+    overallRiskLevel: String(student.overallRiskLevel || student.riskLevel || 'LOW'),
+    semesterAvgScore: student.semesterAvgScore ?? null,
+    suggestions: normalizeSuggestions(student.suggestions)
   }));
 };
 
