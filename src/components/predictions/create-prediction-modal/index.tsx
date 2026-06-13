@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { FaPeopleLine } from 'react-icons/fa6';
 import { BsPersonCheckFill } from 'react-icons/bs';
 import { showToast } from '@/components/ui/toaster';
+import { PredictionGenerationAnimation } from '@/components/predictions/prediction-generation-animation';
 
 interface Student {
   id: string;
@@ -218,7 +219,14 @@ export function CreatePredictionModal({
   const [isLoadingStudents, setIsLoadingStudents] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showGeneratingOverlay, setShowGeneratingOverlay] = useState(false);
+  const [isPredictionReady, setIsPredictionReady] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
+  const pendingResultRef = useRef<{
+    responseData: PredictionSaveResponse;
+    scope: 'CLASS' | 'SELECTED';
+    className: string;
+    classId: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -395,7 +403,8 @@ export function CreatePredictionModal({
 
     setIsSubmitting(true);
     setShowGeneratingOverlay(true);
-    const startedAt = Date.now();
+    setIsPredictionReady(false);
+    pendingResultRef.current = null;
 
     try {
       // Read the access token so we can attach it as a Bearer header
@@ -419,84 +428,94 @@ export function CreatePredictionModal({
       if (!response.ok || !responseData.success)
         throw new Error(responseData.message || 'Failed to save prediction');
 
-      const elapsed = Date.now() - startedAt;
-      const remaining = Math.max(0, 2000 - elapsed);
-      if (remaining > 0)
-        await new Promise((resolve) => setTimeout(resolve, remaining));
-
-      const savedPrediction = responseData.data?.prediction;
-      const fallbackId = `local-${Date.now()}`;
-      const savedDate =
-        savedPrediction?.generatedAt ||
-        savedPrediction?.date ||
-        savedPrediction?.createdAt ||
-        new Date().toISOString();
-      const savedClassName = savedPrediction?.title || savedPrediction?.name || className;
-      const savedStudentsAnalyzed = Number(
-        responseData.data?.count ?? savedPrediction?.studentsAnalyzed ?? 0
-      );
-      const entries = responseData.data?.entries || [];
-      const avgFromEntries = entries.reduce((acc, entry) => acc + Number(entry.predictedScore || 0), 0);
-      const savedAvgScore = entries.length > 0 ? avgFromEntries / entries.length : Number(savedPrediction?.avgScore ?? 0);
-
-      const effectiveClassMetadata = savedPrediction?.classMetadata
-        ? {
-            programCode: String(savedPrediction.classMetadata.programCode || ''),
-            semesterNumber: Number(savedPrediction.classMetadata.semesterNumber || 0),
-            section: String(savedPrediction.classMetadata.section || ''),
-            courseCode: String(savedPrediction.classMetadata.courseCode || ''),
-            courseName: String(savedPrediction.classMetadata.courseName || '')
-          }
-        : undefined;
-
-      const preloadedResults = entries.map((entry, index) => ({
-        id: String(entry.id ?? entry.studentId ?? index),
-        name: String(entry.name || ''),
-        regNo: String(entry.regNo || ''),
-        predictedScore: Number(entry.predictedScore || 0),
-        passProbability: Number(entry.passProbability || 0),
-        performanceCategory: String(entry.performanceCategory || entry.performance || 'N/A'),
-        modelConfidence: Number(entry.modelConfidence || 0),
-        riskLevel: normalizeRiskLevel(entry.riskLevel),
-        expectedCgpa: entry.expectedCgpa ?? null,
-        classRank: entry.classRank ?? null,
-        overallRiskLevel: String(entry.overallRiskLevel || entry.riskLevel || 'LOW'),
-        semesterAvgScore: entry.semesterAvgScore ?? null,
-        suggestions: (
-          entry.suggestions !== null &&
-          entry.suggestions !== undefined &&
-          typeof entry.suggestions === 'object' &&
-          !Array.isArray(entry.suggestions)
-        )
-          ? entry.suggestions
-          : Array.isArray(entry.suggestions)
-            ? entry.suggestions.map(String).filter(Boolean)
-            : String(entry.suggestions || '').split('\n').map((s) => s.trim()).filter(Boolean)
-      }));
-
-      showToast.success(responseData.message || 'Prediction saved successfully');
-      onPredictionSaved?.({
-        id: String(savedPrediction?.id ?? fallbackId),
-        scope: (savedPrediction?.scope || scope) as 'CLASS' | 'SELECTED',
-        classId: String(savedPrediction?.class?.id ?? selectedClass),
-        className: savedClassName,
-        date: new Date(savedDate).toLocaleDateString('en-GB'),
-        status: savedPrediction?.status || 'completed',
-        studentsAnalyzed: Number.isFinite(savedStudentsAnalyzed) ? savedStudentsAnalyzed : 0,
-        avgScore: `${Number.isFinite(savedAvgScore) ? savedAvgScore.toFixed(1) : '0.0'}%`,
-        reportId: savedPrediction?.reportId,
-        classMetadata: effectiveClassMetadata,
-        preloadedResults,
-        metricsSnapshot: responseData.data?.metrics
-      });
-      onClose();
+      // Hand the result off to the AI generation animation - it will be applied
+      // once the reveal sequence finishes via handleAnimationComplete
+      pendingResultRef.current = { responseData, scope, className, classId: selectedClass };
+      setIsPredictionReady(true);
     } catch (error) {
       console.error('Error saving prediction:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to save prediction');
-    } finally {
       setIsSubmitting(false);
       setShowGeneratingOverlay(false);
     }
+  };
+
+  const handleAnimationComplete = () => {
+    const pending = pendingResultRef.current;
+    pendingResultRef.current = null;
+    setShowGeneratingOverlay(false);
+    setIsSubmitting(false);
+    setIsPredictionReady(false);
+
+    if (!pending) return;
+
+    const { responseData, scope, className, classId } = pending;
+    const savedPrediction = responseData.data?.prediction;
+    const fallbackId = `local-${Date.now()}`;
+    const savedDate =
+      savedPrediction?.generatedAt ||
+      savedPrediction?.date ||
+      savedPrediction?.createdAt ||
+      new Date().toISOString();
+    const savedClassName = savedPrediction?.title || savedPrediction?.name || className;
+    const savedStudentsAnalyzed = Number(
+      responseData.data?.count ?? savedPrediction?.studentsAnalyzed ?? 0
+    );
+    const entries = responseData.data?.entries || [];
+    const avgFromEntries = entries.reduce((acc, entry) => acc + Number(entry.predictedScore || 0), 0);
+    const savedAvgScore = entries.length > 0 ? avgFromEntries / entries.length : Number(savedPrediction?.avgScore ?? 0);
+
+    const effectiveClassMetadata = savedPrediction?.classMetadata
+      ? {
+          programCode: String(savedPrediction.classMetadata.programCode || ''),
+          semesterNumber: Number(savedPrediction.classMetadata.semesterNumber || 0),
+          section: String(savedPrediction.classMetadata.section || ''),
+          courseCode: String(savedPrediction.classMetadata.courseCode || ''),
+          courseName: String(savedPrediction.classMetadata.courseName || '')
+        }
+      : undefined;
+
+    const preloadedResults = entries.map((entry, index) => ({
+      id: String(entry.id ?? entry.studentId ?? index),
+      name: String(entry.name || ''),
+      regNo: String(entry.regNo || ''),
+      predictedScore: Number(entry.predictedScore || 0),
+      passProbability: Number(entry.passProbability || 0),
+      performanceCategory: String(entry.performanceCategory || entry.performance || 'N/A'),
+      modelConfidence: Number(entry.modelConfidence || 0),
+      riskLevel: normalizeRiskLevel(entry.riskLevel),
+      expectedCgpa: entry.expectedCgpa ?? null,
+      classRank: entry.classRank ?? null,
+      overallRiskLevel: String(entry.overallRiskLevel || entry.riskLevel || 'LOW'),
+      semesterAvgScore: entry.semesterAvgScore ?? null,
+      suggestions: (
+        entry.suggestions !== null &&
+        entry.suggestions !== undefined &&
+        typeof entry.suggestions === 'object' &&
+        !Array.isArray(entry.suggestions)
+      )
+        ? entry.suggestions
+        : Array.isArray(entry.suggestions)
+          ? entry.suggestions.map(String).filter(Boolean)
+          : String(entry.suggestions || '').split('\n').map((s) => s.trim()).filter(Boolean)
+    }));
+
+    showToast.success(responseData.message || 'Prediction saved successfully');
+    onPredictionSaved?.({
+      id: String(savedPrediction?.id ?? fallbackId),
+      scope: (savedPrediction?.scope || scope) as 'CLASS' | 'SELECTED',
+      classId: String(savedPrediction?.class?.id ?? classId),
+      className: savedClassName,
+      date: new Date(savedDate).toLocaleDateString('en-GB'),
+      status: savedPrediction?.status || 'completed',
+      studentsAnalyzed: Number.isFinite(savedStudentsAnalyzed) ? savedStudentsAnalyzed : 0,
+      avgScore: `${Number.isFinite(savedAvgScore) ? savedAvgScore.toFixed(1) : '0.0'}%`,
+      reportId: savedPrediction?.reportId,
+      classMetadata: effectiveClassMetadata,
+      preloadedResults,
+      metricsSnapshot: responseData.data?.metrics
+    });
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -508,12 +527,10 @@ export function CreatePredictionModal({
         style={{ maxHeight: 'calc(100vh - 40px)' }}
       >
         {showGeneratingOverlay && (
-          <div className='absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/45'>
-            <div className='h-9 w-9 animate-spin rounded-full border-4 border-white/40 border-t-white' />
-            <p className='text-[16px] font-semibold text-white'>
-              Generating prediction...
-            </p>
-          </div>
+          <PredictionGenerationAnimation
+            isComplete={isPredictionReady}
+            onComplete={handleAnimationComplete}
+          />
         )}
 
         {/* Header */}
