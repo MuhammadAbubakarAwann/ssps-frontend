@@ -110,7 +110,6 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
         }
 
         const payload: Record<string, unknown> = await response.json();
-        console.log('API Response:', payload);
 
         const data = payload.data && typeof payload.data === 'object'
           ? (payload.data as Record<string, unknown>)
@@ -120,8 +119,6 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
           ? data.programs
           : [];
 
-        console.log('Programs:', programs);
-
         const codes = programs
           .filter((prog): prog is Record<string, unknown> => typeof prog === 'object' && prog !== null)
           .map((prog) => ({
@@ -130,7 +127,6 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
           }))
           .filter((program) => program.code.length > 0);
 
-        console.log('Extracted codes:', codes);
         setClassNameOptions(codes);
       } catch (error) {
         console.error('Failed to fetch class names:', error);

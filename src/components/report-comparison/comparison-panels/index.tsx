@@ -18,20 +18,9 @@ export interface ComparisonPanelData {
 }
 
 interface ComparisonPanelsProps {
-  leftPanel?: ComparisonPanelData;
-  rightPanel?: ComparisonPanelData;
+  leftPanel: ComparisonPanelData;
+  rightPanel: ComparisonPanelData;
 }
-
-const fallbackPanel: ComparisonPanelData = {
-  title: 'Latest (Today)',
-  date: '2025-01-05T00:00:00.000Z',
-  predictedScore: 76.8,
-  passProbability: 92,
-  confidence: 92,
-  riskLevel: 'LOW',
-  subject: 'Mathematics',
-  subjectPerformance: 'HIGH'
-};
 
 function getRiskClasses(riskLevel: string) {
   const normalized = riskLevel.toUpperCase();
@@ -115,13 +104,10 @@ function ComparisonPanel({ panel }: { panel: ComparisonPanelData }) {
 }
 
 export function ComparisonPanels({ leftPanel, rightPanel }: ComparisonPanelsProps) {
-  const left = leftPanel ?? fallbackPanel;
-  const right = rightPanel ?? fallbackPanel;
-
   return (
     <div className='mb-10 grid grid-cols-2 gap-10'>
-      <ComparisonPanel panel={left} />
-      <ComparisonPanel panel={right} />
+      <ComparisonPanel panel={leftPanel} />
+      <ComparisonPanel panel={rightPanel} />
     </div>
   );
 }
