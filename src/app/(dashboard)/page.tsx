@@ -362,7 +362,7 @@ export default async function DashboardPage() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbPage className='font-semibold'>Dashboard</BreadcrumbPage>
+            {/* <BreadcrumbPage className='font-semibold'>Dashboard</BreadcrumbPage> */}
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

@@ -56,7 +56,7 @@ export async function GET(
         headers: {
           'Authorization': `Bearer ${session.accessToken}`,
           'Content-Type': 'application/json',
-          'User-Agent': 'Domlii-Dashboard/1.0'
+          'User-Agent': 'SPPS-Dashboard/1.0'
         }
       }
     );

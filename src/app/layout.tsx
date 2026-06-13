@@ -14,7 +14,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Domlii Dashboard',
+  title: 'SPPS Dashboard',
   description: 'A modern dashboard built with Next.js, Prisma, and Tailwind CSS'
 };
 
