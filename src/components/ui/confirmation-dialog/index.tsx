@@ -38,8 +38,8 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   cancelText = 'Cancel',
   onConfirm,
   onCancel,
-  actionVariant = 'bg-error text-error-on-error',
-  cancelVariant = 'bg-muted text-muted-foreground',
+  actionVariant = 'bg-[#FF6369]/15 text-[#FF8A8F] border border-[#FF6369]/30 hover:bg-[#FF6369]/25',
+  cancelVariant = 'bg-white/[0.05] text-fg-text hover:bg-white/[0.08] border border-white/10',
   customContent
 }) => {
   const stopPropagation = (event: React.SyntheticEvent) => {
@@ -52,23 +52,23 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
       <AlertDialogPortal>
         <AlertDialogOverlay
           className={cn(
-            'fixed inset-0 z-50 bg-black/20 data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in'
+            'fixed inset-0 z-50 bg-[#04050A]/80 backdrop-blur-sm data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in'
           )}
           onClick={stopPropagation}
           onPointerDown={stopPropagation}
         />
         <AlertDialogContent
           className={cn(
-            'fixed left-[50%] top-[50%] z-50 w-[90%] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-lg'
+            'fixed left-[50%] top-[50%] z-50 w-[90%] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-[#0A0C16] border border-white/10 p-6 shadow-[0_0_60px_rgba(79,166,248,0.1)]'
           )}
           onClick={stopPropagation}
           onPointerDown={stopPropagation}
         >
           <AlertDialogHeader>
-            <AlertDialogTitle className='text-lg font-semibold'>
+            <AlertDialogTitle className='text-lg font-semibold text-fg-default'>
               {title}
             </AlertDialogTitle>
-            <AlertDialogDescription className='text-muted-foreground mt-2 text-sm'>
+            <AlertDialogDescription className='text-fg-text mt-2 text-sm'>
               {description}
             </AlertDialogDescription>
           </AlertDialogHeader>

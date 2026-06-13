@@ -521,9 +521,9 @@ export function CreatePredictionModal({
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4'>
+    <div className='fixed inset-0 bg-[#04050A]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
       <div
-        className='relative bg-white rounded-[15px] w-full max-w-[684px] overflow-hidden flex flex-col'
+        className='relative bg-[#0A0C16] border border-white/10 rounded-[15px] w-full max-w-[684px] overflow-hidden flex flex-col'
         style={{ maxHeight: 'calc(100vh - 40px)' }}
       >
         {showGeneratingOverlay && (
@@ -534,16 +534,16 @@ export function CreatePredictionModal({
         )}
 
         {/* Header */}
-        <div className='px-8 pt-8 pb-6 border-b border-[rgba(0,0,0,0.3)] flex justify-between items-start'>
+        <div className='px-8 pt-8 pb-6 border-b border-white/10 flex justify-between items-start'>
           <div>
-            <h2 className='text-[26px] font-semibold' style={{ color: '#000000' }}>
+            <h2 className='text-[26px] font-semibold text-fg-default'>
               Create New Prediction
             </h2>
-            <p className='text-[15px] mt-2' style={{ color: 'rgba(0, 0, 0, 0.47)' }}>
+            <p className='text-[15px] mt-2 text-fg-text'>
               Select the type of prediction you want to make and choose your class or student
             </p>
           </div>
-          <button onClick={onClose} className='text-gray-500 hover:text-gray-700 p-1'>
+          <button onClick={onClose} className='text-fg-text hover:text-fg-default p-1'>
             <X size={24} />
           </button>
         </div>
@@ -552,7 +552,7 @@ export function CreatePredictionModal({
         <div className='px-8 py-8 overflow-y-auto flex-1'>
           {/* Prediction Type Selection */}
           <div className='mb-8'>
-            <h3 className='text-[18px] font-semibold mb-6' style={{ color: '#000000' }}>
+            <h3 className='text-[18px] font-semibold mb-6 text-fg-default'>
               Prediction Type
             </h3>
             <div className='grid grid-cols-2 gap-4'>
@@ -560,22 +560,22 @@ export function CreatePredictionModal({
                 onClick={() => setPredictionType('fullClass')}
                 className='p-6 rounded-[10px] text-left transition-all'
                 style={{
-                  backgroundColor: predictionType === 'fullClass' ? 'rgba(79, 166, 248, 0.15)' : '#FFFFFF',
-                  border: predictionType === 'fullClass' ? '2.5px solid #4FA6F8' : '2.5px solid rgba(0, 0, 0, 0.2)'
+                  backgroundColor: predictionType === 'fullClass' ? 'rgba(79, 166, 248, 0.15)' : 'rgba(255, 255, 255, 0.03)',
+                  border: predictionType === 'fullClass' ? '2.5px solid #4FA6F8' : '2.5px solid rgba(255, 255, 255, 0.1)'
                 }}
               >
                 <div className='flex items-center gap-4 mb-3'>
-                  <div className='w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center'>
-                    {predictionType === 'fullClass' && <div className='w-3 h-3 rounded-full bg-black' />}
+                  <div className='w-5 h-5 rounded-full border-2 border-white/30 flex items-center justify-center'>
+                    {predictionType === 'fullClass' && <div className='w-3 h-3 rounded-full bg-[#4FA6F8]' />}
                   </div>
                   <div className='flex items-center gap-2'>
                     <FaPeopleLine size={25} style={{ color: '#4FA6F8' }} />
-                    <span className='text-[18px] font-semibold' style={{ color: '#000000' }}>
+                    <span className='text-[18px] font-semibold text-fg-default'>
                       Full Class
                     </span>
                   </div>
                 </div>
-                <p className='text-[15px]' style={{ color: 'rgba(0, 0, 0, 0.46)', marginLeft: '28px' }}>
+                <p className='text-[15px] text-fg-text' style={{ marginLeft: '28px' }}>
                   Predict performance for all students in a class
                 </p>
               </button>
@@ -588,22 +588,22 @@ export function CreatePredictionModal({
                 }}
                 className='p-6 rounded-[10px] text-left transition-all'
                 style={{
-                  backgroundColor: predictionType === 'selectedStudents' ? 'rgba(79, 166, 248, 0.15)' : '#FFFFFF',
-                  border: predictionType === 'selectedStudents' ? '2.5px solid #4FA6F8' : '2.5px solid rgba(0, 0, 0, 0.2)'
+                  backgroundColor: predictionType === 'selectedStudents' ? 'rgba(79, 166, 248, 0.15)' : 'rgba(255, 255, 255, 0.03)',
+                  border: predictionType === 'selectedStudents' ? '2.5px solid #4FA6F8' : '2.5px solid rgba(255, 255, 255, 0.1)'
                 }}
               >
                 <div className='flex items-center gap-4 mb-3'>
-                  <div className='w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center'>
-                    {predictionType === 'selectedStudents' && <div className='w-3 h-3 rounded-full bg-black' />}
+                  <div className='w-5 h-5 rounded-full border-2 border-white/30 flex items-center justify-center'>
+                    {predictionType === 'selectedStudents' && <div className='w-3 h-3 rounded-full bg-[#4FA6F8]' />}
                   </div>
                   <div className='flex items-center gap-2'>
-                    <BsPersonCheckFill size={20} style={{ color: '#8F008D' }} />
-                    <span className='text-[18px] font-semibold' style={{ color: '#000000' }}>
+                    <BsPersonCheckFill size={20} style={{ color: '#C75CFF' }} />
+                    <span className='text-[18px] font-semibold text-fg-default'>
                       Selected Students
                     </span>
                   </div>
                 </div>
-                <p className='text-[15px]' style={{ color: 'rgba(0, 0, 0, 0.46)', marginLeft: '28px' }}>
+                <p className='text-[15px] text-fg-text' style={{ marginLeft: '28px' }}>
                   Choose specific students from a class
                 </p>
               </button>
@@ -612,26 +612,26 @@ export function CreatePredictionModal({
 
           {/* Class Selection */}
           <div className='mb-8'>
-            <h3 className='text-[18px] font-semibold mb-4' style={{ color: '#000000' }}>
+            <h3 className='text-[18px] font-semibold mb-4 text-fg-default'>
               Select Class
             </h3>
             <div ref={classDropdownRef} className='relative w-48'>
               <button
                 onClick={() => setShowClassDropdown(!showClassDropdown)}
-                className='w-full px-4 py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.27)] flex items-center justify-between hover:bg-gray-50 bg-white'
+                className='w-full px-4 py-2.5 rounded-[10px] border border-white/10 flex items-center justify-between hover:bg-white/[0.05] bg-white/[0.03]'
               >
-                <span style={{ color: selectedClass ? '#000000' : 'rgba(0, 0, 0, 0.44)', fontSize: '15px' }}>
+                <span className={`text-[15px] ${selectedClass ? 'text-fg-default' : 'text-fg-text'}`}>
                   {selectedClass
                     ? classes.find((c) => c.id === selectedClass)?.name
                     : isLoadingClasses
                       ? 'Loading classes...'
                       : 'Choose a class'}
                 </span>
-                <ChevronDown size={18} style={{ color: 'rgba(0, 0, 0, 0.44)' }} />
+                <ChevronDown size={18} className='text-fg-text' />
               </button>
 
               {showClassDropdown && (
-                <div className='absolute top-full left-0 right-0 mt-2 bg-white border border-[rgba(0,0,0,0.2)] rounded-[10px] z-10 shadow-lg'>
+                <div className='absolute top-full left-0 right-0 mt-2 bg-[#0A0C16] border border-white/10 rounded-[10px] z-10 shadow-lg'>
                   {classes.map((cls) => (
                     <button
                       key={cls.id}
@@ -639,14 +639,13 @@ export function CreatePredictionModal({
                         setSelectedClass(cls.id);
                         setShowClassDropdown(false);
                       }}
-                      className='w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-[rgba(0,0,0,0.1)] last:border-b-0'
-                      style={{ color: '#000000', fontSize: '14px' }}
+                      className='w-full px-4 py-3 text-left hover:bg-white/[0.05] border-b border-white/5 last:border-b-0 text-[14px] text-fg-default'
                     >
                       {cls.name}
                     </button>
                   ))}
                   {!isLoadingClasses && classes.length === 0 && (
-                    <div className='px-4 py-3 text-[14px] text-[rgba(0,0,0,0.5)]'>No classes found</div>
+                    <div className='px-4 py-3 text-[14px] text-fg-text'>No classes found</div>
                   )}
                 </div>
               )}
@@ -656,50 +655,50 @@ export function CreatePredictionModal({
           {/* Students Selection Table (only for Selected Students mode) */}
           {predictionType === 'selectedStudents' && selectedClass && (
             <div>
-              <h3 className='text-[18px] font-semibold mb-4' style={{ color: '#000000' }}>
+              <h3 className='text-[18px] font-semibold mb-4 text-fg-default'>
                 Select Students
               </h3>
               {isLoadingStudents ? (
-                <div className='rounded-[10px] border border-[rgba(0,0,0,0.18)] px-4 py-6'>
+                <div className='glass-card px-4 py-6'>
                   <div className='animate-pulse space-y-3'>
                     {[0, 1, 2, 3].map((index) => (
-                      <div key={index} className='h-9 rounded-md bg-gray-100' />
+                      <div key={index} className='h-9 rounded-md bg-white/[0.06]' />
                     ))}
                   </div>
                 </div>
               ) : students.length === 0 ? (
-                <div className='rounded-[10px] border border-[rgba(0,0,0,0.18)] px-4 py-6 text-center text-[14px] text-[rgba(0,0,0,0.5)]'>
+                <div className='glass-card px-4 py-6 text-center text-[14px] text-fg-text'>
                   No students found for this class
                 </div>
               ) : (
-                <div className='overflow-x-auto border border-[rgba(0,0,0,0.18)] rounded-[10px]'>
+                <div className='overflow-x-auto border border-white/10 rounded-[10px]'>
                   <table className='w-full text-sm' style={{ borderCollapse: 'collapse' }}>
-                    <thead style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.5)' }}>
+                    <thead className='border-b border-white/10'>
                       <tr>
-                        <th className='px-4 py-3 text-left font-normal text-[14px]' style={{ color: '#000000', width: '50px' }}>
+                        <th className='px-4 py-3 text-left font-normal text-[14px] text-fg-text' style={{ width: '50px' }}>
                           <Checkbox
                             checked={allSelected ? true : someSelected ? 'indeterminate' : false}
                             onCheckedChange={handleSelectAllStudents}
                           />
                         </th>
-                        <th className='px-4 py-3 text-left font-normal text-[14px]' style={{ color: '#000000' }}>Name</th>
-                        <th className='px-4 py-3 text-left font-normal text-[14px]' style={{ color: '#000000' }}>Reg-No</th>
-                        <th className='px-3 py-3 text-center font-normal text-[14px]' style={{ color: '#000000', width: '36px' }} />
+                        <th className='px-4 py-3 text-left font-normal text-[14px] text-fg-text'>Name</th>
+                        <th className='px-4 py-3 text-left font-normal text-[14px] text-fg-text'>Reg-No</th>
+                        <th className='px-3 py-3 text-center font-normal text-[14px] text-fg-text' style={{ width: '36px' }} />
                       </tr>
                     </thead>
                     <tbody>
                       {students.map((student) => (
-                        <tr key={student.id} style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.17)' }}>
+                        <tr key={student.id} className='border-b border-white/5'>
                           <td className='px-4 py-3'>
                             <Checkbox
                               checked={student.selected || false}
                               onCheckedChange={() => handleSelectStudent(student.id)}
                             />
                           </td>
-                          <td className='px-4 py-3 text-[14px]' style={{ color: 'rgba(0, 0, 0, 0.5)' }}>
+                          <td className='px-4 py-3 text-[14px] text-fg-text'>
                             {student.name}
                           </td>
-                          <td className='px-4 py-3 text-[14px]' style={{ color: 'rgba(0, 0, 0, 0.5)' }}>
+                          <td className='px-4 py-3 text-[14px] text-fg-text'>
                             {student.regNo}
                           </td>
                           <td className='px-3 py-3 text-center align-middle'>
@@ -720,14 +719,13 @@ export function CreatePredictionModal({
         </div>
 
         {/* Footer */}
-        <div className='px-8 py-6 border-t border-[rgba(0,0,0,0.3)] flex justify-between gap-4'>
+        <div className='px-8 py-6 border-t border-white/10 flex justify-between gap-4'>
           <Button
             onClick={onClose}
             size='medium'
             color='primary'
             variant='outline'
             className='!rounded-[7px]'
-            style={{ backgroundColor: '#FFFFFF', color: '#000000', border: '1px solid rgba(0, 0, 0, 0.24)' }}
           >
             Cancel
           </Button>
@@ -739,7 +737,6 @@ export function CreatePredictionModal({
             color='primary'
             variant='solid'
             className='!rounded-[7px] text-[16px] disabled:opacity-50 disabled:cursor-not-allowed'
-            style={{ backgroundColor: selectedClass ? '' : 'rgba(0, 0, 0, 0.15)' }}
           >
             Generate Prediction
             <span>→</span>

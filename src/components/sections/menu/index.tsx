@@ -86,7 +86,7 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                   className={cn(
                                     'w-full justify-start h-10 mb-1 text-white hover:text-white',
                                     active 
-                                      ? 'bg-[#B9AFAF33] text-white rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-[#B9AFAF33]'
+                                      ? 'bg-[#4FA6F8]/15 text-[#7FD0FF] rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-[#4FA6F8]/15'
                                       : ''
                                   )}
                                   asChild
@@ -96,18 +96,19 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                     <span
                                       className={cn(
                                         isOpen === false ? '' : 'mr-4',
-                                        'text-white'
+                                        active ? 'text-[#7FD0FF]' : 'text-white'
                                       )}
                                     >
                                       <Icon size={18} />
                                     </span>
                                     <p
                                       className={cn(
-                                        'max-w-[200px] truncate text-white',
+                                        'max-w-[200px] truncate',
+                                        active ? 'text-[#7FD0FF]' : 'text-white',
                                         isOpen === false
                                           ? '-translate-x-96 opacity-0'
                                           : 'translate-x-0 opacity-100',
-                                        active 
+                                        active
                                           ? 'font-semibold text-sm leading-[15px] tracking-[-0.03em] capitalize'
                                           : ''
                                       )}
@@ -184,7 +185,7 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                   className={cn(
                                     'w-full justify-start h-10 mb-1 text-white hover:text-white',
                                     active 
-                                      ? 'bg-[#B9AFAF33] text-white rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-[#B9AFAF33]'
+                                      ? 'bg-[#4FA6F8]/15 text-[#7FD0FF] rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-[#4FA6F8]/15'
                                       : ''
                                   )}
                                   asChild
@@ -194,18 +195,19 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                     <span
                                       className={cn(
                                         isOpen === false ? '' : 'mr-4',
-                                        'text-white'
+                                        active ? 'text-[#7FD0FF]' : 'text-white'
                                       )}
                                     >
                                       <Icon size={18} />
                                     </span>
                                     <p
                                       className={cn(
-                                        'max-w-[200px] truncate text-white',
+                                        'max-w-[200px] truncate',
+                                        active ? 'text-[#7FD0FF]' : 'text-white',
                                         isOpen === false
                                           ? '-translate-x-96 opacity-0'
                                           : 'translate-x-0 opacity-100',
-                                        active 
+                                        active
                                           ? 'font-semibold text-sm leading-[15px] tracking-[-0.03em] capitalize'
                                           : ''
                                       )}

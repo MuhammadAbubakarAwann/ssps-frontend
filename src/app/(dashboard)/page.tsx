@@ -10,8 +10,8 @@ import { PerformanceTrendChart } from '@/components/dashboard/performance-trend-
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage
+  BreadcrumbList
+  // BreadcrumbPage
 } from '@/components/ui/breadcrumb';
 
 type DashboardMetricsResponse = {

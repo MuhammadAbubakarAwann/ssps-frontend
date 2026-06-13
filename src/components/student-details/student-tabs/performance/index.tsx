@@ -108,7 +108,7 @@ export function PerformanceTab({ studentId, role = 'TEACHER', semester }: Perfor
         items: quizzes.map((item) => ({
           detail: `${item.subject} - Score ${item.score}`,
           time: item.submittedAt,
-          dotColor: 'bg-blue-500'
+          dotColor: 'bg-[#4FA6F8]'
         }))
       });
 
@@ -118,7 +118,7 @@ export function PerformanceTab({ studentId, role = 'TEACHER', semester }: Perfor
         items: assignments.map((item) => ({
           detail: `${item.subject} - ${item.name || 'Assignment'} - Score ${item.score}`,
           time: item.submittedAt,
-          dotColor: 'bg-amber-500'
+          dotColor: 'bg-[#FFA30C]'
         }))
       });
 
@@ -128,7 +128,7 @@ export function PerformanceTab({ studentId, role = 'TEACHER', semester }: Perfor
         items: exams.map((item) => ({
           detail: `${item.subject} - ${item.type || 'Exam'} - ${item.score}`,
           time: item.submittedAt,
-          dotColor: 'bg-green-500'
+          dotColor: 'bg-[#3DD68C]'
         }))
       });
 
@@ -139,38 +139,38 @@ export function PerformanceTab({ studentId, role = 'TEACHER', semester }: Perfor
     return (
       <div className='space-y-6'>
         <div className='grid grid-cols-2 gap-6'>
-          <div className='border border-gray-300 rounded-2xl p-6 bg-white space-y-4 animate-pulse'>
-            <div className='h-5 w-48 rounded-full bg-gray-200' />
+          <div className='glass-card rounded-2xl p-6 space-y-4 animate-pulse'>
+            <div className='h-5 w-48 rounded-full bg-white/[0.06]' />
 
-            <div className='border border-gray-200 rounded-xl p-4 space-y-3'>
-              <div className='h-4 w-32 rounded-full bg-gray-200' />
+            <div className='border border-white/5 rounded-xl p-4 space-y-3'>
+              <div className='h-4 w-32 rounded-full bg-white/[0.06]' />
               <div className='flex items-center gap-4'>
-                <div className='h-2 flex-1 rounded-full bg-gray-200' />
-                <div className='h-8 w-16 rounded-full bg-gray-200' />
+                <div className='h-2 flex-1 rounded-full bg-white/[0.06]' />
+                <div className='h-8 w-16 rounded-full bg-white/[0.06]' />
               </div>
             </div>
 
             {[0, 1, 2].map((index) => (
-              <div key={index} className='border border-gray-200 rounded-xl p-4 space-y-3'>
-                <div className='h-4 w-28 rounded-full bg-gray-200' />
+              <div key={index} className='border border-white/5 rounded-xl p-4 space-y-3'>
+                <div className='h-4 w-28 rounded-full bg-white/[0.06]' />
                 <div className='flex items-center justify-between gap-4'>
-                  <div className='h-6 w-24 rounded-full bg-gray-200' />
-                  <div className='h-4 w-20 rounded-full bg-gray-200' />
+                  <div className='h-6 w-24 rounded-full bg-white/[0.06]' />
+                  <div className='h-4 w-20 rounded-full bg-white/[0.06]' />
                 </div>
               </div>
             ))}
           </div>
 
-          <div className='border border-gray-300 rounded-2xl p-6 bg-white space-y-4 animate-pulse'>
-            <div className='h-5 w-40 rounded-full bg-gray-200' />
+          <div className='glass-card rounded-2xl p-6 space-y-4 animate-pulse'>
+            <div className='h-5 w-40 rounded-full bg-white/[0.06]' />
             {[0, 1, 2, 3].map((index) => (
-              <div key={index} className='space-y-3 border border-gray-200 rounded-xl p-4'>
-                <div className='h-4 w-24 rounded-full bg-gray-200' />
+              <div key={index} className='space-y-3 border border-white/5 rounded-xl p-4'>
+                <div className='h-4 w-24 rounded-full bg-white/[0.06]' />
                 <div className='flex items-center gap-3'>
-                  <div className='h-3 w-3 rounded-full bg-gray-200' />
-                  <div className='h-4 flex-1 rounded-full bg-gray-200' />
+                  <div className='h-3 w-3 rounded-full bg-white/[0.06]' />
+                  <div className='h-4 flex-1 rounded-full bg-white/[0.06]' />
                 </div>
-                <div className='h-3 w-32 rounded-full bg-gray-200' />
+                <div className='h-3 w-32 rounded-full bg-white/[0.06]' />
               </div>
             ))}
           </div>
@@ -179,70 +179,70 @@ export function PerformanceTab({ studentId, role = 'TEACHER', semester }: Perfor
     );
 
   if (error)
-    return <div className='rounded-2xl border border-gray-300 bg-white p-6 text-red-600'>{error}</div>;
+    return <div className='rounded-2xl glass-card p-6 text-[#FF8A8F]'>{error}</div>;
 
   return (
     <div className='space-y-6'>
       <div className='grid grid-cols-2 gap-6'>
         {/* Performance Overview */}
-        <div className='border border-gray-300 rounded-2xl p-6 bg-white space-y-4'>
-          <h3 className='text-lg font-semibold text-black'>Performance Overview</h3>
+        <div className='glass-card rounded-2xl p-6 space-y-4'>
+          <h3 className='text-lg font-semibold text-fg-default'>Performance Overview</h3>
 
           {/* Average Score */}
-          <div className='border border-gray-300 rounded-xl p-4 space-y-2'>
-            <p className='text-sm text-gray-700'>Average Score</p>
+          <div className='border border-white/5 rounded-xl p-4 space-y-2'>
+            <p className='text-sm text-fg-text'>Average Score</p>
             <div className='flex items-center justify-between'>
               <div className='flex-1'>
-                <div className='w-full bg-gray-200 rounded-full h-2'>
-                  <div className='bg-blue-500 h-2 rounded-full' style={{ width: averageScoreBarWidth }}></div>
+                <div className='w-full bg-white/[0.08] rounded-full h-2'>
+                  <div className='bg-[#4FA6F8] h-2 rounded-full' style={{ width: averageScoreBarWidth }}></div>
                 </div>
               </div>
-              <p className='text-2xl font-bold text-blue-500 ml-4'>{averageScoreValue.toFixed(2)}</p>
+              <p className='text-2xl font-bold text-[#7FD0FF] ml-4'>{averageScoreValue.toFixed(2)}</p>
             </div>
           </div>
 
           {/* Class Rank */}
-          <div className='border border-gray-300 rounded-xl p-4 space-y-2'>
-            <p className='text-sm text-gray-700'>Class Rank</p>
+          <div className='border border-white/5 rounded-xl p-4 space-y-2'>
+            <p className='text-sm text-fg-text'>Class Rank</p>
             <div className='flex justify-between items-center'>
-              <p className='text-xl font-bold text-black'>{payload?.performance?.classRank || '-'}</p>
-              <p className='text-sm text-gray-600'>{payload?.performance?.percentileStanding || '-'}</p>
+              <p className='text-xl font-bold text-fg-default'>{payload?.performance?.classRank || '-'}</p>
+              <p className='text-sm text-fg-text'>{payload?.performance?.percentileStanding || '-'}</p>
             </div>
           </div>
 
           {/* Improvement Rate */}
-          <div className='border border-gray-300 rounded-xl p-4 space-y-2'>
-            <p className='text-sm text-gray-700'>Improvement Rate</p>
-            <p className='text-xl font-bold text-green-600'>{payload?.performance?.improvementRate || '-'}</p>
-            <p className='text-xs text-gray-600'>This semester vs last semester</p>
+          <div className='border border-white/5 rounded-xl p-4 space-y-2'>
+            <p className='text-sm text-fg-text'>Improvement Rate</p>
+            <p className='text-xl font-bold text-[#3DD68C]'>{payload?.performance?.improvementRate || '-'}</p>
+            <p className='text-xs text-fg-text'>This semester vs last semester</p>
           </div>
 
           {/* Strong Subjects */}
-          <div className='border border-gray-300 rounded-xl p-4 space-y-2'>
-            <p className='text-sm text-gray-700'>Strong Subjects</p>
-            <p className='text-xl font-bold text-green-600'>{payload?.performance?.strongSubjects || '-'}</p>
-            <p className='text-xs text-gray-600'>A or A+ grade subjects</p>
+          <div className='border border-white/5 rounded-xl p-4 space-y-2'>
+            <p className='text-sm text-fg-text'>Strong Subjects</p>
+            <p className='text-xl font-bold text-[#3DD68C]'>{payload?.performance?.strongSubjects || '-'}</p>
+            <p className='text-xs text-fg-text'>A or A+ grade subjects</p>
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className='border border-gray-300 rounded-2xl p-6 bg-white space-y-4'>
-          <h3 className='text-lg font-semibold text-black'>Recent Activity</h3>
+        <div className='glass-card rounded-2xl p-6 space-y-4'>
+          <h3 className='text-lg font-semibold text-fg-default'>Recent Activity</h3>
 
           {activityGroups.length === 0 && (
-            <p className='text-sm text-gray-600'>No recent activity found.</p>
+            <p className='text-sm text-fg-text'>No recent activity found.</p>
           )}
 
           {activityGroups.map((group) => (
             <div key={group.title} className='space-y-3'>
-              <p className='text-sm font-semibold text-black'>{group.title}</p>
+              <p className='text-sm font-semibold text-fg-default'>{group.title}</p>
               <div className='space-y-3'>
                 {group.items.map((item, index) => (
                   <div key={`${group.title}-${index}`} className='flex gap-3 items-start pl-1'>
                     <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${item.dotColor}`}></div>
                     <div>
-                      <p className='text-sm text-gray-600'>{item.detail}</p>
-                      <p className='text-xs text-gray-500'>{item.time}</p>
+                      <p className='text-sm text-fg-text'>{item.detail}</p>
+                      <p className='text-xs text-fg-text'>{item.time}</p>
                     </div>
                   </div>
                 ))}

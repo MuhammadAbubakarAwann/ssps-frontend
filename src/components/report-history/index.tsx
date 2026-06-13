@@ -589,14 +589,14 @@ export function ReportHistoryMainData() {
   if (isLoadingUser)
     return (
       <div className='mt-4 space-y-6 animate-pulse'>
-        <div className='h-8 w-2/3 rounded-full bg-gray-200' />
+        <div className='h-8 w-2/3 rounded-full bg-white/[0.06]' />
         <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-          <div className='h-10 rounded-md bg-gray-200' />
-          <div className='h-10 rounded-md bg-gray-200' />
+          <div className='h-10 rounded-md bg-white/[0.06]' />
+          <div className='h-10 rounded-md bg-white/[0.06]' />
         </div>
-        <div className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'>
+        <div className='glass-card p-5 space-y-3'>
           {[0, 1, 2].map((index) => (
-            <div key={index} className='h-16 rounded-md bg-gray-100' />
+            <div key={index} className='h-16 rounded-md bg-white/[0.06]' />
           ))}
         </div>
       </div>
@@ -606,7 +606,7 @@ export function ReportHistoryMainData() {
     <>
       <div className='mt-4'>
         {/* Page Title */}
-        <h1 className='mb-8 text-2xl font-semibold text-black'>
+        <h1 className='mb-8 text-2xl font-semibold text-fg-default'>
           See the student/class report history
         </h1>
 
@@ -619,67 +619,67 @@ export function ReportHistoryMainData() {
               placeholder='Search by Report ID, Class, or Student Name'
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className='h-[44px] w-full rounded-[7px] border border-black/40 pr-10 text-base text-black/60 placeholder:text-black/50'
+              className='h-[44px] w-full rounded-[7px] border border-white/10 bg-white/[0.03] pr-10 text-base text-fg-default placeholder:text-fg-text focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20'
             />
             <Search
               size={20}
-              className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50'
+              className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-fg-text'
             />
           </div>
 
           {/* Class Filter */}
-          <div className='relative h-[44px] rounded-[7px] border border-black/30 shadow-sm'>
+          <div className='relative h-[44px] rounded-[7px] border border-white/10 bg-white/[0.03]'>
             <select
               value={selectedClass}
               onChange={(event) => setSelectedClass(event.target.value)}
-              className='h-full w-auto cursor-pointer appearance-none bg-transparent px-3 pr-9 text-[15px] text-black/70 outline-none whitespace-nowrap'
+              className='h-full w-auto cursor-pointer appearance-none bg-transparent px-3 pr-9 text-[15px] text-fg-default outline-none whitespace-nowrap'
             >
               {classOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
-            <ChevronDown size={16} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50' />
+            <ChevronDown size={16} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-fg-text' />
           </div>
 
           {/* Prediction Type Filter */}
-          <div className='relative h-[44px] rounded-[7px] border border-black/30 shadow-sm'>
+          <div className='relative h-[44px] rounded-[7px] border border-white/10 bg-white/[0.03]'>
             <select
               value={selectedType}
               onChange={(event) => setSelectedType(event.target.value)}
-              className='h-full w-auto cursor-pointer appearance-none bg-transparent px-3 pr-9 text-[15px] text-black/70 outline-none whitespace-nowrap'
+              className='h-full w-auto cursor-pointer appearance-none bg-transparent px-3 pr-9 text-[15px] text-fg-default outline-none whitespace-nowrap'
             >
               {predictionTypeOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
-            <ChevronDown size={16} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50' />
+            <ChevronDown size={16} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-fg-text' />
           </div>
 
           {/* Risk Level Filter */}
-          <div className='relative h-[44px] rounded-[7px] border border-black/30 shadow-sm'>
+          <div className='relative h-[44px] rounded-[7px] border border-white/10 bg-white/[0.03]'>
             <select
               value={selectedRisk}
               onChange={(event) => setSelectedRisk(event.target.value)}
-              className='h-full w-auto cursor-pointer appearance-none bg-transparent px-3 pr-9 text-[15px] text-black/70 outline-none whitespace-nowrap'
+              className='h-full w-auto cursor-pointer appearance-none bg-transparent px-3 pr-9 text-[15px] text-fg-default outline-none whitespace-nowrap'
             >
               {riskLevelOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
-            <ChevronDown size={16} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50' />
+            <ChevronDown size={16} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-fg-text' />
           </div>
         </div>
 
         {error && (
-          <div className='mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700'>
+          <div className='mb-4 rounded-md border border-[#FF6369]/30 bg-[#FF6369]/[0.08] p-3 text-sm text-[#FF8A8F]'>
             {error}
           </div>
         )}
 
         {isLoadingReports ? (
-          <div className='rounded-xl border border-gray-200 bg-white p-5 animate-pulse space-y-3'>
+          <div className='glass-card p-5 animate-pulse space-y-3'>
             {[0, 1, 2, 3].map((index) => (
-              <div key={index} className='h-12 rounded-md bg-gray-100' />
+              <div key={index} className='h-12 rounded-md bg-white/[0.06]' />
             ))}
           </div>
         ) : (

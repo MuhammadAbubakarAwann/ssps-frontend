@@ -478,35 +478,35 @@ export function PredictionsMainData() {
   if (isLoading)
     return (
       <div className='mt-4 space-y-6 animate-pulse'>
-        <div className='h-8 w-2/3 rounded-full bg-gray-200' />
+        <div className='h-8 w-2/3 rounded-full bg-white/[0.06]' />
 
         <div className='grid grid-cols-3 gap-6'>
           {[0, 1, 2].map((index) => (
             <div
               key={index}
-              className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'
+              className='glass-card space-y-3 p-5'
             >
-              <div className='h-4 w-28 rounded-full bg-gray-200' />
-              <div className='h-8 w-20 rounded-full bg-gray-200' />
-              <div className='h-3 w-24 rounded-full bg-gray-200' />
+              <div className='h-4 w-28 rounded-full bg-white/[0.06]' />
+              <div className='h-8 w-20 rounded-full bg-white/[0.06]' />
+              <div className='h-3 w-24 rounded-full bg-white/[0.06]' />
             </div>
           ))}
         </div>
 
         <div className='flex items-center justify-between'>
-          <div className='h-4 w-64 rounded-full bg-gray-200' />
-          <div className='h-10 w-36 rounded-md bg-gray-200' />
+          <div className='h-4 w-64 rounded-full bg-white/[0.06]' />
+          <div className='h-10 w-36 rounded-md bg-white/[0.06]' />
         </div>
 
         <div className='grid grid-cols-3 gap-6'>
           {[0, 1, 2].map((index) => (
             <div
               key={index}
-              className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'
+              className='glass-card space-y-3 p-5'
             >
-              <div className='h-4 w-36 rounded-full bg-gray-200' />
-              <div className='h-8 w-20 rounded-full bg-gray-200' />
-              <div className='h-3 w-28 rounded-full bg-gray-200' />
+              <div className='h-4 w-36 rounded-full bg-white/[0.06]' />
+              <div className='h-8 w-20 rounded-full bg-white/[0.06]' />
+              <div className='h-3 w-28 rounded-full bg-white/[0.06]' />
             </div>
           ))}
         </div>
@@ -522,10 +522,7 @@ export function PredictionsMainData() {
     <>
       <div className='mt-4'>
         {/* Page Title */}
-        <h1
-          className='text-2xl font-semibold mb-6'
-          style={{ color: '#000000', fontSize: '24px', fontWeight: '600' }}
-        >
+        <h1 className='mb-6 text-2xl font-semibold text-fg-default'>
           Make a new predictions, or see recent predictions
         </h1>
 
@@ -536,8 +533,8 @@ export function PredictionsMainData() {
             value={metricsData.totalPredictions}
             change={metricsData.predictionsChange}
             changeText='from last month'
-            icon={<FiBarChart2 size={32} style={{ color: '#4A90E2' }} />}
-            changeColor='#447C00'
+            icon={<FiBarChart2 size={32} style={{ color: '#4FA6F8' }} />}
+            changeColor='#3DD68C'
           />
           <MetricCard
             title='Active Classes'
@@ -545,7 +542,7 @@ export function PredictionsMainData() {
             change={metricsData.classesChange}
             changeText='from last month'
             icon={<FiUsers size={32} style={{ color: '#8B5CF6' }} />}
-            changeColor='#447C00'
+            changeColor='#3DD68C'
           />
           <MetricCard
             title='Average Improvement'
@@ -553,18 +550,18 @@ export function PredictionsMainData() {
             change={metricsData.improvementChange}
             changeText='from last month'
             icon={<FiTrendingUp size={32} style={{ color: '#A78BFA' }} />}
-            changeColor='#447C00'
+            changeColor='#3DD68C'
           />
         </div>
 
         {/* View and Manage Section */}
         <div className='flex justify-between items-center mb-6'>
-          <p style={{ color: 'rgba(0, 0, 0, 0.58)', fontSize: '14px' }}>
+          <p className='text-sm text-fg-text'>
             View and manage your prediction history
           </p>
           <div className='flex items-center gap-3'>
             <select
-              className='h-10  rounded-[5px] border border-black/20 bg-white px-3 text-[14px]'
+              className='h-10 rounded-[5px] border border-white/10 bg-white/[0.03] px-3 text-[14px] text-fg-default focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20'
               value={scope}
               onChange={(event) =>
                 setScope(event.target.value as 'CLASS' | 'SELECTED')
@@ -575,7 +572,7 @@ export function PredictionsMainData() {
             </select>
 
             <select
-              className='h-10 rounded-[5px] border border-black/20 bg-white px-3 text-[14px]'
+              className='h-10 rounded-[5px] border border-white/10 bg-white/[0.03] px-3 text-[14px] text-fg-default focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20'
               value={selectedClass}
               onChange={(event) => setSelectedClass(event.target.value)}
             >
@@ -592,8 +589,7 @@ export function PredictionsMainData() {
               color='primary'
               variant='solid'
               onClick={() => setShowPredictionModal(true)}
-              className='gap-2 text-white !rounded-[5px] text-sm font-semibold'
-              style={{ backgroundColor: '#000000' }}
+              className='gap-2 !rounded-[5px] text-sm font-semibold text-white'
             >
               <Plus size={20} />
               New Prediction
@@ -607,16 +603,16 @@ export function PredictionsMainData() {
             {[0, 1, 2].map((index) => (
               <div
                 key={index}
-                className='rounded-[10px] border border-gray-200 bg-white p-5 space-y-3'
+                className='glass-card space-y-3 p-5'
               >
-                <div className='h-4 w-36 rounded-full bg-gray-200' />
-                <div className='h-9 w-20 rounded-full bg-gray-200' />
-                <div className='h-3 w-24 rounded-full bg-gray-200' />
+                <div className='h-4 w-36 rounded-full bg-white/[0.06]' />
+                <div className='h-9 w-20 rounded-full bg-white/[0.06]' />
+                <div className='h-3 w-24 rounded-full bg-white/[0.06]' />
               </div>
             ))}
           </div>
         ) : predictionHistory.length === 0 ? (
-          <div className={`py-12 text-center text-[14px] text-black/60 transition-opacity duration-300 ease-out ${cardsTransitioning ? 'opacity-50' : 'opacity-100'}`}>
+          <div className={`py-12 text-center text-[14px] text-fg-text transition-opacity duration-300 ease-out ${cardsTransitioning ? 'opacity-50' : 'opacity-100'}`}>
             No prediction history found
           </div>
         ) : (

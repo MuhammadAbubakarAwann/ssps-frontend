@@ -103,17 +103,18 @@ export function CollapseMenuButton({
             key={index}
             className={cn(
               'w-full justify-start h-10 mb-1 text-white hover:text-white',
-              active && 'bg-[#B9AFAF33] hover:bg-[#B9AFAF33]'
+              active && 'bg-[#4FA6F8]/15 text-[#7FD0FF] hover:bg-[#4FA6F8]/15 hover:text-[#7FD0FF]'
             )}
             asChild
           >
             <Link href={href}>
-              <span className='mr-4 ml-2 text-white'>
+              <span className={cn('mr-4 ml-2', active ? 'text-[#7FD0FF]' : 'text-white')}>
                 <GoDot size={18} />
               </span>
               <p
                 className={cn(
-                  'max-w-[170px] truncate text-white',
+                  'max-w-[170px] truncate',
+                  active ? 'text-[#7FD0FF]' : 'text-white',
                   isOpen
                     ? 'translate-x-0 opacity-100'
                     : '-translate-x-96 opacity-0'
@@ -135,7 +136,7 @@ export function CollapseMenuButton({
               <Button
                 className={cn(
                   'w-full justify-start h-10 mb-1 text-white hover:text-white',
-                  active && 'bg-[#B9AFAF33] hover:bg-[#B9AFAF33]'
+                  active && 'bg-[#4FA6F8]/15 text-[#7FD0FF] hover:bg-[#4FA6F8]/15 hover:text-[#7FD0FF]'
                 )}
               >
                 <div className='w-full items-center flex justify-between'>
@@ -170,10 +171,10 @@ export function CollapseMenuButton({
           <DropdownMenuItem 
             key={index} 
             asChild
-            className={cn(active && 'bg-[#B9AFAF33]')}
+            className={cn(active && 'bg-[#4FA6F8]/15')}
           >
             <Link className='cursor-pointer' href={href}>
-              <p className={cn('max-w-[180px] truncate', active && 'text-white')}>
+              <p className={cn('max-w-[180px] truncate', active && 'text-[#7FD0FF]')}>
                 {label}
               </p>
             </Link>

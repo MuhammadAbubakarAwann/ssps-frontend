@@ -9,7 +9,8 @@ export default function RootLayout({
 }) {
   return (
     <div className='font-graphik'>
-      <NextTopLoader color='#0a778f' />
+      <div className='app-grid-bg' />
+      <NextTopLoader color='#4FA6F8' />
       {children}
       <Toaster />
     </div>

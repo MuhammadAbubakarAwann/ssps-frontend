@@ -29,7 +29,7 @@ export default function EditClassPage({
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/dashboard' className='text-black'>
+              <Link href='/dashboard' className='text-fg-text'>
                 Dashboard
               </Link>
             </BreadcrumbLink>
@@ -37,20 +37,20 @@ export default function EditClassPage({
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/class-management' className='text-black'>
+              <Link href='/class-management' className='text-fg-text'>
                 All Classes
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className='text-black'>Edit Class</BreadcrumbPage>
+            <BreadcrumbPage className='text-fg-default'>Edit Class</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className='mt-4'>
-        <h1 className='mb-6 text-2xl font-semibold text-black'>
+        <h1 className='mb-6 text-2xl font-semibold text-fg-default'>
           Update class details and student information
         </h1>
 

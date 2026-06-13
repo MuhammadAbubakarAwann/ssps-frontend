@@ -58,14 +58,14 @@ export function ClassCard({ classItem, onView, onDelete }: ClassCardProps) {
 
   return (
     <Card
-      className='h-full cursor-pointer overflow-hidden rounded-[10px] border border-black/20 bg-white transition-shadow hover:shadow-lg flex flex-col'
+      className='glass-card glass-card-hover h-full cursor-pointer overflow-hidden flex flex-col'
       onClick={onView}
     >
       {/* Header */}
-      <div className='flex items-start justify-between bg-white px-4 py-4'>
+      <div className='flex items-start justify-between px-4 py-4'>
         <div>
-          <h3 className='text-[20px] font-bold leading-[30px] text-black'>{titleText}</h3>
-          <div className='mt-1 space-y-0.5 text-[12px] leading-[18px] text-black/75'>
+          <h3 className='text-[20px] font-bold leading-[30px] text-fg-default'>{titleText}</h3>
+          <div className='mt-1 space-y-0.5 text-[12px] leading-[18px] text-fg-text'>
             {classItem.subject && <p className='font-semibold'>{classItem.subject}</p>}
           </div>
         </div>
@@ -74,13 +74,13 @@ export function ClassCard({ classItem, onView, onDelete }: ClassCardProps) {
             size='small'
             variant='ghost'
             color='primary'
-            className='flex items-center justify-center rounded-[5px] bg-black/40'
+            className='flex items-center justify-center rounded-[5px] bg-white/[0.05] hover:bg-white/[0.08]'
             onClick={(e) => {
               e.stopPropagation();
               router.push(`/class-management/edit/${classItem.id}`);
             }}
           >
-            <Edit2 className='h-[19px] w-[19px] text-black stroke-2' />
+            <Edit2 className='h-[19px] w-[19px] text-[#7FD0FF] stroke-2' />
           </Button>
           <ConfirmationDialog
             trigger={(
@@ -88,12 +88,12 @@ export function ClassCard({ classItem, onView, onDelete }: ClassCardProps) {
                 size='small'
                 color='gray'
                 variant='ghost'
-                className='flex items-center justify-center rounded-[5px] bg-black/35'
+                className='flex items-center justify-center rounded-[5px] bg-white/[0.05] hover:bg-white/[0.08]'
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
               >
-                <Trash2 className='h-5 w-5 text-black' />
+                <Trash2 className='h-5 w-5 text-[#FF8A8F]' />
               </Button>
             )}
             title='Delete class?'
@@ -106,49 +106,49 @@ export function ClassCard({ classItem, onView, onDelete }: ClassCardProps) {
       </div>
 
       {/* Mini Table */}
-      <div className='flex-1 overflow-hidden bg-white px-3 pb-3'>
+      <div className='flex-1 overflow-hidden px-3 pb-3'>
         <div className='text-xs overflow-x-auto'>
           {/* Table Header */}
           <table className='w-full border-collapse'>
             <thead>
-              <tr className='h-[18px] border-b border-black/50'>
-                <th className='px-1 py-1 text-left text-[10px] font-normal text-black'>#</th>
-                <th className='px-1 py-1 text-left text-[10px] font-normal text-black'>Reg-No</th>
-                <th className='px-1 py-1 text-left text-[10px] font-normal text-black'>Name</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>Q1</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>Q2</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>Q3</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>Q4</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>A1</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>A2</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>A3</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>A4</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>M</th>
-                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-black'>A%</th>
+              <tr className='h-[18px] border-b border-white/10'>
+                <th className='px-1 py-1 text-left text-[10px] font-normal text-fg-text'>#</th>
+                <th className='px-1 py-1 text-left text-[10px] font-normal text-fg-text'>Reg-No</th>
+                <th className='px-1 py-1 text-left text-[10px] font-normal text-fg-text'>Name</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>Q1</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>Q2</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>Q3</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>Q4</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>A1</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>A2</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>A3</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>A4</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>M</th>
+                <th className='px-0.5 py-1 text-center text-[10px] font-normal text-fg-text'>A%</th>
               </tr>
             </thead>
             <tbody>
               {displayedStudents.map((student, index) => (
-                <tr key={student.id} className='h-[18px] border-b border-black/15'>
-                  <td className='px-1 py-0 text-left text-[10px] text-black/50'>{index + 1}</td>
-                  <td className='px-1 py-0 text-left text-[10px] text-black/50 truncate'>{student.regNo}</td>
-                  <td className='px-1 py-0 text-left text-[10px] text-black/50 truncate'>{student.name}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.Q1}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.Q2}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.Q3}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.Q4}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.A1}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.A2}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.A3}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.A4}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.mids}</td>
-                  <td className='px-0.5 py-0 text-center text-[10px] text-black/50'>{student.att}</td>
+                <tr key={student.id} className='h-[18px] border-b border-white/5'>
+                  <td className='px-1 py-0 text-left text-[10px] text-fg-text'>{index + 1}</td>
+                  <td className='px-1 py-0 text-left text-[10px] text-fg-text truncate'>{student.regNo}</td>
+                  <td className='px-1 py-0 text-left text-[10px] text-fg-text truncate'>{student.name}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.Q1}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.Q2}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.Q3}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.Q4}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.A1}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.A2}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.A3}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.A4}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.mids}</td>
+                  <td className='px-0.5 py-0 text-center text-[10px] text-fg-text'>{student.att}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {remainingStudents > 0 && (
-            <div className='mt-2 border-t border-black/15 py-1 text-center text-[10px] text-black/50'>
+            <div className='mt-2 border-t border-white/5 py-1 text-center text-[10px] text-fg-text'>
               +{remainingStudents} more students
             </div>
           )}
@@ -156,7 +156,7 @@ export function ClassCard({ classItem, onView, onDelete }: ClassCardProps) {
       </div>
 
       {/* Footer Button */}
-      <div className='border-t border-black/20 bg-white px-3 py-3'>
+      <div className='border-t border-white/10 px-3 py-3'>
         <Button
         color='primary'
         size='medium'

@@ -27,11 +27,11 @@ function formatTooltipValue(
 
 export function GPATrendChart({ data }: GPATrendChartProps) {
   return (
-    <div className='rounded-[20px] border border-black/30 bg-white p-6 shadow-[1px_1px_3px_rgba(0,0,0,0.25),-1px_-1px_3px_rgba(0,0,0,0.25)]'>
+    <div className='rounded-[20px] glass-card p-6'>
       {/* Header */}
       <div className='mb-6 flex items-center gap-2.5'>
-        <TrendingUp size={24} className='text-[#0084FF]' />
-        <h3 className='text-[20px] font-semibold text-black'>
+        <TrendingUp size={24} className='text-[#7FD0FF]' />
+        <h3 className='text-[20px] font-semibold text-fg-default'>
           GPA Trend Over Semesters
         </h3>
       </div>
@@ -40,33 +40,34 @@ export function GPATrendChart({ data }: GPATrendChartProps) {
       <div className='h-[300px] w-full'>
         <ResponsiveContainer width='100%' height='100%'>
           <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray='3 3' stroke='rgba(0, 0, 0, 0.1)' />
+            <CartesianGrid strokeDasharray='3 3' stroke='rgba(255,255,255,0.08)' />
             <XAxis
               dataKey='semester'
-              stroke='rgba(0, 0, 0, 0.5)'
-              tick={{ fontSize: 14 }}
+              stroke='rgba(255,255,255,0.5)'
+              tick={{ fontSize: 14, fill: 'rgba(255,255,255,0.5)' }}
             />
             <YAxis
               domain={[3.0, 3.5]}
-              stroke='rgba(0, 0, 0, 0.5)'
-              tick={{ fontSize: 14 }}
+              stroke='rgba(255,255,255,0.5)'
+              tick={{ fontSize: 14, fill: 'rgba(255,255,255,0.5)' }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid rgba(0, 0, 0, 0.2)',
+                backgroundColor: 'rgba(10,12,22,0.95)',
+                border: '1px solid rgba(255,255,255,0.1)',
                 borderRadius: '8px',
-                color: '#000000'
+                color: 'var(--fg-default)',
+                backdropFilter: 'blur(20px)'
               }}
               formatter={(value) => formatTooltipValue(value)}
             />
             <Line
               type='monotone'
               dataKey='gpa'
-              stroke='#0084FF'
+              stroke='#4FA6F8'
               strokeWidth={2}
-              dot={{ fill: '#0084FF', r: 5 }}
-              activeDot={{ r: 7 }}
+              dot={{ fill: '#4FA6F8', r: 5 }}
+              activeDot={{ r: 7, fill: '#7FD0FF' }}
             />
           </LineChart>
         </ResponsiveContainer>

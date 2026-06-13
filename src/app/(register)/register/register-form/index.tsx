@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Mail, Eye, EyeOff, Lock, User, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import sppsLogoWhite from '../../../../../public/images/logo/SPPS-logo-white.png';
 
 export default function RegisterForm() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -60,19 +62,19 @@ export default function RegisterForm() {
       <div className='w-full lg:w-2/5 flex flex-col items-center justify-center px-6 md:px-12 lg:px-20'>
         <div className='w-full max-w-[419px] flex flex-col gap-12'>
           <div className='flex justify-center'>
-            <div className='text-2xl font-bold text-gray-900'>Your Logo</div>
+            <Image src={sppsLogoWhite} alt='SPPS Logo' width={160} height={124} style={{ width: '160', height: '124' }} />
           </div>
 
           <div className='flex flex-col gap-2.5 text-center'>
-            <h1 className='text-[28px] font-medium leading-[130%] tracking-[-0.02em]'>Create your account</h1>
-            <p className='text-lg text-black/50'>Welcome! Please enter your details to get started.</p>
+            <h1 className='text-[28px] font-medium leading-[130%] tracking-[-0.02em] text-fg-default'>Create your account</h1>
+            <p className='text-lg text-fg-text'>Welcome! Please enter your details to get started.</p>
           </div>
 
           <form ref={ref} onSubmit={handleSubmit} className='flex flex-col gap-8 w-full'>
             <div className='flex flex-col gap-2.5'>
-              <label className='text-lg font-medium'>Full Name*</label>
+              <label className='text-lg font-medium text-fg-default'>Full Name*</label>
               <div className='relative'>
-                <div className='absolute left-4 top-1/2 transform -translate-y-1/2 text-black/50'>
+                <div className='absolute left-4 top-1/2 transform -translate-y-1/2 text-fg-text'>
                   <User size={20} />
                 </div>
                 <Input
@@ -80,15 +82,15 @@ export default function RegisterForm() {
                   name='name'
                   required
                   placeholder='Enter your full name'
-                  className='h-12 pl-12 border border-black/10 bg-black/[0.01] text-lg rounded-none focus:outline-none focus:ring-0 focus:border-black/20'
+                  className='h-12 pl-12 rounded-lg border border-white/10 bg-white/[0.03] text-lg text-fg-default placeholder:text-fg-text focus:outline-none focus:ring-2 focus:ring-[#4FA6F8]/30 focus:border-[#4FA6F8]/50 transition-colors'
                 />
               </div>
             </div>
 
             <div className='flex flex-col gap-2.5'>
-              <label className='text-lg font-medium'>Email*</label>
+              <label className='text-lg font-medium text-fg-default'>Email*</label>
               <div className='relative'>
-                <div className='absolute left-4 top-1/2 transform -translate-y-1/2 text-black/50'>
+                <div className='absolute left-4 top-1/2 transform -translate-y-1/2 text-fg-text'>
                   <Mail size={20} />
                 </div>
                 <Input
@@ -96,15 +98,15 @@ export default function RegisterForm() {
                   name='email'
                   required
                   placeholder='Enter your email'
-                  className='h-12 pl-12 border border-black/10 bg-black/[0.01] text-lg rounded-none focus:outline-none focus:ring-0 focus:border-black/20'
+                  className='h-12 pl-12 rounded-lg border border-white/10 bg-white/[0.03] text-lg text-fg-default placeholder:text-fg-text focus:outline-none focus:ring-2 focus:ring-[#4FA6F8]/30 focus:border-[#4FA6F8]/50 transition-colors'
                 />
               </div>
             </div>
 
             <div className='flex flex-col gap-2.5'>
-              <label className='text-lg font-medium'>Password*</label>
+              <label className='text-lg font-medium text-fg-default'>Password*</label>
               <div className='relative'>
-                <div className='absolute left-4 top-1/2 transform -translate-y-1/2 text-black/50'>
+                <div className='absolute left-4 top-1/2 transform -translate-y-1/2 text-fg-text'>
                   <Lock size={20} />
                 </div>
                 <Input
@@ -112,12 +114,12 @@ export default function RegisterForm() {
                   name='password'
                   required
                   placeholder='Create a password'
-                  className='h-12 pl-12 pr-12 border border-black/10 bg-black/[0.01] text-lg rounded-none focus:outline-none focus:ring-0 focus:border-black/20'
+                  className='h-12 pl-12 pr-12 rounded-lg border border-white/10 bg-white/[0.03] text-lg text-fg-default placeholder:text-fg-text focus:outline-none focus:ring-2 focus:ring-[#4FA6F8]/30 focus:border-[#4FA6F8]/50 transition-colors'
                 />
                 <button
                   type='button'
                   onClick={togglePasswordVisibility}
-                  className='absolute right-4 top-1/2 transform -translate-y-1/2 text-black/50 hover:text-black'
+                  className='absolute right-4 top-1/2 transform -translate-y-1/2 text-fg-text hover:text-fg-default transition-colors'
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -127,28 +129,30 @@ export default function RegisterForm() {
             <button
               type='submit'
               disabled={loading}
-              className='h-12 bg-[#2A313B] text-white flex items-center justify-center gap-2 hover:bg-[#1f2430] transition-colors disabled:opacity-70'
+              className='h-12 rounded-lg bg-gradient-to-r from-[#4FA6F8] to-[#7FD0FF] text-[#04050A] font-medium flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(79,166,248,0.25)] hover:shadow-[0_0_45px_rgba(79,166,248,0.45)] transition-all disabled:opacity-70'
             >
               <span className='text-lg font-medium'>{loading ? 'Creating Account...' : 'Create Account'}</span>
               {!loading && <ArrowRight size={20} />}
             </button>
           </form>
 
-          <div className='text-center text-lg'>
+          <div className='text-center text-lg text-fg-text'>
             Already have an account?{' '}
-            <Link href={loginLink} className='font-semibold text-black hover:text-black/70'>
+            <Link href={loginLink} className='font-semibold text-[#7FD0FF] hover:text-[#9FE0FF] transition-colors'>
               Log in
             </Link>
           </div>
         </div>
       </div>
 
-      <div className='hidden lg:block lg:w-3/5 relative bg-gray-900'>
-        <div className='absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black' />
-        <div className='absolute bottom-20 left-10 text-white max-w-[474px] flex flex-col gap-5 z-10'>
-          <h2 className='text-[28px] font-semibold tracking-[0.05em]'>Your Company</h2>
-          <p className='text-xl font-normal leading-[180%] tracking-[-0.02em]'>
-            From vision to reality — we empower your digital journey with purpose and precision.
+      <div className='hidden lg:block lg:w-3/5 relative bg-bg-base overflow-hidden'>
+        <div className='absolute inset-0 bg-gradient-to-br from-[#04050A] via-[#0A0C16] to-[#04050A]' />
+        <div className='absolute -right-20 -top-20 h-96 w-96 rounded-full bg-glow-purple opacity-20 blur-[120px]' />
+        <div className='absolute -bottom-24 -left-24 h-[28rem] w-[28rem] rounded-full bg-glow-blue opacity-20 blur-[130px]' />
+        <div className='absolute bottom-20 left-10 max-w-[474px] flex flex-col gap-5 z-10 glass-card p-8'>
+          <h2 className='text-[28px] font-semibold tracking-[0.05em] text-fg-default'>Student Performance Prediction System</h2>
+          <p className='text-xl font-normal leading-[180%] tracking-[-0.02em] text-fg-text'>
+            Predict the future grading to improve student Performance
           </p>
         </div>
       </div>

@@ -86,9 +86,9 @@ export const PdfReader: FC<{
   }
 
   return (
-    <div ref={containerRef} className='flex flex-col w-full h-[500px] ssm:h-[700px] bg-primary-solid'>
-      <div className='flex items-center justify-between p-4 bg-primary-solid border-b border-gray-600'>
-        <h2 className='flex-1 font-bold text-primary-on-primary text-center text-xl sm:text-2xl truncate'>
+    <div ref={containerRef} className='flex flex-col w-full h-[500px] ssm:h-[700px] bg-[#0A0C16] border border-white/10'>
+      <div className='flex items-center justify-between p-4 bg-[#0A0C16] border-b border-white/10'>
+        <h2 className='flex-1 font-bold text-fg-default text-center text-xl sm:text-2xl truncate'>
           {title}
         </h2>
         <div className='flex items-center space-x-2'>
@@ -102,22 +102,22 @@ export const PdfReader: FC<{
               document.body.removeChild(link);
             }}
             aria-label='download'
-            className='text-primary-on-primary bg-transparent rounded-full hover:bg-gray-300/20 transition-colors p-2'
+            className='text-fg-text hover:text-fg-default bg-transparent rounded-full hover:bg-white/[0.08] transition-colors p-2'
           >
             <IoMdDownload className='w-6 h-6' />
           </button>
           <button
             aria-label='close'
             onClick={() => setOpen(false)}
-            className='text-primary-on-primary bg-transparent rounded-full hover:bg-gray-300/20 transition-colors p-2'
+            className='text-fg-text hover:text-fg-default bg-transparent rounded-full hover:bg-white/[0.08] transition-colors p-2'
           >
             <IoMdClose className='w-6 h-6' />
           </button>
         </div>
       </div>
-      <div className='flex-1 overflow-auto p-4 bg-primary-solid flex flex-col items-center'>
+      <div className='flex-1 overflow-auto p-4 bg-[#0A0C16] flex flex-col items-center'>
         {error ? (
-          <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative' role='alert'>
+          <div className='bg-[#FF6369]/15 border border-[#FF6369]/30 text-[#FF8A8F] px-4 py-3 rounded relative' role='alert'>
             <strong className='font-bold'>Error!</strong>
             <span className='block sm:inline'> {error}</span>
           </div>

@@ -25,24 +25,24 @@ export default function NewClassPage() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/dashboard' className='text-black'>
+              <Link href='/dashboard' className='text-fg-text'>
                 Dashboard
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className='text-black'>All Classes</BreadcrumbPage>
+            <BreadcrumbPage className='text-fg-default'>All Classes</BreadcrumbPage>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className='text-black'>New Class</BreadcrumbPage>
+            <BreadcrumbPage className='text-fg-default'>New Class</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className='mt-4'>
-        <h1 className='mb-6 text-2xl font-semibold text-black'>
+        <h1 className='mb-6 text-2xl font-semibold text-fg-default'>
           Add new class to the student performance management system
         </h1>
         <AddClassForm />

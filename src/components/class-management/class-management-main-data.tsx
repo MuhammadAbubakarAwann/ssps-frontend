@@ -195,10 +195,10 @@ export function ClassManagementMainData() {
       <div className='max-w-7xl mx-auto'>
           <div className='mb-8 flex justify-between items-start'>
             <div>
-              <h1 className='text-3xl font-bold text-slate-900 mb-2'>
+              <h1 className='text-3xl font-bold text-fg-default mb-2'>
                 Manage classes to predict data for all classes
               </h1>
-              <p className='text-slate-600'>Monitor and manage student performance across all classes</p>
+              <p className='text-fg-text'>Monitor and manage student performance across all classes</p>
             </div>
             <Button
               className='gap-2 '
@@ -215,18 +215,18 @@ export function ClassManagementMainData() {
           {isLoading ? (
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 animate-pulse'>
               {[0, 1, 2, 3].map((index) => (
-                <div key={index} className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'>
-                  <div className='h-5 w-40 rounded-full bg-gray-200' />
-                  <div className='h-4 w-32 rounded-full bg-gray-200' />
-                  <div className='h-3 w-full rounded-full bg-gray-200' />
-                  <div className='h-3 w-5/6 rounded-full bg-gray-200' />
+                <div key={index} className='glass-card p-5 space-y-3'>
+                  <div className='h-5 w-40 rounded-full bg-white/[0.06]' />
+                  <div className='h-4 w-32 rounded-full bg-white/[0.06]' />
+                  <div className='h-3 w-full rounded-full bg-white/[0.06]' />
+                  <div className='h-3 w-5/6 rounded-full bg-white/[0.06]' />
                 </div>
               ))}
             </div>
           ) : errorMessage ? (
-            <div className='py-8 text-center text-red-500'>{errorMessage}</div>
+            <div className='py-8 text-center text-[#FF8A8F]'>{errorMessage}</div>
           ) : classes.length === 0 ? (
-            <div className='py-8 text-center text-slate-600'>No classes found.</div>
+            <div className='py-8 text-center text-fg-text'>No classes found.</div>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6'>
               {classes.map((classItem) => (

@@ -120,12 +120,12 @@ export const StudentSelectionModal = ({
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <h2 className='m-0 text-[18px] font-semibold text-black'>
+          <h2 className='m-0 text-[18px] font-semibold text-fg-default'>
             Select Student
           </h2>
           <button
             onClick={onClose}
-            className='cursor-pointer border-none bg-transparent text-2xl text-black'
+            className='cursor-pointer border-none bg-transparent text-2xl text-fg-default'
           >
             ✕
           </button>
@@ -134,9 +134,9 @@ export const StudentSelectionModal = ({
         {isLoading && (
           <div className={styles.loadingState}>
             <div className='w-full animate-pulse space-y-3'>
-              <div className='h-4 w-36 rounded-full bg-gray-200' />
+              <div className='h-4 w-36 rounded-full bg-white/[0.06]' />
               {[0, 1, 2, 3].map((index) => (
-                <div key={index} className='h-10 rounded-md bg-gray-100' />
+                <div key={index} className='h-10 rounded-md bg-white/[0.06]' />
               ))}
             </div>
           </div>
@@ -144,7 +144,7 @@ export const StudentSelectionModal = ({
 
         {error && (
           <div className={styles.errorState}>
-            <p className='text-[#d32f2f]'>{error}</p>
+            <p className='text-[#FF8A8F]'>{error}</p>
           </div>
         )}
 

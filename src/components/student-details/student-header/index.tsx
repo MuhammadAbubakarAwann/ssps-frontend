@@ -130,33 +130,33 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
 
   if (isLoading)
     return (
-      <div className='relative rounded-[20px] border border-black/30 bg-white p-9 shadow-[1px_1px_3px_rgba(0,0,0,0.25),-1px_-1px_3px_rgba(0,0,0,0.25)] animate-pulse'>
+      <div className='relative rounded-[20px] glass-card p-9 animate-pulse'>
         <div className='mb-9 flex items-start gap-10'>
-          <div className='h-[150px] w-[117px] rounded-[20px] bg-gray-200' />
+          <div className='h-[150px] w-[117px] rounded-[20px] bg-white/[0.06]' />
 
           <div className='flex-1 space-y-4'>
-            <div className='h-7 w-64 rounded-full bg-gray-200' />
-            <div className='h-5 w-32 rounded-full bg-gray-200' />
-            <div className='h-8 w-28 rounded-full bg-gray-200' />
+            <div className='h-7 w-64 rounded-full bg-white/[0.06]' />
+            <div className='h-5 w-32 rounded-full bg-white/[0.06]' />
+            <div className='h-8 w-28 rounded-full bg-white/[0.06]' />
           </div>
 
           <div className='flex gap-5'>
             {[0, 1, 2, 3].map((index) => (
-              <div key={index} className='w-[190px] rounded-[20px] border border-black/20 bg-gray-50 p-4 text-center space-y-3'>
-                <div className='h-4 w-28 mx-auto rounded-full bg-gray-200' />
-                <div className='h-10 w-20 mx-auto rounded-full bg-gray-200' />
+              <div key={index} className='w-[190px] rounded-[20px] glass-card p-4 text-center space-y-3'>
+                <div className='h-4 w-28 mx-auto rounded-full bg-white/[0.06]' />
+                <div className='h-10 w-20 mx-auto rounded-full bg-white/[0.06]' />
               </div>
             ))}
           </div>
         </div>
 
-        <div className='my-6 border-t border-black/20'></div>
+        <div className='my-6 border-t border-white/10'></div>
 
         <div className='flex justify-start gap-6'>
           {[0, 1, 2].map((index) => (
             <div key={index} className='flex items-center gap-2.5'>
-              <div className='h-6 w-6 rounded-full bg-gray-200' />
-              <div className='h-4 w-44 rounded-full bg-gray-200' />
+              <div className='h-6 w-6 rounded-full bg-white/[0.06]' />
+              <div className='h-4 w-44 rounded-full bg-white/[0.06]' />
             </div>
           ))}
         </div>
@@ -165,8 +165,8 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
 
   if (error || !studentData)
     return (
-      <div className='relative rounded-[20px] border border-black/30 bg-white p-9 shadow-[1px_1px_3px_rgba(0,0,0,0.25),-1px_-1px_3px_rgba(0,0,0,0.25)]'>
-        <div className='py-12 text-center text-red-600'>{error || 'Failed to load student details'}</div>
+      <div className='relative rounded-[20px] glass-card p-9'>
+        <div className='py-12 text-center text-[#FF8A8F]'>{error || 'Failed to load student details'}</div>
       </div>
     );
 
@@ -181,23 +181,23 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
   const classRank = Number(studentData.classRank ?? 0);
 
   return (
-    <div className='relative rounded-[20px] border  bg-white p-9 border-gray-300'>
+    <div className='relative rounded-[20px] glass-card p-9'>
       {/* Student Avatar and Info */}
       <div className='mb-9 flex items-start gap-10'>
         {/* Avatar */}
-        <div className='flex h-[150px] w-[117px] items-center justify-center rounded-[20px] bg-gradient-to-r from-[#0065C4] to-[#00BEE9] text-[32px] font-bold text-white'>
+        <div className='flex h-[150px] w-[117px] items-center justify-center rounded-[20px] bg-gradient-to-br from-glow-blue to-glow-cyan text-[32px] font-bold text-[#04050A]'>
           {initials}
         </div>
 
         {/* Student Info */}
         <div className='flex-1'>
-          <h2 className='mb-2 text-2xl font-bold text-black'>
+          <h2 className='mb-2 text-2xl font-bold text-fg-default'>
             {studentData.name}
           </h2>
-          <p className='mb-4 text-base text-black/70'>
+          <p className='mb-4 text-base text-fg-text'>
             {studentData.regNo}
           </p>
-          <div className='inline-block rounded-[25px] border-[1.5px] border-[#995200] bg-[rgba(217,102,20,0.44)] px-[10px] py-[5px] text-base font-bold text-[#995200]'>
+          <div className='inline-block rounded-[25px] border-[1.5px] border-[#FFA30C]/40 bg-[#FFD166]/15 px-[10px] py-[5px] text-base font-bold text-[#FFA30C]'>
             {studentData.overallRiskLevel}
           </div>
         </div>
@@ -205,43 +205,43 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
         {/* Metrics Cards */}
         <div className='flex gap-5'>
           {/* Expected GPA */}
-          <div className='w-[190px] rounded-[20px] border border-black/30 bg-white p-4 pb-12 text-center'>
-            <p className='mb-2 text-[18px] font-semibold text-black/45'>
+          <div className='w-[190px] rounded-[20px] glass-card p-4 pb-12 text-center'>
+            <p className='mb-2 text-[18px] font-semibold text-fg-text'>
               EXPECTED GPA
             </p>
             <div className='flex items-baseline justify-center gap-2'>
-              <span className='text-[32px] font-semibold text-black'>
+              <span className='text-[32px] font-semibold text-fg-default'>
                 {Number.isFinite(expectedCgpa) ? expectedCgpa.toFixed(2) : '0.00'}
               </span>
             </div>
           </div>
 
           {/* Attendance */}
-          <div className='w-[190px] rounded-[20px] border border-black/30 bg-white p-4 text-center'>
-            <p className='mb-2 text-[18px] font-semibold text-black/45'>
+          <div className='w-[190px] rounded-[20px] glass-card p-4 text-center'>
+            <p className='mb-2 text-[18px] font-semibold text-fg-text'>
               ATTENDANCE
             </p>
-            <p className='text-[32px] font-semibold text-black'>
+            <p className='text-[32px] font-semibold text-fg-default'>
               {attendance}%
             </p>
           </div>
 
           {/* Average Score */}
-          <div className='w-[190px] rounded-[20px] border border-black/30 bg-white p-4 text-center'>
-            <p className='mb-2 text-[18px] font-semibold text-black/45'>
+          <div className='w-[190px] rounded-[20px] glass-card p-4 text-center'>
+            <p className='mb-2 text-[18px] font-semibold text-fg-text'>
               AVERAGE SCORE
             </p>
-            <p className='text-[32px] font-semibold text-black'>
+            <p className='text-[32px] font-semibold text-fg-default'>
               {Number.isFinite(averageScore) ? averageScore.toFixed(1) : '0.0'}
             </p>
           </div>
 
           {/* Class Rank */}
-          <div className='w-[190px] rounded-[20px] border border-black/30 bg-white p-4 text-center'>
-            <p className='mb-2 text-[18px] font-semibold text-black/45'>
+          <div className='w-[190px] rounded-[20px] glass-card p-4 text-center'>
+            <p className='mb-2 text-[18px] font-semibold text-fg-text'>
               CLASS RANK
             </p>
-            <p className='text-[32px] font-semibold text-black'>
+            <p className='text-[32px] font-semibold text-fg-default'>
               {Number.isFinite(classRank) ? classRank : 0}
             </p>
           </div>
@@ -249,30 +249,30 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
       </div>
 
       {/* Divider */}
-      <div className='my-6 border-t border-black/30'></div>
+      <div className='my-6 border-t border-white/10'></div>
 
       {/* Contact Info */}
       <div className='flex justify-start gap-6'>
         {/* Email */}
         <div className='flex items-center gap-2.5'>
-          <Mail size={24} className='text-[#0084FF]' />
-          <span className='text-sm text-black/70'>
+          <Mail size={24} className='text-[#7FD0FF]' />
+          <span className='text-sm text-fg-text'>
             {studentData.email}
           </span>
         </div>
 
         {/* Phone */}
         <div className='flex items-center gap-2.5'>
-          <Phone size={24} className='text-[#0084FF]' />
-          <span className='text-sm text-black/70'>
+          <Phone size={24} className='text-[#7FD0FF]' />
+          <span className='text-sm text-fg-text'>
             {studentData.phoneNumber}
           </span>
         </div>
 
         {/* Location */}
         <div className='flex items-center gap-2.5'>
-          <MapPin size={24} className='text-[#0084FF]' />
-          <span className='text-sm text-black/70'>
+          <MapPin size={24} className='text-[#7FD0FF]' />
+          <span className='text-sm text-fg-text'>
             {studentData.address}
           </span>
         </div>

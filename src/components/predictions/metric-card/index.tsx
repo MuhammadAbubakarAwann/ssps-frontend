@@ -18,41 +18,19 @@ export function MetricCard({
   changeColor = '#447C00'
 }: MetricCardProps) {
   return (
-    <div
-      style={{
-        backgroundColor: '#FFFFFF',
-        border: '1px solid rgba(0, 0, 0, 0.18)',
-        borderRadius: '10px',
-        padding: '24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)'
-      }}
-    >
+    <div className='glass-card glass-card-hover flex items-start justify-between p-6 transition-all duration-300'>
       <div>
-        <p style={{ color: 'rgba(0, 0, 0, 0.7)', fontSize: '14px', marginBottom: '12px' }}>
+        <p className='mb-3 text-sm text-fg-text'>
           {title}
         </p>
-        <p style={{ color: '#000000', fontSize: '32px', fontWeight: '700', marginBottom: '8px' }}>
+        <p className='mb-2 text-[32px] font-bold text-fg-default'>
           {value}
         </p>
         <p style={{ color: changeColor, fontSize: '13px', fontWeight: '500' }}>
           {change} {changeText}
         </p>
       </div>
-      <div
-        style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.08)',
-          borderRadius: '50%',
-          width: '60px',
-          height: '60px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0
-        }}
-      >
+      <div className='flex h-[60px] w-[60px] flex-shrink-0 items-center justify-center rounded-full bg-white/[0.06]'>
         {icon}
       </div>
     </div>

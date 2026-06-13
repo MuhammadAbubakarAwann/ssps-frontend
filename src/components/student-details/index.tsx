@@ -233,74 +233,74 @@ export function StudentDetailsMainData() {
   ];
 
   const loadingSkeleton = (
-    <div className='min-h-screen bg-[#F1F1F1] p-6'>
+    <div className='p-6'>
       <div className='mx-auto max-w-[1200px] space-y-6 animate-pulse'>
-        <div className='h-4 w-40 rounded-full bg-gray-200' />
-        <div className='h-6 w-2/3 rounded-full bg-gray-200' />
+        <div className='h-4 w-40 rounded-full bg-white/[0.06]' />
+        <div className='h-6 w-2/3 rounded-full bg-white/[0.06]' />
 
         <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-          <div className='h-10 rounded-[7px] border border-gray-200 bg-gray-100' />
-          <div className='h-10 rounded-[7px] border border-gray-200 bg-gray-100' />
+          <div className='h-10 rounded-[7px] glass-card' />
+          <div className='h-10 rounded-[7px] glass-card' />
         </div>
 
-        <div className='relative rounded-[20px] border border-black/20 bg-white p-9'>
+        <div className='relative rounded-[20px] glass-card p-9'>
           <div className='mb-9 flex items-start gap-10'>
-            <div className='h-[150px] w-[117px] rounded-[20px] bg-gray-200' />
+            <div className='h-[150px] w-[117px] rounded-[20px] bg-white/[0.06]' />
 
             <div className='flex-1 space-y-4'>
-              <div className='h-7 w-64 rounded-full bg-gray-200' />
-              <div className='h-5 w-32 rounded-full bg-gray-200' />
-              <div className='h-8 w-28 rounded-full bg-gray-200' />
+              <div className='h-7 w-64 rounded-full bg-white/[0.06]' />
+              <div className='h-5 w-32 rounded-full bg-white/[0.06]' />
+              <div className='h-8 w-28 rounded-full bg-white/[0.06]' />
             </div>
 
             <div className='flex gap-5'>
               {[0, 1, 2, 3].map((index) => (
-                <div key={index} className='w-[190px] rounded-[20px] border border-black/20 bg-gray-50 p-4 text-center space-y-3'>
-                  <div className='h-4 w-28 mx-auto rounded-full bg-gray-200' />
-                  <div className='h-10 w-20 mx-auto rounded-full bg-gray-200' />
+                <div key={index} className='w-[190px] rounded-[20px] glass-card p-4 text-center space-y-3'>
+                  <div className='h-4 w-28 mx-auto rounded-full bg-white/[0.06]' />
+                  <div className='h-10 w-20 mx-auto rounded-full bg-white/[0.06]' />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className='my-6 border-t border-black/20'></div>
+          <div className='my-6 border-t border-white/10'></div>
 
           <div className='flex justify-start gap-6'>
             {[0, 1, 2].map((index) => (
               <div key={index} className='flex items-center gap-2.5'>
-                <div className='h-6 w-6 rounded-full bg-gray-200' />
-                <div className='h-4 w-44 rounded-full bg-gray-200' />
+                <div className='h-6 w-6 rounded-full bg-white/[0.06]' />
+                <div className='h-4 w-44 rounded-full bg-white/[0.06]' />
               </div>
             ))}
           </div>
         </div>
 
         <div className='flex flex-col gap-4'>
-          <div className='flex gap-5 border-b border-black/20 pb-3'>
+          <div className='flex gap-5 border-b border-white/10 pb-3'>
             {[0, 1, 2, 3].map((index) => (
-              <div key={index} className='h-5 w-28 rounded-full bg-gray-200' />
+              <div key={index} className='h-5 w-28 rounded-full bg-white/[0.06]' />
             ))}
           </div>
 
           <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-            <div className='rounded-[20px] border border-black/20 bg-white p-6 space-y-4'>
-              <div className='h-5 w-48 rounded-full bg-gray-200' />
+            <div className='rounded-[20px] glass-card p-6 space-y-4'>
+              <div className='h-5 w-48 rounded-full bg-white/[0.06]' />
               {[0, 1, 2, 3].map((index) => (
-                <div key={index} className='space-y-3 rounded-xl border border-gray-200 p-4'>
-                  <div className='h-4 w-36 rounded-full bg-gray-200' />
-                  <div className='h-2 w-full rounded-full bg-gray-200' />
-                  <div className='h-3 w-24 rounded-full bg-gray-200' />
+                <div key={index} className='space-y-3 rounded-xl border border-white/5 p-4'>
+                  <div className='h-4 w-36 rounded-full bg-white/[0.06]' />
+                  <div className='h-2 w-full rounded-full bg-white/[0.06]' />
+                  <div className='h-3 w-24 rounded-full bg-white/[0.06]' />
                 </div>
               ))}
             </div>
 
-            <div className='rounded-[20px] border border-black/20 bg-white p-6 space-y-4'>
-              <div className='h-5 w-40 rounded-full bg-gray-200' />
+            <div className='rounded-[20px] glass-card p-6 space-y-4'>
+              <div className='h-5 w-40 rounded-full bg-white/[0.06]' />
               {[0, 1, 2, 3].map((index) => (
-                <div key={index} className='space-y-3 rounded-xl border border-gray-200 p-4'>
-                  <div className='h-4 w-40 rounded-full bg-gray-200' />
-                  <div className='h-4 w-3/4 rounded-full bg-gray-200' />
-                  <div className='h-3 w-32 rounded-full bg-gray-200' />
+                <div key={index} className='space-y-3 rounded-xl border border-white/5 p-4'>
+                  <div className='h-4 w-40 rounded-full bg-white/[0.06]' />
+                  <div className='h-4 w-3/4 rounded-full bg-white/[0.06]' />
+                  <div className='h-3 w-32 rounded-full bg-white/[0.06]' />
                 </div>
               ))}
             </div>
@@ -314,22 +314,22 @@ export function StudentDetailsMainData() {
     return loadingSkeleton;
 
   if (selectionError)
-    return <div className='p-6 text-red-600'>{selectionError}</div>;
+    return <div className='p-6 text-[#FF8A8F]'>{selectionError}</div>;
 
   if (isInitializingSelection)
     return loadingSkeleton;
 
   if (!isStudentRole && !resolvedStudentId)
-    return <div className='p-6 text-red-600'>Please select a student to continue.</div>;
+    return <div className='p-6 text-[#FF8A8F]'>Please select a student to continue.</div>;
 
   return (
     <>
       {!isStudentRole && (
         <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-2'>
           <div>
-            <label className='mb-2 block text-sm font-medium text-black'>Select Class</label>
+            <label className='mb-2 block text-sm font-medium text-fg-default'>Select Class</label>
             <select
-              className='h-10 w-full rounded-[7px] border border-black/30 bg-white px-3 text-sm text-black outline-none'
+              className='h-10 w-full rounded-[7px] bg-white/[0.03] border border-white/10 px-3 text-sm text-fg-default placeholder:text-fg-text outline-none focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20'
               value={selectedClassId}
               onChange={(event) => {
                 setSelectedClassId(event.target.value);
@@ -347,9 +347,9 @@ export function StudentDetailsMainData() {
           </div>
 
           <div>
-            <label className='mb-2 block text-sm font-medium text-black'>Select Student</label>
+            <label className='mb-2 block text-sm font-medium text-fg-default'>Select Student</label>
             <select
-              className='h-10 w-full rounded-[7px] border border-black/30 bg-white px-3 text-sm text-black outline-none'
+              className='h-10 w-full rounded-[7px] bg-white/[0.03] border border-white/10 px-3 text-sm text-fg-default placeholder:text-fg-text outline-none focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20'
               value={selectedStudentId}
               onChange={(event) => setSelectedStudentId(event.target.value)}
               disabled={!selectedClassId || isLoadingStudents}

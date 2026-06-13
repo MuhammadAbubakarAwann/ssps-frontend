@@ -198,69 +198,39 @@ export function PredictionHistoryCard({ prediction, shouldAutoOpen = false, onAu
     <>
       <div
         onClick={handleOpenResults}
-        style={{
-          backgroundColor: '#FFFFFF',
-          border: '1px solid rgba(0, 0, 0, 0.18)',
-          borderRadius: '10px',
-          padding: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease'
-        }}
+        className='glass-card glass-card-hover flex flex-col p-6 cursor-pointer transition-all duration-300'
       >
         {/* Header with Status and Date */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <span
-            style={{
-              backgroundColor: 'rgba(74, 144, 226, 0.2)',
-              color: '#2563EB',
-              padding: '4px 12px',
-              borderRadius: '5px',
-              fontSize: '12px',
-              fontWeight: '600'
-            }}
-          >
+        <div className='mb-4 flex items-center justify-between'>
+          <span className='rounded-[5px] bg-[#4FA6F8]/15 px-3 py-1 text-xs font-semibold text-[#7FD0FF]'>
             {prediction.status}
           </span>
-          <span style={{ color: 'rgba(0, 0, 0, 0.5)', fontSize: '12px' }}>
+          <span className='text-xs text-fg-text'>
             {prediction.date}
           </span>
         </div>
 
         {/* Class Name */}
-        <h3 style={{ color: '#000000', fontSize: '20px', fontWeight: '600', marginBottom: '8px' }}>
+        <h3 className='mb-2 text-xl font-semibold text-fg-default'>
           {prediction.className}
         </h3>
 
         {/* Students Analyzed */}
-        <p style={{ color: 'rgba(0, 0, 0, 0.58)', fontSize: '13px', marginBottom: '24px' }}>
+        <p className='mb-6 text-[13px] text-fg-text'>
           {prediction.studentsAnalyzed} Students analyzed
         </p>
 
         {/* Avg Score and Icon */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div className='flex items-end justify-between'>
           <div>
-            <p style={{ color: 'rgba(0, 0, 0, 0.58)', fontSize: '12px', marginBottom: '4px' }}>
+            <p className='mb-1 text-xs text-fg-text'>
               Avg Score
             </p>
-            <p style={{ color: '#000000', fontSize: '28px', fontWeight: '700' }}>
+            <p className='text-[28px] font-bold text-fg-default'>
               {prediction.avgScore}
             </p>
           </div>
-          <div
-            style={{
-              border: '2px solid #10B981',
-              borderRadius: '50%',
-              width: '50px',
-              height: '50px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}
-          >
+          <div className='flex h-[50px] w-[50px] flex-shrink-0 items-center justify-center rounded-full border-2 border-[#10B981]'>
             <FiTrendingUp size={24} style={{ color: '#10B981' }} />
           </div>
         </div>

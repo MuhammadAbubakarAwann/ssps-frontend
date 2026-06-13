@@ -578,44 +578,44 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
   if (isLoading)
     return (
       <div className='animate-pulse space-y-5'>
-        <div className='rounded-[10px] border border-gray-200 bg-white p-5 space-y-4'>
-          <div className='h-5 w-36 rounded-full bg-gray-200' />
+        <div className='glass-card p-5 space-y-4'>
+          <div className='h-5 w-36 rounded-full bg-white/[0.06]' />
           <div className='grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4'>
             {[0, 1, 2, 3].map((index) => (
               <div key={index} className='space-y-2'>
-                <div className='h-4 w-24 rounded-full bg-gray-200' />
-                <div className='h-10 rounded-md bg-gray-200' />
+                <div className='h-4 w-24 rounded-full bg-white/[0.06]' />
+                <div className='h-10 rounded-md bg-white/[0.06]' />
               </div>
             ))}
           </div>
         </div>
 
-        <div className='rounded-[10px] border border-gray-200 bg-white p-5 space-y-3'>
-          <div className='h-5 w-48 rounded-full bg-gray-200' />
+        <div className='glass-card p-5 space-y-3'>
+          <div className='h-5 w-48 rounded-full bg-white/[0.06]' />
           {[0, 1, 2, 3, 4].map((index) => (
-            <div key={index} className='h-9 rounded-md bg-gray-100' />
+            <div key={index} className='h-9 rounded-md bg-white/[0.06]' />
           ))}
         </div>
       </div>
     );
 
   return (
-    <div className='w-full' style={{ backgroundColor: '#FFFFFF', borderRadius: '10px', border: '1px solid rgba(0, 0, 0, 0.18)' }}>
+    <div className='w-full glass-card'>
       <div className='p-6'>
         {/* Class Details Section */}
-        <div className='mb-6' style={{ border: '1px solid rgba(0, 0, 0, 0.2)', borderRadius: '10px', padding: '20px', backgroundColor: '#FCFCFC' }}>
-          <p className='text-[16px] font-semibold mb-4' style={{ color: '#000000' }}>
+        <div className='mb-6 rounded-[10px] border border-white/10 bg-white/[0.02] p-5'>
+          <p className='text-[16px] font-semibold mb-4 text-fg-default'>
             Class Details
           </p>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3'>
             {/* Class Name */}
             <div className='flex flex-col gap-1.5'>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Class (Program)</label>
+              <label className='block text-sm font-medium text-fg-text'>Class (Program)</label>
               <select
                 name='name'
                 value={classData.name}
                 onChange={handleClassInputChange}
-                className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30'
+                className='h-10 w-full rounded-[5px] border border-white/10 bg-white/[0.03] px-3 text-[14px] text-fg-default outline-none focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20'
               >
                 <option value=''>Select class</option>
                 {classNameOptions?.length > 0 ? (
@@ -632,12 +632,12 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
 
             {/* Semester */}
             <div className='flex flex-col gap-1.5'>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Semester</label>
+              <label className='block text-sm font-medium text-fg-text'>Semester</label>
               <select
                 name='semester'
                 value={classData.semester}
                 onChange={handleClassInputChange}
-                className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30'
+                className='h-10 w-full rounded-[5px] border border-white/10 bg-white/[0.03] px-3 text-[14px] text-fg-default outline-none focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20'
               >
                 <option value=''>Select semester</option>
                 {withExistingValue(semesterOptions.map((option) => option.value), classData.semester).map((semesterValue) => {
@@ -653,13 +653,13 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
 
             {/* Subject */}
             <div className='flex flex-col gap-1.5'>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Subject (Course)</label>
+              <label className='block text-sm font-medium text-fg-text'>Subject (Course)</label>
               <select
                 name='subject'
                 value={classData.courseCatalogId}
                 onChange={handleClassInputChange}
                 disabled={!classData.name || !classData.semester || loadingSubjects}
-                className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30 disabled:bg-gray-100 disabled:text-gray-400'
+                className='h-10 w-full rounded-[5px] border border-white/10 bg-white/[0.03] px-3 text-[14px] text-fg-default outline-none focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20 disabled:bg-white/[0.01] disabled:text-fg-text/50'
               >
                 <option value=''>
                   {loadingSubjects ? 'Loading subjects...' : 'Select subject'}
@@ -682,12 +682,12 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
 
             {/* Section */}
             <div className='flex flex-col gap-1.5'>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Section</label>
+              <label className='block text-sm font-medium text-fg-text'>Section</label>
               <select
                 name='section'
                 value={classData.section}
                 onChange={handleClassInputChange}
-                className='h-10 w-full rounded-[5px] border border-black/20 bg-white px-3 text-[14px] text-black outline-none focus-visible:ring-1 focus-visible:ring-black/30'
+                className='h-10 w-full rounded-[5px] border border-white/10 bg-white/[0.03] px-3 text-[14px] text-fg-default outline-none focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20'
               >
                 <option value=''>Select section</option>
                 {withExistingValue(sectionOptions, classData.section).map((option) => (
@@ -699,51 +699,41 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
         </div>
 
         {/* Manual Entry Section */}
-        <div style={{ border: '1px solid rgba(0, 0, 0, 0.2)', borderRadius: '10px', padding: '24px', backgroundColor: '#FCFCFC' }}>
-         
+        <div className='rounded-[10px] border border-white/10 bg-white/[0.02] p-6'>
+
           {/* All Fields in One Row */}
           <div className='mb-5'>
             <div className='flex gap-2 flex-nowrap items-end w-full min-w-0 pb-1'>
             {/* Name Field */}
             <div className='flex flex-col gap-1.5 min-w-0' style={{ flex: '2 1 220px' }}>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Name</label>
+              <label className='block text-sm font-medium text-fg-text'>Name</label>
               <Input
                 type='text'
                 name='name'
                 placeholder='Enter Student name...'
                 value={formData.name}
                 onChange={handleInputChange}
-                className='h-10 w-full min-w-0 bg-white placeholder:text-gray-300 focus-visible:ring-1 focus-visible:ring-black/30 focus-visible:ring-offset-0'
-                style={{
-                  borderRadius: '5px',
-                  border: '1px solid rgba(0, 0, 0, 0.2)',
-                  fontSize: '14px'
-                }}
+                className='h-10 w-full min-w-0 rounded-[5px] border border-white/10 bg-white/[0.03] text-[14px] text-fg-default placeholder:text-fg-text focus-visible:ring-2 focus-visible:ring-[#4FA6F8]/20 focus-visible:ring-offset-0 focus-visible:border-[#4FA6F8]/50'
               />
             </div>
 
             {/* Reg-No Field */}
             <div className='flex flex-col gap-1.5 min-w-0' style={{ flex: '1.1 1 160px' }}>
-              <label className='block text-sm font-medium' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>Reg-No</label>
+              <label className='block text-sm font-medium text-fg-text'>Reg-No</label>
               <Input
                 type='text'
                 name='regNo'
                 placeholder='Enter Reg-No..'
                 value={formData.regNo}
                 onChange={handleInputChange}
-                className='h-10 w-full min-w-0 bg-white placeholder:text-gray-300 focus-visible:ring-1 focus-visible:ring-black/30 focus-visible:ring-offset-0'
-                style={{
-                  borderRadius: '5px',
-                  border: '1px solid rgba(0, 0, 0, 0.2)',
-                  fontSize: '14px'
-                }}
+                className='h-10 w-full min-w-0 rounded-[5px] border border-white/10 bg-white/[0.03] text-[14px] text-fg-default placeholder:text-fg-text focus-visible:ring-2 focus-visible:ring-[#4FA6F8]/20 focus-visible:ring-offset-0 focus-visible:border-[#4FA6F8]/50'
               />
             </div>
 
             {/* All Grade Fields */}
             {['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'A1', 'A2', 'A3', 'A4', 'A5', 'Mids', 'Att'].map(field => (
               <div key={field} className='flex flex-col gap-1.5 min-w-0' style={{ flex: '0.55 1 56px' }}>
-                <label className='block text-sm font-medium leading-none text-center' style={{ color: 'rgba(0, 0, 0, 0.75)' }}>
+                <label className='block text-sm font-medium leading-none text-center text-fg-text'>
                   {field}
                 </label>
                 <Input
@@ -752,12 +742,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                   placeholder='-'
                   value={formData[field === 'Mids' ? 'mids' : field === 'Att' ? 'att' : field as keyof typeof formData] || ''}
                   onChange={handleInputChange}
-                  className='h-10 w-full min-w-0 bg-white placeholder:text-gray-300 text-center px-1 focus-visible:ring-1 focus-visible:ring-black/30 focus-visible:ring-offset-0'
-                  style={{
-                    borderRadius: '5px',
-                    border: '1px solid rgba(0, 0, 0, 0.2)',
-                    fontSize: '14px'
-                  }}
+                  className='h-10 w-full min-w-0 rounded-[5px] border border-white/10 bg-white/[0.03] text-center px-1 text-[14px] text-fg-default placeholder:text-fg-text focus-visible:ring-2 focus-visible:ring-[#4FA6F8]/20 focus-visible:ring-offset-0 focus-visible:border-[#4FA6F8]/50'
                 />
               </div>
             ))}
@@ -765,23 +750,15 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
           </div>
 
           {/* Add Button */}
-          <div style={{ borderTop: '1px solid rgba(0, 0, 0, 0.24)' }}>
+          <div className='border-t border-white/10'>
             <Button
               onClick={handleAddStudent}
-              className='w-full gap-2 text-center h-10 px-6'
+              className='w-full gap-2 text-center h-10 px-6 mt-4'
               variant='outline'
               color='primary'
               size='medium'
-              style={{
-                border: '1px solid #2A313B',
-               
-                borderRadius: '5px',
-                fontSize: '15px',
-                fontWeight: '600',
-                letterSpacing: '0.01em'
-              }}
             >
-              <Plus className='w-4 h-4 !text-white' />
+              <Plus className='w-4 h-4' />
               Add Student
             </Button>
           </div>
@@ -789,26 +766,15 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
 
         {/* OR Divider */}
         <div className='flex items-center justify-center my-6 gap-4'>
-          <div className='flex-1' style={{ borderTop: '1px solid rgba(0, 0, 0, 0.1)' }}></div>
-          <span style={{ color: '#000000', fontWeight: '600', fontSize: '16px' }}>OR</span>
-          <div className='flex-1' style={{ borderTop: '1px solid rgba(0, 0, 0, 0.1)' }}></div>
+          <div className='flex-1 border-t border-white/10'></div>
+          <span className='text-fg-default font-semibold text-[16px]'>OR</span>
+          <div className='flex-1 border-t border-white/10'></div>
         </div>
 
         {/* File Upload Section */}
         <div className='mb-6'>
           <label htmlFor='file-upload' className='block cursor-pointer'>
-            <div
-              style={{
-               backgroundColor: '#2A313B',
-                color: '#FFFFFF',
-                borderRadius: '5px',
-                padding: '10px 24px',
-                textAlign: 'center',
-                fontWeight: '500',
-                fontSize: '16px'
-              }}
-              className='flex items-center justify-center gap-2'
-            >
+            <div className='flex items-center justify-center gap-2 rounded-[5px] bg-white/[0.05] hover:bg-white/[0.08] text-fg-default text-center font-medium text-[16px] px-6 py-2.5 border border-white/10 transition-colors'>
               <Upload className='w-5 h-5' />
               Upload Excel Sheet or CSV file
             </div>
@@ -824,9 +790,9 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
 
         {/* Students Table */}
         {students.length > 0 && (
-          <div style={{ border: '1px solid rgba(0, 0, 0, 0.18)', borderRadius: '10px', marginTop: '24px', overflow: 'hidden' }}>
+          <div className='rounded-[10px] border border-white/10 overflow-hidden' style={{ marginTop: '24px' }}>
             <table
-              className='w-full table-fixed text-sm [&_th]:border-r [&_th]:border-[rgba(0,0,0,0.17)] [&_td]:border-r [&_td]:border-[rgba(0,0,0,0.17)] [&_th:last-child]:border-r-0 [&_td:last-child]:border-r-0'
+              className='w-full table-fixed text-sm [&_th]:border-r [&_th]:border-white/5 [&_td]:border-r [&_td]:border-white/5 [&_th:last-child]:border-r-0 [&_td:last-child]:border-r-0'
               style={{ borderCollapse: 'collapse', tableLayout: 'fixed', width: '100%' }}
             >
               <colgroup>
@@ -848,38 +814,38 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                 <col style={{ width: '4%' }} />
                 <col style={{ width: '10%' }} />
               </colgroup>
-              <thead style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.5)' }}>
+              <thead className='border-b border-white/10'>
                 <tr>
-                  <th className='text-left px-2 py-2 text-[14px] font-normal' style={{ color: '#000000', whiteSpace: 'nowrap' }}>#</th>
-                  <th className='text-left px-2 py-2 text-[14px] font-normal' style={{ color: '#000000', whiteSpace: 'nowrap' }}>Reg-No</th>
-                  <th className='text-left px-2 py-2 text-[14px] font-normal' style={{ color: '#000000', whiteSpace: 'nowrap' }}>Name</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>Q1</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>Q2</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>Q3</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>Q4</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>Q5</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>Q6</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>A1</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>A2</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>A3</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>A4</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>A5</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>Mids</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000' }}>Att</th>
-                  <th className='text-center px-1 py-2 text-[14px] font-normal' style={{ color: '#000000', whiteSpace: 'nowrap' }}>Actions</th>
+                  <th className='text-left px-2 py-2 text-[14px] font-normal text-fg-text' style={{ whiteSpace: 'nowrap' }}>#</th>
+                  <th className='text-left px-2 py-2 text-[14px] font-normal text-fg-text' style={{ whiteSpace: 'nowrap' }}>Reg-No</th>
+                  <th className='text-left px-2 py-2 text-[14px] font-normal text-fg-text' style={{ whiteSpace: 'nowrap' }}>Name</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>Q1</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>Q2</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>Q3</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>Q4</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>Q5</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>Q6</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>A1</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>A2</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>A3</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>A4</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>A5</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>Mids</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text'>Att</th>
+                  <th className='text-center px-1 py-2 text-[14px] font-normal text-fg-text' style={{ whiteSpace: 'nowrap' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {students.map((student, index) => {
                   const isEditing = editingRowId === student.id;
                   return (
-                    <tr key={student.id} style={{ 
-                      borderBottom: '1px solid rgba(0, 0, 0, 0.17)', 
-                      height: '22px',
-                      backgroundColor: isEditing ? 'rgba(76, 175, 80, 0.15)' : 'transparent'
-                    }}>
-                      <td className='text-left px-2 py-1 text-[14px]' style={{ color: 'rgba(0, 0, 0, 0.5)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{index + 1}</td>
-                      <td className='text-left px-2 py-1 text-[14px]' style={{ color: 'rgba(0, 0, 0, 0.5)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <tr
+                      key={student.id}
+                      className={`border-b border-white/5 ${isEditing ? 'bg-[#12B76A]/15' : ''}`}
+                      style={{ height: '22px' }}
+                    >
+                      <td className='text-left px-2 py-1 text-[14px] text-fg-text' style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{index + 1}</td>
+                      <td className='text-left px-2 py-1 text-[14px] text-fg-text' style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {isEditing ? (
                           <input
                             type='text'
@@ -890,7 +856,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                               );
                               setStudents(updated);
                             }}
-                            style={{ 
+                            style={{
                               width: '100%',
                               display: 'block',
                               boxSizing: 'border-box',
@@ -902,7 +868,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                               fontSize: 'inherit',
                               lineHeight: 'inherit',
                               font: 'inherit',
-                              color: 'rgba(0, 0, 0, 0.5)',
+                              color: 'inherit',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis'
@@ -913,7 +879,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                           student.regNo
                         )}
                       </td>
-                      <td className='text-left px-2 py-1 text-[14px]' style={{ color: 'rgba(0, 0, 0, 0.5)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <td className='text-left px-2 py-1 text-[14px] text-fg-text' style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {isEditing ? (
                           <input
                             type='text'
@@ -924,7 +890,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                               );
                               setStudents(updated);
                             }}
-                            style={{ 
+                            style={{
                               width: '100%',
                               display: 'block',
                               boxSizing: 'border-box',
@@ -936,7 +902,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                               fontSize: 'inherit',
                               lineHeight: 'inherit',
                               font: 'inherit',
-                              color: 'rgba(0, 0, 0, 0.5)',
+                              color: 'inherit',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis'
@@ -947,7 +913,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                         )}
                       </td>
                       {['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'A1', 'A2', 'A3', 'A4', 'A5', 'mids', 'att'].map((field) => (
-                        <td key={field} className='text-center px-1 py-1 text-[14px]' style={{ color: 'rgba(0, 0, 0, 0.5)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <td key={field} className='text-center px-1 py-1 text-[14px] text-fg-text' style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {isEditing ? (
                             <input
                               type='text'
@@ -958,7 +924,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                                 );
                                 setStudents(updated);
                               }}
-                              style={{ 
+                              style={{
                                 width: '100%',
                                 display: 'block',
                                 boxSizing: 'border-box',
@@ -971,7 +937,7 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                                 lineHeight: 'inherit',
                                 font: 'inherit',
                                 textAlign: 'center',
-                                color: 'rgba(0, 0, 0, 0.5)',
+                                color: 'inherit',
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis'
@@ -990,27 +956,19 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                                 color='primary'
                                 size='icon'
                                 variant='ghost'
-                                className='w-6 h-6 p-0 rounded'
-                                style={{ 
-                                  backgroundColor: 'rgba(76, 175, 80, 0.4)',
-                                  borderRadius: '3px'
-                                }}
+                                className='w-6 h-6 p-0 rounded-[3px] bg-[#12B76A]/40 hover:bg-[#12B76A]/50'
                                 onClick={() => handleSaveRow(student.id)}
                               >
-                                <Check className='w-3.5 h-3.5' style={{ color: '#4CAF50' }} />
+                                <Check className='w-3.5 h-3.5 text-[#3DD68C]' />
                               </Button>
                               <Button
                                 color='primary'
                                 size='icon'
                                 variant='ghost'
-                                className='w-6 h-6 p-0 rounded'
-                                style={{ 
-                                  backgroundColor: 'rgba(244, 67, 54, 0.2)',
-                                  borderRadius: '3px'
-                                }}
+                                className='w-6 h-6 p-0 rounded-[3px] bg-[#FF6369]/20 hover:bg-[#FF6369]/30'
                                 onClick={handleCancelEdit}
                               >
-                                <XClose className='w-3.5 h-3.5' style={{ color: '#F44336' }} />
+                                <XClose className='w-3.5 h-3.5 text-[#FF8A8F]' />
                               </Button>
                             </>
                           ) : (
@@ -1019,27 +977,19 @@ export function AddClassForm({ editClassId }: AddClassFormProps) {
                                 color='primary'
                                 size='icon'
                                 variant='ghost'
-                                className='w-6 h-6 p-0 rounded'
-                                style={{ 
-                                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                  borderRadius: '3px'
-                                }}
+                                className='w-6 h-6 p-0 rounded-[3px] bg-white/[0.05] hover:bg-white/[0.08]'
                                 onClick={() => handleEditRow(student.id)}
                               >
-                                <Edit2 className='w-3.5 h-3.5' style={{ color: '#000000' }} />
+                                <Edit2 className='w-3.5 h-3.5 text-fg-default' />
                               </Button>
                               <Button
                                 color='primary'
                                 size='icon'
                                 variant='ghost'
-                                className='w-6 h-6 p-0 rounded'
-                                style={{ 
-                                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                  borderRadius: '3px'
-                                }}
+                                className='w-6 h-6 p-0 rounded-[3px] bg-white/[0.05] hover:bg-white/[0.08]'
                                 onClick={() => handleDeleteStudent(student.id)}
                               >
-                                <Trash2 className='w-3.5 h-3.5' style={{ color: '#000000' }} />
+                                <Trash2 className='w-3.5 h-3.5 text-fg-default' />
                               </Button>
                             </>
                           )}

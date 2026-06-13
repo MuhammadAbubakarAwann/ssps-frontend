@@ -25,21 +25,21 @@ export default function StudentDetailsPage() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/dashboard' className='text-black'>
+              <Link href='/dashboard' className='text-fg-text'>
                 Dashboard
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className='text-black'>
+            <BreadcrumbPage className='text-fg-default'>
               Student Details
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className='mt-4'>
-        <h1 className='mb-6 text-[20px] font-semibold text-black'>
+        <h1 className='mb-6 text-[20px] font-semibold text-fg-default'>
           See student detailed overview, performance, predictions and
           recommendations
         </h1>

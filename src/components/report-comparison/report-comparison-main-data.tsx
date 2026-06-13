@@ -294,40 +294,40 @@ export function ReportComparisonMainData() {
     };
   }, [selectedClassId, selectedStudent?.apiStudentId, selectedFirstHistory, selectedSecondHistory]);
 
-  if (isLoading) 
+  if (isLoading)
     return (
       <div className='mt-4 space-y-6 animate-pulse'>
-        <div className='h-8 w-2/3 rounded-full bg-gray-200' />
-        <div className='h-10 w-72 rounded-md bg-gray-200' />
-        <div className='rounded-xl border border-gray-200 bg-white p-5 space-y-4'>
+        <div className='h-8 w-2/3 rounded-full bg-white/[0.06]' />
+        <div className='h-10 w-72 rounded-md bg-white/[0.06]' />
+        <div className='glass-card p-5 space-y-4'>
           {[0, 1, 2].map((index) => (
-            <div key={index} className='h-16 rounded-md bg-gray-100' />
+            <div key={index} className='h-16 rounded-md bg-white/[0.06]' />
           ))}
         </div>
       </div>
     );
-  
+
 
   return (
     <>
       <div className=''>
         {/* Page Title */}
-        <h1 className='mb-4 text-2xl font-semibold text-black'>
+        <h1 className='mb-4 text-2xl font-semibold text-fg-default'>
           Compare student predictions over time
         </h1>
 
         {/* Step 1: Class Selection */}
         <div className='mb-4'>
-          <label className='mb-2 block font-medium text-black'>
+          <label className='mb-2 block font-medium text-fg-default'>
             Step 1: Select Class
           </label>
           {classesLoading ? (
-            <div className='h-11 w-[300px] animate-pulse rounded-[7px] border border-gray-200 bg-gray-100' />
+            <div className='h-11 w-[300px] animate-pulse rounded-[7px] border border-white/10 bg-white/[0.06]' />
           ) : (
             <select
               value={selectedClassId}
               onChange={handleClassChange}
-              className={`min-w-[300px] cursor-pointer rounded-[7px] border border-black/40 bg-white p-2.5 text-base ${selectedClassId ? 'text-black' : 'text-black/50'}`}
+              className={`min-w-[300px] cursor-pointer rounded-[7px] border border-white/10 bg-white/[0.03] p-2.5 text-base focus:border-[#4FA6F8]/50 focus:ring-2 focus:ring-[#4FA6F8]/20 ${selectedClassId ? 'text-fg-default' : 'text-fg-text'}`}
             >
               <option value=''>Select Class</option>
               {classes.map((cls) => (
@@ -342,7 +342,7 @@ export function ReportComparisonMainData() {
         {/* Step 2: Student Selection Button */}
         {selectedClassId && (
           <div className='mb-4'>
-            <label className='mb-2 block font-medium text-black'>
+            <label className='mb-2 block font-medium text-fg-default'>
               Step 2: Select Student
             </label>
             <Button
@@ -360,7 +360,7 @@ export function ReportComparisonMainData() {
         {/* Step 3: Prediction History Timeline */}
         {selectedStudent?.apiStudentId && (
           <div className='mb-4'>
-            <label className='mb-2 block font-medium text-black'>
+            <label className='mb-2 block font-medium text-fg-default'>
               Step 3: Select Predictions to Compare
             </label>
             <PredictionHistoryTimeline
@@ -376,15 +376,15 @@ export function ReportComparisonMainData() {
             {comparisonLoading && (
               <div className='grid grid-cols-1 gap-4 lg:grid-cols-2 animate-pulse'>
                 {[0, 1].map((index) => (
-                  <div key={index} className='rounded-xl border border-gray-200 bg-white p-5 space-y-3'>
-                    <div className='h-5 w-40 rounded-full bg-gray-200' />
-                    <div className='h-4 w-28 rounded-full bg-gray-200' />
-                    <div className='h-24 rounded-md bg-gray-100' />
+                  <div key={index} className='glass-card p-5 space-y-3'>
+                    <div className='h-5 w-40 rounded-full bg-white/[0.06]' />
+                    <div className='h-4 w-28 rounded-full bg-white/[0.06]' />
+                    <div className='h-24 rounded-md bg-white/[0.06]' />
                   </div>
                 ))}
               </div>
             )}
-            {comparisonError && <div className='text-[#d32f2f]'>{comparisonError}</div>}
+            {comparisonError && <div className='text-[#FF8A8F]'>{comparisonError}</div>}
             {!comparisonLoading && !comparisonError && comparisonLeft && comparisonRight && (
               <ComparisonPanels leftPanel={comparisonLeft} rightPanel={comparisonRight} />
             )}

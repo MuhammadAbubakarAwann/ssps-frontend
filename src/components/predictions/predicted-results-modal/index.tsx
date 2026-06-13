@@ -33,52 +33,52 @@ interface PredictedResultsModalProps {
 const getRiskLevelColorClass = (riskLevel: 'Low' | 'Mid' | 'High') => {
   switch (riskLevel) {
     case 'Low':
-      return 'bg-[rgba(178,229,39,0.28)]';
+      return 'bg-[#12B76A]/15';
     case 'Mid':
-      return 'bg-[rgba(229,201,39,0.28)]';
+      return 'bg-[#FFD166]/15';
     case 'High':
-      return 'bg-[rgba(229,39,39,0.28)]';
+      return 'bg-[#FF6369]/15';
     default:
-      return 'bg-[rgba(178,229,39,0.28)]';
+      return 'bg-[#12B76A]/15';
   }
 };
 
 const getRiskLevelNumberClass = (riskLevel: 'Low' | 'Mid' | 'High') => {
   switch (riskLevel) {
     case 'Low':
-      return 'text-[#9DD35B]';
+      return 'text-[#3DD68C]';
     case 'Mid':
-      return 'text-[#D3BB5B]';
+      return 'text-[#FFA30C]';
     case 'High':
-      return 'text-[#D35B5B]';
+      return 'text-[#FF8A8F]';
     default:
-      return 'text-[#9DD35B]';
+      return 'text-[#3DD68C]';
   }
 };
 
 const getValueColorClass = (riskLevel: 'Low' | 'Mid' | 'High') => {
   switch (riskLevel) {
     case 'Low':
-      return 'text-[#447C00]';
+      return 'text-[#3DD68C]';
     case 'Mid':
-      return 'text-[#7C6900]';
+      return 'text-[#FFA30C]';
     case 'High':
-      return 'text-[#7C0000]';
+      return 'text-[#FF8A8F]';
     default:
-      return 'text-[#447C00]';
+      return 'text-[#3DD68C]';
   }
 };
 
 const getValueBgColorClass = (riskLevel: 'Low' | 'Mid' | 'High') => {
   switch (riskLevel) {
     case 'Low':
-      return 'bg-[rgba(157,211,91,0.56)]';
+      return 'bg-[#12B76A]/15';
     case 'Mid':
-      return 'bg-[rgba(211,173,91,0.31)]';
+      return 'bg-[#FFD166]/15';
     case 'High':
-      return 'bg-[rgba(211,91,91,0.31)]';
+      return 'bg-[#FF6369]/15';
     default:
-      return 'bg-[rgba(157,211,91,0.56)]';
+      return 'bg-[#12B76A]/15';
   }
 };
 
@@ -107,29 +107,29 @@ export function PredictedResultsModal({
 
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'
+      className='fixed inset-0 z-50 flex items-center justify-center bg-[#04050A]/80 backdrop-blur-sm p-4'
       onClick={onClose}
     >
       <div
-        className={`flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl ${className}`}
+        className={`flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-lg bg-[#0A0C16] border border-white/10 shadow-2xl ${className}`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className='flex items-center justify-between border-b border-black/[0.18] px-6 py-6'>
+        <div className='flex items-center justify-between border-b border-white/10 px-6 py-6'>
           <div className='flex items-center gap-4'>
             <div>
-              <h2 className='text-[28px] font-bold text-black'>Predicted Results</h2>
+              <h2 className='text-[28px] font-bold text-fg-default'>Predicted Results</h2>
               {classTitle && (
-                <p className='text-[16px] font-semibold text-black/75'>{classTitle}</p>
+                <p className='text-[16px] font-semibold text-fg-text'>{classTitle}</p>
               )}
             </div>
           </div>
           <div className='flex items-center gap-3'>
-            <span className='text-[14px] font-bold text-[#9D9D9D]'>{date}</span>
+            <span className='text-[14px] font-bold text-fg-text'>{date}</span>
             <Button
               color='gray'
               size='icon'
               variant='ghost'
-              className='h-8 w-8 p-0 text-black'
+              className='h-8 w-8 p-0 text-fg-default'
               onClick={onClose}
             >
               <X className='h-5 w-5' />
@@ -141,19 +141,19 @@ export function PredictedResultsModal({
           {isLoading ? (
             <div className='animate-pulse space-y-3'>
               {[0, 1, 2, 3].map((index) => (
-                <div key={index} className='rounded border border-gray-200 bg-gray-50 p-4'>
+                <div key={index} className='glass-card p-4'>
                   <div className='flex items-center justify-between gap-4'>
                     <div className='space-y-2'>
-                      <div className='h-4 w-32 rounded-full bg-gray-200' />
-                      <div className='h-3 w-24 rounded-full bg-gray-200' />
+                      <div className='h-4 w-32 rounded-full bg-white/[0.06]' />
+                      <div className='h-3 w-24 rounded-full bg-white/[0.06]' />
                     </div>
-                    <div className='h-7 w-16 rounded-full bg-gray-200' />
+                    <div className='h-7 w-16 rounded-full bg-white/[0.06]' />
                   </div>
                 </div>
               ))}
             </div>
           ) : displayResults.length === 0 ? (
-            <div className='py-10 text-center text-[14px] text-black/60'>No prediction results available</div>
+            <div className='py-10 text-center text-[14px] text-fg-text'>No prediction results available</div>
           ) : (
             <div className='space-y-2'>
               {displayResults.map((result, index) => (
@@ -167,15 +167,15 @@ export function PredictedResultsModal({
                       {index + 1}
                     </div>
                     <div>
-                      <div className='text-[16px] font-bold text-black'>{result.name}</div>
-                      <div className='text-[12px] font-bold text-black'>{result.regNo}</div>
+                      <div className='text-[16px] font-bold text-fg-default'>{result.name}</div>
+                      <div className='text-[12px] font-bold text-fg-text'>{result.regNo}</div>
                     </div>
                   </div>
 
                   <div className='flex flex-1 self-center gap-[30px]'>
                     <div className='flex flex-col  self-center items-end gap-3'>
                       <div className='flex items-center gap-3'>
-                        <span className='min-w-[97px] text-[12px] text-right font-bold text-black'>
+                        <span className='min-w-[97px] text-[12px] text-right font-bold text-fg-text'>
                           Predicted Score
                         </span>
                         <div
@@ -185,7 +185,7 @@ export function PredictedResultsModal({
                         </div>
                       </div>
                       <div className='flex items-center gap-3'>
-                        <span className='min-w-[97px] text-[12px] text-right font-bold text-black'>
+                        <span className='min-w-[97px] text-[12px] text-right font-bold text-fg-text'>
                           Performance Category
                         </span>
                         <div
@@ -198,7 +198,7 @@ export function PredictedResultsModal({
 
                     <div className='flex flex-col  self-center items-end gap-3'>
                       <div className='flex items-center gap-3'>
-                        <span className='min-w-[100px] text-[12px] text-right font-bold text-black'>
+                        <span className='min-w-[100px] text-[12px] text-right font-bold text-fg-text'>
                           Pass Probability
                         </span>
                         <div
@@ -208,7 +208,7 @@ export function PredictedResultsModal({
                         </div>
                       </div>
                       <div className='flex items-center gap-3'>
-                        <span className='min-w-[100px] text-[12px] text-right font-bold text-black'>
+                        <span className='min-w-[100px] text-[12px] text-right font-bold text-fg-text'>
                           Model Confidence
                         </span>
                         <div
@@ -220,7 +220,7 @@ export function PredictedResultsModal({
                     </div>
 
                     <div className='flex flex-row items-center gap-1'>
-                      <span className='min-w-[60px] text-center text-[12px] font-bold text-black'>
+                      <span className='min-w-[60px] text-center text-[12px] font-bold text-fg-text'>
                         Risk Level
                       </span>
                       <div
@@ -231,7 +231,7 @@ export function PredictedResultsModal({
                     </div>
 
                     <div className='flex flex-1 flex-col gap-[2px]'>
-                      <span className='text-[12px] font-bold text-black'>Suggestions:</span>
+                      <span className='text-[12px] font-bold text-fg-text'>Suggestions:</span>
                       <div className='flex flex-col gap-[0px]'>
                         {getSuggestionStrings(result.suggestions).map((suggestion, idx) => (
                           <div key={idx} className={`text-[11px] font-bold ${getValueColorClass(result.riskLevel)}`}>

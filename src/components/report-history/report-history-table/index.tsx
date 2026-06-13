@@ -37,9 +37,9 @@ const getTypeDotColor = (type: string) => {
   const normalizedType = type.toLowerCase();
 
   if (normalizedType === 'class')
-    return '#0083FF';
+    return '#4FA6F8';
 
-  return '#8B5CF6';
+  return '#C75CFF';
 };
 
 const formatTypeLabel = (type: string) => {
@@ -55,33 +55,26 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
   const getRiskLevelDotColor = (riskLevel: string) => {
     const level = riskLevel.toLowerCase();
     if (level === 'low')
-      return '#62A510';
+      return '#3DD68C';
     if (level === 'medium' || level === 'mid' || level === 'avg')
-      return '#C37200';
+      return '#FFA30C';
     if (level === 'high')
-      return '#C30000';
-    return '#C37200';
+      return '#FF8A8F';
+    return '#FFA30C';
   };
 
   return (
-    <div
-      style={{
-        border: '1px solid #000000',
-        borderRadius: '7px',
-        overflow: 'hidden',
-        backgroundColor: '#FFFFFF'
-      }}
-    >
+    <div className='glass-card overflow-hidden'>
       <Table>
         <TableHeader>
-          <TableRow className='bg-[#2A3138] hover:bg-[#2A3138] border-b border-black/50'>
-            <TableHead className='h-[52px] border-r border-black px-5 text-[16px] font-medium text-white'>Report ID</TableHead>
-            <TableHead className='h-[52px] border-r border-black px-4 text-[16px] font-medium text-white'>Type</TableHead>
-            <TableHead className='h-[52px] border-r border-black px-4 text-[16px] font-medium text-white'>Class / Student</TableHead>
-            <TableHead className='h-[52px] border-r border-black px-4 text-[16px] font-medium text-white'>Summary</TableHead>
-            <TableHead className='h-[52px] border-r border-black px-4 text-[16px] font-medium text-white'>Risk Level</TableHead>
-            <TableHead className='h-[52px] border-r border-black px-4 text-[16px] font-medium text-white'>Date</TableHead>
-            <TableHead className='h-[52px] px-4 text-center text-[16px] font-medium text-white'>Actions</TableHead>
+          <TableRow className='border-b border-white/10 bg-white/[0.04] hover:bg-white/[0.04]'>
+            <TableHead className='h-[52px] border-r border-white/5 px-5 text-[16px] font-medium text-fg-text'>Report ID</TableHead>
+            <TableHead className='h-[52px] border-r border-white/5 px-4 text-[16px] font-medium text-fg-text'>Type</TableHead>
+            <TableHead className='h-[52px] border-r border-white/5 px-4 text-[16px] font-medium text-fg-text'>Class / Student</TableHead>
+            <TableHead className='h-[52px] border-r border-white/5 px-4 text-[16px] font-medium text-fg-text'>Summary</TableHead>
+            <TableHead className='h-[52px] border-r border-white/5 px-4 text-[16px] font-medium text-fg-text'>Risk Level</TableHead>
+            <TableHead className='h-[52px] border-r border-white/5 px-4 text-[16px] font-medium text-fg-text'>Date</TableHead>
+            <TableHead className='h-[52px] px-4 text-center text-[16px] font-medium text-fg-text'>Actions</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -94,14 +87,14 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
               return (
                 <TableRow
                   key={`${report.predictionId}-${index}`}
-                  className='border-b border-black/50 bg-white even:bg-[#FAFAFA] hover:bg-inherit'
+                  className='border-b border-white/5 hover:bg-white/[0.03]'
                 >
-                  <TableCell className='h-[52px] border-r border-black px-5 text-[16px] font-medium text-black/80'>
+                  <TableCell className='h-[52px] border-r border-white/5 px-5 text-[16px] font-medium text-fg-default'>
                     {report.reportCode}
                   </TableCell>
 
-                  <TableCell className='h-[52px] border-r border-black px-4'>
-                    <div className='inline-flex items-center gap-2 text-[16px] font-medium text-black/80'>
+                  <TableCell className='h-[52px] border-r border-white/5 px-4'>
+                    <div className='inline-flex items-center gap-2 text-[16px] font-medium text-fg-default'>
                       <span
                         className='inline-block h-2.5 w-2.5 rounded-full'
                         style={{ backgroundColor: typeDotColor }}
@@ -110,16 +103,16 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
                     </div>
                   </TableCell>
 
-                  <TableCell className='h-[52px] border-r border-black px-4 text-[16px] font-medium text-black/80'>
+                  <TableCell className='h-[52px] border-r border-white/5 px-4 text-[16px] font-medium text-fg-default'>
                     {report.className}
                   </TableCell>
 
-                  <TableCell className='h-[52px] border-r border-black px-4 text-[16px] font-medium text-black/80'>
+                  <TableCell className='h-[52px] border-r border-white/5 px-4 text-[16px] font-medium text-fg-default'>
                     {report.summary}
                   </TableCell>
 
-                  <TableCell className='h-[52px] border-r border-black px-4'>
-                    <div className='inline-flex items-center gap-2 text-[16px] font-medium text-black/80'>
+                  <TableCell className='h-[52px] border-r border-white/5 px-4'>
+                    <div className='inline-flex items-center gap-2 text-[16px] font-medium text-fg-default'>
                       <span
                         className='inline-block h-2.5 w-2.5 rounded-full'
                         style={{ backgroundColor: riskDotColor }}
@@ -128,7 +121,7 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
                     </div>
                   </TableCell>
 
-                  <TableCell className='h-[52px] border-r border-black px-4 text-[16px] font-medium text-black/80'>
+                  <TableCell className='h-[52px] border-r border-white/5 px-4 text-[16px] font-medium text-fg-default'>
                     {report.date}
                   </TableCell>
 
@@ -143,7 +136,7 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
                           style={{ backgroundColor: 'transparent' }}
                           onClick={() => onViewReport?.(report)}
                         >
-                          <Eye size={20} style={{ color: '#65B1F9' }} />
+                          <Eye size={20} style={{ color: '#7FD0FF' }} />
                         </Button>
                       )}
                       {report.actions.download && (
@@ -155,7 +148,7 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
                           style={{ backgroundColor: 'transparent' }}
                           onClick={() => onDownloadReport?.(report)}
                         >
-                          <Download size={20} style={{ color: '#62A510' }} />
+                          <Download size={20} style={{ color: '#3DD68C' }} />
                         </Button>
                       )}
                     </div>
@@ -165,7 +158,7 @@ export function ReportHistoryTable({ reports, onViewReport, onDownloadReport }: 
             })
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className='py-10 text-center text-[16px] text-black/50'>
+              <TableCell colSpan={7} className='py-10 text-center text-[16px] text-fg-text'>
                 No reports found matching your filters.
               </TableCell>
             </TableRow>

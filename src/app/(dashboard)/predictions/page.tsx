@@ -25,14 +25,14 @@ export default function PredictionsPage() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/dashboard' className='text-black'>
+              <Link href='/dashboard' className='text-fg-default'>
                 Dashboard
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className='text-black'>Predictions</BreadcrumbPage>
+            <BreadcrumbPage className='text-fg-default'>Predictions</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

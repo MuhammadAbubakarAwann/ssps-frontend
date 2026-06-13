@@ -50,16 +50,11 @@ export function PerformanceChange({ latestPanel, olderPanel, leftPanel, rightPan
   const riskDiff = getRiskValue(latest.riskLevel) - getRiskValue(older.riskLevel);
 
   return (
-    <div style={{
-      backgroundColor: '#FFFFFF',
-      border: '1px solid rgba(0, 0, 0, 0.34)',
-      borderRadius: '10px',
-      padding: '28px'
-    }}>
+    <div className='glass-card' style={{ padding: '28px' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#000000' }}>Performance Change</h3>
-        <span style={{ fontSize: '11px', color: 'rgba(0, 0, 0, 0.61)' }}>
+        <h3 className='text-fg-default' style={{ fontSize: '18px', fontWeight: '600' }}>Performance Change</h3>
+        <span className='text-fg-text' style={{ fontSize: '11px' }}>
           {new Date(latest.date).toLocaleDateString('en-GB')}
         </span>
       </div>
@@ -72,80 +67,75 @@ export function PerformanceChange({ latestPanel, olderPanel, leftPanel, rightPan
         marginBottom: '24px'
       }}>
         {/* Score Difference */}
-        <div style={{
-          border: '1px solid rgba(0, 0, 0, 0.34)',
+        <div className='border border-white/10' style={{
           borderRadius: '10px',
           padding: '16px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <span style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.6)' }}>Score Difference</span>
-            <TrendingUp size={20} style={{ color: '#40BA3E' }} />
+            <span className='text-fg-text' style={{ fontSize: '14px' }}>Score Difference</span>
+            <TrendingUp size={20} style={{ color: '#3DD68C' }} />
           </div>
-          <p style={{ fontSize: '24px', fontWeight: '700', color: '#40BA3E' }}>{formatDiff(scoreDiff)}</p>
+          <p style={{ fontSize: '24px', fontWeight: '700', color: '#3DD68C' }}>{formatDiff(scoreDiff)}</p>
         </div>
 
         {/* Pass Probability Change */}
-        <div style={{
-          border: '1px solid rgba(0, 0, 0, 0.34)',
+        <div className='border border-white/10' style={{
           borderRadius: '10px',
           padding: '16px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <span style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.6)' }}>Pass Probability Change</span>
-            <TrendingUp size={20} style={{ color: '#40BA3E' }} />
+            <span className='text-fg-text' style={{ fontSize: '14px' }}>Pass Probability Change</span>
+            <TrendingUp size={20} style={{ color: '#3DD68C' }} />
           </div>
-          <p style={{ fontSize: '24px', fontWeight: '700', color: '#40BA3E' }}>{formatDiff(probabilityDiff)}%</p>
+          <p style={{ fontSize: '24px', fontWeight: '700', color: '#3DD68C' }}>{formatDiff(probabilityDiff)}%</p>
         </div>
 
         {/* Risk Level Change */}
-        <div style={{
-          border: '1px solid rgba(0, 0, 0, 0.34)',
+        <div className='border border-white/10' style={{
           borderRadius: '10px',
           padding: '16px'
         }}>
-          <p style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.6)', marginBottom: '8px' }}>Risk Level Change</p>
+          <p className='text-fg-text' style={{ fontSize: '14px', marginBottom: '8px' }}>Risk Level Change</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{
               display: 'inline-block',
-              backgroundColor: riskDiff < 0 ? 'rgba(37, 255, 17, 0.15)' : 'rgba(255, 205, 0, 0.14)',
-              border: `1px solid ${riskDiff < 0 ? '#3CFF00' : '#F59E0B'}`,
+              backgroundColor: riskDiff < 0 ? 'rgba(18, 183, 106, 0.15)' : 'rgba(255, 209, 102, 0.15)',
+              border: `1px solid ${riskDiff < 0 ? 'rgba(61, 214, 140, 0.3)' : 'rgba(255, 163, 12, 0.3)'}`,
               borderRadius: '8px',
               padding: '4px 13px'
             }}>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: riskDiff < 0 ? '#00C351' : '#B45309' }}>{formatRiskLabel(older.riskLevel)}</span>
+              <span style={{ fontSize: '14px', fontWeight: '500', color: riskDiff < 0 ? '#3DD68C' : '#FFA30C' }}>{formatRiskLabel(older.riskLevel)}</span>
             </div>
-            <span style={{ fontSize: '16px', color: '#000000' }}>→</span>
+            <span className='text-fg-default' style={{ fontSize: '16px' }}>→</span>
             <div style={{
               display: 'inline-block',
-              backgroundColor: riskDiff <= 0 ? 'rgba(37, 255, 17, 0.15)' : 'rgba(255, 205, 0, 0.14)',
-              border: `1px solid ${riskDiff <= 0 ? '#3CFF00' : '#F59E0B'}`,
+              backgroundColor: riskDiff <= 0 ? 'rgba(18, 183, 106, 0.15)' : 'rgba(255, 209, 102, 0.15)',
+              border: `1px solid ${riskDiff <= 0 ? 'rgba(61, 214, 140, 0.3)' : 'rgba(255, 163, 12, 0.3)'}`,
               borderRadius: '8px',
               padding: '4px 13px'
             }}>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: riskDiff <= 0 ? '#00C351' : '#B45309' }}>{formatRiskLabel(latest.riskLevel)}</span>
+              <span style={{ fontSize: '14px', fontWeight: '500', color: riskDiff <= 0 ? '#3DD68C' : '#FFA30C' }}>{formatRiskLabel(latest.riskLevel)}</span>
             </div>
           </div>
         </div>
 
         {/* Best Improvement */}
-        <div style={{
-          border: '1px solid rgba(0, 0, 0, 0.34)',
+        <div className='border border-white/10' style={{
           borderRadius: '10px',
           padding: '16px'
         }}>
-          <p style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.6)', marginBottom: '8px' }}>Best Improvement</p>
-          <p style={{ fontSize: '14px', fontWeight: '600', color: '#000000' }}>{bestImprovement}</p>
+          <p className='text-fg-text' style={{ fontSize: '14px', marginBottom: '8px' }}>Best Improvement</p>
+          <p className='text-fg-default' style={{ fontSize: '14px', fontWeight: '600' }}>{bestImprovement}</p>
         </div>
       </div>
 
       {/* Overall Trend */}
-      <div style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+      <div className='bg-white/[0.03]' style={{
         borderRadius: '10px',
         padding: '16px'
       }}>
-        <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>Overall Trend</h4>
-        <p style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.7)', lineHeight: '1.6' }}>
+        <h4 className='text-fg-default' style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Overall Trend</h4>
+        <p className='text-fg-text' style={{ fontSize: '14px', lineHeight: '1.6' }}>
           {scoreDiff >= 0
             ? `Great progress! The student&apos;s predicted score has improved by ${scoreDiff.toFixed(1)} points since the last prediction. Continue maintaining this positive momentum.`
             : `The student&apos;s predicted score has dropped by ${Math.abs(scoreDiff).toFixed(1)} points since the last prediction. Review the key areas and intervene early.`}

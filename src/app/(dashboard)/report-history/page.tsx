@@ -25,14 +25,14 @@ export default function ReportHistoryPage() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/dashboard' className='text-black'>
+              <Link href='/dashboard' className='text-fg-text'>
                 Dashboard
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className='text-black'>Report History</BreadcrumbPage>
+            <BreadcrumbPage className='text-fg-default'>Report History</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

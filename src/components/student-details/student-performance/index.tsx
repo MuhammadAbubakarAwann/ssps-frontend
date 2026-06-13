@@ -90,49 +90,49 @@ export function SubjectPerformance({ studentId, role = 'TEACHER', semester }: Su
         return {
           icon: TrendingUp,
           text: 'UP',
-          className: 'text-[#3FBA3DFD]'
+          className: 'text-[#3DD68C]'
         };
 
       if (trend === 'DOWN')
         return {
           icon: TrendingDown,
           text: 'DOWN',
-          className: 'text-[#d32f2f]'
+          className: 'text-[#FF8A8F]'
         };
 
       if (trend === 'STABLE')
         return {
           icon: Minus,
           text: 'STABLE',
-          className: 'text-black/60'
+          className: 'text-fg-text'
         };
 
       return {
         icon: Minus,
         text: 'NO PREVIOUS',
-        className: 'text-black/50'
+        className: 'text-fg-text'
       };
     };
   }, []);
 
   if (isLoading)
     return (
-      <div className='rounded-[20px] border border-black/30 bg-white p-6 shadow-[1px_1px_3px_rgba(0,0,0,0.25),-1px_-1px_3px_rgba(0,0,0,0.25)] animate-pulse'>
+      <div className='rounded-[20px] glass-card p-6 animate-pulse'>
         <div className='mb-6 flex items-center gap-2.5'>
-          <div className='h-6 w-6 rounded-full bg-gray-200' />
-          <div className='h-5 w-48 rounded-full bg-gray-200' />
+          <div className='h-6 w-6 rounded-full bg-white/[0.06]' />
+          <div className='h-5 w-48 rounded-full bg-white/[0.06]' />
         </div>
 
         <div className='flex flex-col gap-3'>
           {[0, 1, 2, 3].map((index) => (
-            <div key={index} className='rounded-xl border border-black/20 bg-white p-4 space-y-4'>
+            <div key={index} className='rounded-xl border border-white/5 p-4 space-y-4'>
               <div className='flex items-center justify-between gap-4'>
-                <div className='h-5 w-40 rounded-full bg-gray-200' />
-                <div className='h-4 w-56 rounded-full bg-gray-200' />
+                <div className='h-5 w-40 rounded-full bg-white/[0.06]' />
+                <div className='h-4 w-56 rounded-full bg-white/[0.06]' />
               </div>
 
-              <div className='h-2 rounded-full bg-gray-200' />
-              <div className='h-3 w-16 rounded-full bg-gray-200' />
+              <div className='h-2 rounded-full bg-white/[0.06]' />
+              <div className='h-3 w-16 rounded-full bg-white/[0.06]' />
             </div>
           ))}
         </div>
@@ -141,17 +141,17 @@ export function SubjectPerformance({ studentId, role = 'TEACHER', semester }: Su
 
   if (error)
     return (
-      <div className='rounded-[20px] border border-black/30 bg-white p-6 shadow-[1px_1px_3px_rgba(0,0,0,0.25),-1px_-1px_3px_rgba(0,0,0,0.25)]'>
-        <div className='py-8 text-center text-red-600'>{error}</div>
+      <div className='rounded-[20px] glass-card p-6'>
+        <div className='py-8 text-center text-[#FF8A8F]'>{error}</div>
       </div>
     );
 
   return (
-    <div className='rounded-[20px] border border-black/30 bg-white p-6 shadow-[1px_1px_3px_rgba(0,0,0,0.25),-1px_-1px_3px_rgba(0,0,0,0.25)]'>
+    <div className='rounded-[20px] glass-card p-6'>
       {/* Header */}
       <div className='mb-6 flex items-center gap-2.5'>
-        <BookOpen size={24} className='text-[#0084FF]' />
-        <h3 className='text-[20px] font-semibold text-black'>
+        <BookOpen size={24} className='text-[#7FD0FF]' />
+        <h3 className='text-[20px] font-semibold text-fg-default'>
           Subject Performance
         </h3>
       </div>
@@ -159,7 +159,7 @@ export function SubjectPerformance({ studentId, role = 'TEACHER', semester }: Su
       {/* Subject List */}
       <div className='flex flex-col gap-3'>
         {subjects.length === 0 && (
-          <div className='rounded-xl border border-black/20 bg-white p-4 text-sm text-black/60'>No subject performance found.</div>
+          <div className='rounded-xl border border-white/5 p-4 text-sm text-fg-text'>No subject performance found.</div>
         )}
         {subjects.map((subject, index) => {
           const progressWidth = Math.max(0, Math.min(100, (subject.score / maxScore) * 100));
@@ -169,27 +169,27 @@ export function SubjectPerformance({ studentId, role = 'TEACHER', semester }: Su
           return (
             <div
               key={index}
-              className='rounded-xl border border-black/30 bg-white p-4'
+              className='rounded-xl border border-white/5 p-4'
             >
               {/* Subject Header */}
               <div className='mb-3 flex items-center justify-between'>
-                <h4 className='text-base font-semibold text-black'>
+                <h4 className='text-base font-semibold text-fg-default'>
                   {subject.name}
                 </h4>
                 <div className='flex items-center gap-4'>
-                  <span className='text-[15px] font-medium text-black/60'>
+                  <span className='text-[15px] font-medium text-fg-text'>
                     Grade: {subject.grade} | {subject.predictedPerformance}
                   </span>
-                  <span className='text-[20px] font-bold text-black/60'>
+                  <span className='text-[20px] font-bold text-fg-text'>
                     {subject.score.toFixed(1)}
                   </span>
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className='relative mb-2 h-[9px] overflow-hidden rounded-[5px] bg-[#C6C6C6]'>
+              <div className='relative mb-2 h-[9px] overflow-hidden rounded-[5px] bg-white/[0.08]'>
                 <div
-                  className='h-full rounded-l-[5px] bg-gradient-to-r from-[#1072EB] to-[#17CBEB] transition-[width] duration-300 ease-in-out'
+                  className='h-full rounded-l-[5px] bg-gradient-to-r from-[#4FA6F8] to-[#7FD0FF] transition-[width] duration-300 ease-in-out'
                   style={{ width: `${progressWidth}%` }}
                 ></div>
               </div>

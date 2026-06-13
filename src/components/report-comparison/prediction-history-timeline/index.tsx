@@ -155,14 +155,14 @@ export function PredictionHistoryTimeline({
   if (isLoading)
     return (
       <div className='mb-4 animate-pulse'>
-        <div className='mb-2 h-7 w-52 rounded-full bg-gray-200' />
-        <div className='mb-4 h-4 w-56 rounded-full bg-gray-200' />
+        <div className='mb-2 h-7 w-52 rounded-full bg-white/[0.06]' />
+        <div className='mb-4 h-4 w-56 rounded-full bg-white/[0.06]' />
         <div className='flex gap-5 overflow-x-auto px-2 pb-4 pt-4'>
           {[0, 1, 2, 3].map((index) => (
-            <div key={index} className='min-w-[215px] rounded-[10px] border border-gray-200 bg-white p-5 space-y-3'>
-              <div className='h-4 w-32 rounded-full bg-gray-200' />
-              <div className='h-9 w-20 rounded-full bg-gray-200' />
-              <div className='h-3 w-24 rounded-full bg-gray-200' />
+            <div key={index} className='glass-card min-w-[215px] p-5 space-y-3'>
+              <div className='h-4 w-32 rounded-full bg-white/[0.06]' />
+              <div className='h-9 w-20 rounded-full bg-white/[0.06]' />
+              <div className='h-3 w-24 rounded-full bg-white/[0.06]' />
             </div>
           ))}
         </div>
@@ -170,17 +170,17 @@ export function PredictionHistoryTimeline({
     );
 
   if (error)
-    return <div className='text-[#d32f2f]'>{error}</div>;
+    return <div className='text-[#FF8A8F]'>{error}</div>;
 
   if (allHistories.length === 0)
-    return <div>No prediction history found for this student.</div>;
+    return <div className='text-fg-text'>No prediction history found for this student.</div>;
 
   return (
     <div className='mb-4'>
-      <h2 className='mb-2 text-xl font-semibold text-black'>
+      <h2 className='mb-2 text-xl font-semibold text-fg-default'>
         Prediction History
       </h2>
-      <p className='mb-3 text-base text-black/50'>
+      <p className='mb-3 text-base text-fg-text'>
         Select base and compare predictions
       </p>
 
@@ -193,11 +193,11 @@ export function PredictionHistoryTimeline({
             <div
               key={item.reportCode}
               onClick={() => handleCardClick(item.reportCode)}
-              className='relative min-w-[215px] overflow-hidden rounded-[10px] border-2 border-transparent bg-white p-5 text-left shadow-[1px_1px_3px_rgba(0,0,0,0.25),-1px_-1px_3px_rgba(0,0,0,0.1)] transition-all duration-300'
+              className='glass-card glass-card-hover relative min-w-[215px] cursor-pointer overflow-hidden p-5 text-left transition-all duration-300'
             >
               {(isFirst || isSecond) && (
                 <div
-                  className={`pointer-events-none absolute inset-0 z-10 backdrop-blur-[1px] ${isFirst ? 'bg-[#40BA3E]/50' : 'bg-yellow-500/50'}`}
+                  className={`pointer-events-none absolute inset-0 z-10 backdrop-blur-[1px] ${isFirst ? 'bg-[#12B76A]/50' : 'bg-[#FFD166]/50'}`}
                 />
               )}
 
@@ -213,17 +213,17 @@ export function PredictionHistoryTimeline({
               )}
 
               <div className='mb-3 flex items-center gap-2.5'>
-                <Calendar size={24} className='shrink-0 text-black' />
-                <p className='m-0 text-base font-semibold text-black/70'>
+                <Calendar size={24} className='shrink-0 text-fg-default' />
+                <p className='m-0 text-base font-semibold text-fg-text'>
                   {item.label}
                 </p>
               </div>
 
-              <p className='mb-2 text-[36px] font-bold leading-none text-black'>
+              <p className='mb-2 text-[36px] font-bold leading-none text-fg-default'>
                 {Number(item.averageScore).toFixed(1)}
               </p>
 
-              <p className='text-sm text-black/50'>
+              <p className='text-sm text-fg-text'>
                 {new Date(item.date).toLocaleDateString()}
               </p>
             </div>
