@@ -16,11 +16,11 @@ export function RecentActivity({ activities = [] }: RecentActivityProps) {
   const getIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className='h-5 w-5 text-green-600' />;
+        return <CheckCircle className='h-5 w-5 text-[#3DD68C]' />;
       case 'warning':
-        return <AlertCircle className='h-5 w-5 text-yellow-600' />;
+        return <AlertCircle className='h-5 w-5 text-[#FFD166]' />;
       case 'info':
-        return <TrendingUp className='h-5 w-5 text-blue-600' />;
+        return <TrendingUp className='h-5 w-5 text-[#7FD0FF]' />;
       default:
         return null;
     }
@@ -29,48 +29,48 @@ export function RecentActivity({ activities = [] }: RecentActivityProps) {
   const getBgColor = (type: string) => {
     switch (type) {
       case 'success':
-        return 'bg-gradient-to-r from-green-50/80 to-emerald-50/40 border border-green-200/50 hover:border-green-300';
+        return 'bg-[#12B76A]/[0.06] border border-[#12B76A]/20 hover:border-[#12B76A]/40';
       case 'warning':
-        return 'bg-gradient-to-r from-yellow-50/80 to-amber-50/40 border border-yellow-200/50 hover:border-yellow-300';
+        return 'bg-[#FFD166]/[0.06] border border-[#FFD166]/20 hover:border-[#FFD166]/40';
       case 'info':
-        return 'bg-gradient-to-r from-blue-50/80 to-cyan-50/40 border border-blue-200/50 hover:border-blue-300';
+        return 'bg-[#4FA6F8]/[0.06] border border-[#4FA6F8]/20 hover:border-[#4FA6F8]/40';
       default:
         return '';
     }
   };
 
   return (
-    <div className='group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white shadow-sm hover:shadow-2xl p-6 hover:border-blue-200 transition-all duration-300'>
-      <div className='absolute -left-20 -bottom-20 h-40 w-40 rounded-full bg-gradient-to-tr from-blue-100 to-transparent opacity-20 blur-3xl'></div>
+    <div className='group glass-card glass-card-hover relative overflow-hidden p-6 transition-all duration-300'>
+      <div className='absolute -left-20 -bottom-20 h-40 w-40 rounded-full bg-glow-purple/10 blur-3xl'></div>
 
       <div className='relative z-10 flex h-full flex-col'>
         <div className='mb-8 '>
-          <h2 className='text-2xl font-bold text-gray-900 flex items-center gap-3'>
-            <div className='h-2 w-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500'></div>
+          <h2 className='text-2xl font-bold text-fg-default flex items-center gap-3'>
+            <div className='h-2 w-2 rounded-full bg-gradient-to-r from-glow-blue to-glow-cyan'></div>
             Recent Activity
           </h2>
-          <p className='mt-1 text-xs text-gray-500'>
+          <p className='mt-1 text-xs text-fg-text'>
             Watch Recent Activities
           </p>
         </div>
         <div className='space-y-3'>
           {activities.length === 0 ? (
-            <div className='rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center text-sm text-gray-500'>
+            <div className='rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-6 text-center text-sm text-fg-text'>
               No recent activity available.
             </div>
           ) : (
             activities.map((activity) => (
               <div
                 key={activity.id}
-                className={`group relative cursor-pointer overflow-hidden rounded-xl p-5 transition-all duration-300 hover:shadow-lg ${getBgColor(activity.type)}`}
+                className={`group relative cursor-pointer overflow-hidden rounded-xl p-5 transition-all duration-300 ${getBgColor(activity.type)}`}
               >
                 <div
                   className={`absolute bottom-0 left-0 top-0 w-1 transition-all duration-300 group-hover:w-1.5 ${
                     activity.type === 'success'
-                      ? 'bg-gradient-to-b from-green-400 to-emerald-500'
+                      ? 'bg-gradient-to-b from-[#12B76A] to-[#3DD68C]'
                       : activity.type === 'warning'
-                        ? 'bg-gradient-to-b from-yellow-400 to-amber-500'
-                        : 'bg-gradient-to-b from-blue-400 to-cyan-500'
+                        ? 'bg-gradient-to-b from-[#FFA30C] to-[#FFD166]'
+                        : 'bg-gradient-to-b from-[#4FA6F8] to-[#7FD0FF]'
                   }`}
                 ></div>
 
@@ -79,13 +79,13 @@ export function RecentActivity({ activities = [] }: RecentActivityProps) {
                     {getIcon(activity.type)}
                   </div>
                   <div className='min-w-0 flex-1'>
-                    <p className='text-sm font-bold text-gray-900'>
+                    <p className='text-sm font-bold text-fg-default'>
                       {activity.title}
                     </p>
-                    <p className='mt-1.5 line-clamp-2 text-xs text-gray-600'>
+                    <p className='mt-1.5 line-clamp-2 text-xs text-fg-text'>
                       {activity.description}
                     </p>
-                    <p className='mt-2 text-xs font-medium text-gray-500'>
+                    <p className='mt-2 text-xs font-medium text-fg-text'>
                       {activity.timestamp}
                     </p>
                   </div>

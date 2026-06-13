@@ -193,7 +193,16 @@ const config: Config = {
         // Border colors
         'border-subtle': 'var(--border-subtle)',
         'border-light': 'var(--border-light)',
-        'border-image': 'var(--border-image)'
+        'border-image': 'var(--border-image)',
+
+        // Glow / glass accents - Prediction Animation palette
+        'glow-blue': 'var(--glow-blue)',
+        'glow-purple': 'var(--glow-purple)',
+        'glow-cyan': 'var(--glow-cyan)',
+        'glow-yellow': 'var(--glow-yellow)',
+        'glass-bg': 'var(--glass-bg)',
+        'glass-bg-hover': 'var(--glass-bg-hover)',
+        'glass-border': 'var(--glass-border)'
       },
       borderRadius: {
         lg: 'var(--radius)',

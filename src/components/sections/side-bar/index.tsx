@@ -18,7 +18,7 @@ export function Sidebar({ activeRole }: { activeRole: Role; }) {
   return (
     <aside
       className={cn(
-        'fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300 bg-bg-bg-subtle',
+        'fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300 bg-bg-bg-subtle border-r border-white/[0.06] shadow-[4px_0_30px_rgba(0,0,0,0.4)]',
         sidebar?.isOpen === false ? 'w-[90px]' : 'w-72'
       )}
     >

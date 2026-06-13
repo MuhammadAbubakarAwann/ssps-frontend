@@ -91,8 +91,8 @@ function resolveMonthlyGainLevel(percent: number, backendLevel?: string): Monthl
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className='rounded-xl border border-gray-200 bg-white p-4 shadow-xl'>
-        <p className='font-semibold text-gray-900'>{payload[0].payload.month}</p>
+      <div className='rounded-xl border border-white/10 bg-[#0A0C16]/95 p-4 shadow-xl backdrop-blur-xl'>
+        <p className='font-semibold text-fg-default'>{payload[0].payload.month}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} style={{ color: entry.color }} className='text-sm font-medium'>
             {entry.name}: {Number(entry.value).toFixed(1)}%
@@ -161,75 +161,75 @@ export function PerformanceTrendChart() {
   const gainColors = useMemo(() => {
     if (summary.monthlyGain.level === 'HIGH')
       return {
-        bg: 'from-emerald-50 to-emerald-100/50',
-        border: 'border-emerald-200/30',
-        title: 'text-emerald-700',
-        value: 'text-emerald-900',
-        subtitle: 'text-emerald-700'
+        bg: 'bg-[#12B76A]/10',
+        border: 'border-[#12B76A]/20 hover:border-[#12B76A]/40',
+        title: 'text-[#3DD68C]',
+        value: 'text-fg-default',
+        subtitle: 'text-[#3DD68C]/80'
       };
 
     if (summary.monthlyGain.level === 'AVERAGE')
       return {
-        bg: 'from-amber-50 to-amber-100/50',
-        border: 'border-amber-200/30',
-        title: 'text-amber-700',
-        value: 'text-amber-900',
-        subtitle: 'text-amber-700'
+        bg: 'bg-[#FFD166]/10',
+        border: 'border-[#FFD166]/20 hover:border-[#FFD166]/40',
+        title: 'text-[#FFD166]',
+        value: 'text-fg-default',
+        subtitle: 'text-[#FFD166]/80'
       };
 
     return {
-      bg: 'from-red-50 to-red-100/50',
-      border: 'border-red-200/30',
-      title: 'text-red-700',
-      value: 'text-red-900',
-      subtitle: 'text-red-700'
+      bg: 'bg-[#FF6369]/10',
+      border: 'border-[#FF6369]/20 hover:border-[#FF6369]/40',
+      title: 'text-[#FF8A8F]',
+      value: 'text-fg-default',
+      subtitle: 'text-[#FF8A8F]/80'
     };
   }, [summary.monthlyGain.level]);
 
   return (
-    <div className='group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white shadow-sm hover:shadow-2xl hover:border-blue-200 transition-all duration-300'>
-      {/* Decorative gradient background */}
-      <div className='absolute -right-32 -top-32 h-64 w-64 rounded-full bg-gradient-to-br from-blue-100 to-transparent opacity-30 blur-3xl'></div>
-      
+    <div className='group glass-card glass-card-hover relative overflow-hidden transition-all duration-300'>
+      {/* Decorative glow background */}
+      <div className='absolute -right-32 -top-32 h-64 w-64 rounded-full bg-glow-blue/10 blur-3xl'></div>
+
       {/* Header Section */}
-      <div className='relative z-10 border-b border-gray-200/50 p-6'>
+      <div className='relative z-10 border-b border-white/10 p-6'>
         <div className='flex items-start justify-between'>
           <div>
             <div className='flex items-center gap-4'>
-              <div className='rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-500 p-3 shadow-lg'>
-                <TrendingUp className='h-7 w-7 text-white' />
+              <div className='rounded-xl bg-gradient-to-br from-glow-blue to-glow-cyan p-3 shadow-[0_0_30px_rgba(79,166,248,0.35)]'>
+                <TrendingUp className='h-7 w-7 text-[#04050A]' />
               </div>
               <div>
-                <h2 className='text-3xl font-bold text-gray-900'>Performance Trend</h2>
-                <p className='text-sm text-gray-600 mt-1'>Monthly prediction accuracy and improvement analysis</p>
+                <h2 className='text-3xl font-bold text-fg-default'>Performance Trend</h2>
+                <p className='text-sm text-fg-text mt-1'>Monthly prediction accuracy and improvement analysis</p>
               </div>
             </div>
           </div>
-        
+
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className='relative z-10 grid grid-cols-3 gap-4 border-b border-gray-200/50 p-6'>
-        <div className='rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 p-5 border border-blue-200/30 hover:border-blue-300 transition-colors'>
-          <p className='text-xs font-bold uppercase tracking-widest text-blue-700'>Peak Accuracy</p>
-          <p className='mt-3 text-4xl font-bold text-blue-900'>
+      <div className='relative z-10 grid grid-cols-3 gap-4 border-b border-white/10 p-6'>
+        <div className='rounded-xl bg-[#4FA6F8]/10 p-5 border border-[#4FA6F8]/20 hover:border-[#4FA6F8]/40 transition-colors'>
+          <p className='text-xs font-bold uppercase tracking-widest text-[#7FD0FF]'>Peak Accuracy</p>
+          <p className='mt-3 text-4xl font-bold text-fg-default'>
             {isLoading ? '--' : `${summary.peakModelAccuracy.value.toFixed(1)}%`}
           </p>
-          <p className='mt-2 text-xs text-blue-600'>
+          <p className='mt-2 text-xs text-[#7FD0FF]/80'>
             {isLoading
               ? 'Loading...'
               : (summary.peakModelAccuracy.month ? toMonthWithYear(summary.peakModelAccuracy.month) : 'N/A')}
           </p>
         </div>
-        <div className='rounded-xl bg-gradient-to-br from-purple-50 to-purple-100/50 p-5 border border-purple-200/30 hover:border-purple-300 transition-colors'>
-          <p className='text-xs font-bold uppercase tracking-widest text-purple-700'>Avg Accuracy</p>
-          <p className='mt-3 text-4xl font-bold text-purple-900'>
+        <div className='rounded-xl bg-[#8F008D]/12 p-5 border border-[#C75CFF]/20 hover:border-[#C75CFF]/40 transition-colors'>
+          <p className='text-xs font-bold uppercase tracking-widest text-[#E69BFF]'>Avg Accuracy</p>
+          <p className='mt-3 text-4xl font-bold text-fg-default'>
             {isLoading ? '--' : `${summary.avgAccuracyYTD.toFixed(1)}%`}
           </p>
-          <p className='mt-2 text-xs text-purple-600'>Year to date</p>
+          <p className='mt-2 text-xs text-[#E69BFF]/80'>Year to date</p>
         </div>
-        <div className={`rounded-xl bg-gradient-to-br ${gainColors.bg} p-5 border ${gainColors.border} transition-colors`}>
+        <div className={`rounded-xl ${gainColors.bg} p-5 border ${gainColors.border} transition-colors`}>
           <p className={`text-xs font-bold uppercase tracking-widest ${gainColors.title}`}>Monthly Gain</p>
           <p className={`mt-3 text-4xl font-bold ${gainColors.value}`}>
             {isLoading
@@ -244,11 +244,11 @@ export function PerformanceTrendChart() {
       <div className='relative z-10 p-0'>
         <div className='h-80 w-full'>
           {isLoading ? (
-            <div className='flex h-full items-center justify-center text-sm font-medium text-slate-500'>
+            <div className='flex h-full items-center justify-center text-sm font-medium text-fg-text'>
               Loading performance trend...
             </div>
           ) : chartData.length === 0 ? (
-            <div className='flex h-full items-center justify-center text-sm font-medium text-slate-500'>
+            <div className='flex h-full items-center justify-center text-sm font-medium text-fg-text'>
               No trend data available
             </div>
           ) : (
@@ -259,26 +259,26 @@ export function PerformanceTrendChart() {
             >
               <defs>
                 <linearGradient id='predictionGradient' x1='0' y1='0' x2='0' y2='1'>
-                  <stop offset='5%' stopColor='#3B82F6' stopOpacity={0.3} />
-                  <stop offset='95%' stopColor='#3B82F6' stopOpacity={0} />
+                  <stop offset='5%' stopColor='#4FA6F8' stopOpacity={0.35} />
+                  <stop offset='95%' stopColor='#4FA6F8' stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id='accuracyGradient' x1='0' y1='0' x2='0' y2='1'>
-                  <stop offset='5%' stopColor='#10B981' stopOpacity={0.3} />
-                  <stop offset='95%' stopColor='#10B981' stopOpacity={0} />
+                  <stop offset='5%' stopColor='#3DD68C' stopOpacity={0.35} />
+                  <stop offset='95%' stopColor='#3DD68C' stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray='4 4' stroke='#E5E7EB' vertical={true} />
+              <CartesianGrid strokeDasharray='4 4' stroke='rgba(255,255,255,0.08)' vertical={true} />
               <XAxis
                 dataKey='month'
                 tickLine={false}
                 axisLine={false}
-                tick={{ fill: '#9CA3AF', fontSize: 13, fontWeight: 500 }}
+                tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500 }}
               />
               <YAxis
                 yAxisId='scores'
                 tickLine={false}
                 axisLine={false}
-                tick={{ fill: '#9CA3AF', fontSize: 13 }}
+                tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 13 }}
                 domain={[0, 100]}
               />
               <YAxis
@@ -286,12 +286,12 @@ export function PerformanceTrendChart() {
                 orientation='right'
                 tickLine={false}
                 axisLine={false}
-                tick={{ fill: '#9CA3AF', fontSize: 13 }}
+                tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 13 }}
                 domain={['dataMin - 2', 'dataMax + 2']}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
-                wrapperStyle={{ paddingTop: '20px' }}
+                wrapperStyle={{ paddingTop: '20px', color: 'rgba(255,255,255,0.7)' }}
                 iconType='line'
               />
               <Area
@@ -299,10 +299,10 @@ export function PerformanceTrendChart() {
                 dataKey='prediction'
                 name='Prediction Score'
                 yAxisId='scores'
-                stroke='#3B82F6'
+                stroke='#4FA6F8'
                 strokeWidth={3}
                 fill='url(#predictionGradient)'
-                dot={{ fill: '#3B82F6', r: 5, strokeWidth: 0 }}
+                dot={{ fill: '#4FA6F8', r: 5, strokeWidth: 0 }}
                 activeDot={{ r: 7 }}
                 isAnimationActive={true}
               />
@@ -311,9 +311,9 @@ export function PerformanceTrendChart() {
                 dataKey='accuracy'
                 name='Accuracy Score'
                 yAxisId='scores'
-                stroke='#10B981'
+                stroke='#3DD68C'
                 strokeWidth={3}
-                dot={{ fill: '#10B981', r: 5, strokeWidth: 0 }}
+                dot={{ fill: '#3DD68C', r: 5, strokeWidth: 0 }}
                 activeDot={{ r: 7 }}
                 isAnimationActive={true}
               />
@@ -321,7 +321,7 @@ export function PerformanceTrendChart() {
                 dataKey='improvement'
                 name='Monthly Improvement'
                 yAxisId='improvement'
-                fill='#FBBF24'
+                fill='#FFD166'
                 radius={[8, 8, 0, 0]}
                 opacity={0.6}
               />

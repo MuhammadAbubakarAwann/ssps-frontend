@@ -16,16 +16,16 @@ interface ClassOverviewProps {
 export function ClassOverview({ classes = [] }: ClassOverviewProps) {
 
   return (
-    <div className='group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white p-6 shadow-sm transition-all duration-300 hover:border-blue-200 hover:shadow-2xl'>
-      <div className='absolute -right-32 -top-32 h-64 w-64 rounded-full bg-gradient-to-br from-blue-100 to-transparent opacity-20 blur-3xl'></div>
+    <div className='group glass-card glass-card-hover relative overflow-hidden p-6 transition-all duration-300'>
+      <div className='absolute -right-32 -top-32 h-64 w-64 rounded-full bg-glow-blue/10 blur-3xl'></div>
 
       <div className='relative z-10'>
         <div className='mb-8 flex items-center justify-between'>
           <div>
-            <h2 className='text-2xl font-bold text-gray-900'>Class Overview</h2>
-            <p className='mt-1 text-xs text-gray-500'>Monitor performance across your classes</p>
+            <h2 className='text-2xl font-bold text-fg-default'>Class Overview</h2>
+            <p className='mt-1 text-xs text-fg-text'>Monitor performance across your classes</p>
           </div>
-          <Link href='/predictions' className='flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700'>
+          <Link href='/predictions' className='flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-[#7FD0FF] transition-colors hover:bg-[#4FA6F8]/10 hover:text-[#9FE0FF]'>
             View All
             <ChevronRight size={18} />
           </Link>
@@ -33,29 +33,27 @@ export function ClassOverview({ classes = [] }: ClassOverviewProps) {
 
         <div className='space-y-4'>
           {classes.length === 0 ? (
-            <div className='rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center text-sm text-gray-500'>
+            <div className='rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-6 text-center text-sm text-fg-text'>
               No class overview data available.
             </div>
           ) : (
             classes.map((cls) => (
               <Link key={cls.id} href='/predictions' className='block'>
-                <div className='group relative overflow-hidden rounded-xl border border-gray-200/50 bg-gradient-to-br from-white to-gray-50/30 p-6 transition-all duration-300 hover:border-blue-300 hover:shadow-md'>
-                  <div className='absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100'></div>
-
+                <div className='group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-6 transition-all duration-300 hover:border-[#4FA6F8]/30 hover:bg-white/[0.05]'>
                   <div className='relative z-10 flex items-center justify-between'>
                     <div className='flex-1'>
-                      <p className='text-lg font-bold text-gray-900'>{cls.name}</p>
-                      <p className='mt-1 text-sm text-gray-500'>{cls.students} students enrolled</p>
+                      <p className='text-lg font-bold text-fg-default'>{cls.name}</p>
+                      <p className='mt-1 text-sm text-fg-text'>{cls.students} students enrolled</p>
                     </div>
 
                     <div className='ml-6 flex gap-8'>
                       <div className='text-right'>
-                        <p className='text-xs font-bold uppercase tracking-wide text-gray-500'>Avg Score</p>
-                        <p className='mt-1 text-3xl font-bold text-blue-600'>{cls.avgScore}%</p>
+                        <p className='text-xs font-bold uppercase tracking-wide text-fg-text'>Avg Score</p>
+                        <p className='mt-1 text-3xl font-bold text-[#7FD0FF]'>{cls.avgScore}%</p>
                       </div>
                       <div className='text-right'>
-                        <p className='text-xs font-bold uppercase tracking-wide text-gray-500'>At Risk</p>
-                        <p className='mt-1 text-3xl font-bold text-red-500'>{cls.atRisk}</p>
+                        <p className='text-xs font-bold uppercase tracking-wide text-fg-text'>At Risk</p>
+                        <p className='mt-1 text-3xl font-bold text-[#FF8A8F]'>{cls.atRisk}</p>
                       </div>
                     </div>
                   </div>

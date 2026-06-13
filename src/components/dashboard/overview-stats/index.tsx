@@ -54,39 +54,39 @@ export function OverviewStats({ metrics }: OverviewStatsProps) {
       value: formatNumber(classMetrics.totalStudents),
       change: classMetrics.totalClassesCreatedByTeacher ? `+${formatNumber(classMetrics.totalClassesCreatedByTeacher)} classes` : 'class metrics',
       icon: FiUsers,
-      color: 'bg-blue-100',
-      textColor: 'text-blue-600'
+      color: 'bg-[#4FA6F8]/15',
+      textColor: 'text-[#7FD0FF]'
     },
     {
       label: 'Students at Risk',
       value: formatNumber(classMetrics.totalAtRisk),
       change: 'from current class data',
       icon: FiAlertCircle,
-      color: 'bg-red-100',
-      textColor: 'text-red-600'
+      color: 'bg-[#FF6369]/15',
+      textColor: 'text-[#FF8A8F]'
     },
     {
       label: 'Avg Performance',
       value: formatPercentage(classMetrics.averagePerformance),
       change: 'current average',
       icon: FiBarChart2,
-      color: 'bg-green-100',
-      textColor: 'text-green-600'
+      color: 'bg-[#12B76A]/15',
+      textColor: 'text-[#3DD68C]'
     },
     {
       label: 'Improvement Rate',
       value: formatPercentage(classMetrics.improvementRate),
       change: classMetrics.class?.name ? classMetrics.class.name : 'this semester',
       icon: FiTrendingUp,
-      color: 'bg-purple-100',
-      textColor: 'text-purple-600'
+      color: 'bg-[#8F008D]/20',
+      textColor: 'text-[#E69BFF]'
     }
   ];
 
   return (
     <div className='space-y-4'>
       {classMetrics.class?.name && (
-        <div className='inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200'>
+        <div className='glass-card inline-flex items-center px-4 py-2 text-sm font-semibold text-fg-default'>
           {classMetrics.class.name}
         </div>
       )}

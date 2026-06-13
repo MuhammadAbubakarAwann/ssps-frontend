@@ -19,10 +19,11 @@ export default function AdminPanelLayout({
 
   return (
     <>
+      <div className='app-grid-bg' />
       <Sidebar activeRole={activeRole} />
       <main
         className={cn(
-          'min-h-[calc(100vh_-_56px)] dark:bg-bg-default bg-bg-default transition-[margin-left] ease-in-out duration-300',
+          'min-h-[calc(100vh_-_56px)] transition-[margin-left] ease-in-out duration-300',
           sidebar?.isOpen === false ? 'lg:ml-[90px]' : 'lg:ml-72'
         )}
       >
