@@ -203,12 +203,14 @@ interface CreatePredictionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPredictionSaved?: (prediction: SavedPredictionSummary) => void;
+  initialClassId?: string;
 }
 
 export function CreatePredictionModal({
   isOpen,
   onClose,
-  onPredictionSaved
+  onPredictionSaved,
+  initialClassId
 }: CreatePredictionModalProps) {
   const [predictionType, setPredictionType] = useState<'fullClass' | 'selectedStudents'>('fullClass');
   const [selectedClass, setSelectedClass] = useState<string>('');
@@ -270,6 +272,11 @@ export function CreatePredictionModal({
 
     void fetchClasses();
   }, [isOpen]);
+
+  // Pre-select a class when the modal is opened from elsewhere (e.g. Send to Predictor)
+  useEffect(() => {
+    if (isOpen && initialClassId) setSelectedClass(initialClassId);
+  }, [isOpen, initialClassId]);
 
   // Only fetch students when the teacher needs to pick individuals
   useEffect(() => {

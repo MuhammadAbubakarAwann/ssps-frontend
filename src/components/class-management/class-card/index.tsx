@@ -164,6 +164,7 @@ export function ClassCard({ classItem, onView, onDelete }: ClassCardProps) {
           className='w-full text-[10px] h-8 gap-1.5 flex justify-center items-center font-normal'
           onClick={(e) => {
             e.stopPropagation();
+            router.push(`/predictions?classId=${classItem.id}`);
           }}
         >
           <Send className='w-3 h-3' />

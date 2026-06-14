@@ -8,6 +8,7 @@ import type { SavedPredictionSummary, SuggestionsObject } from '@/components/pre
 import { Plus } from 'lucide-react';
 import { FiBarChart2, FiUsers, FiTrendingUp } from 'react-icons/fi';
 import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { showToast } from '@/components/ui/toaster';
 
 interface PredictionClass {
@@ -187,8 +188,11 @@ function mapMetricsSnapshotToViewModel(snapshot?: SavedPredictionMetricsSnapshot
 }
 
 export function PredictionsMainData() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading] = useState(false);
   const [showPredictionModal, setShowPredictionModal] = useState(false);
+  const [preselectedClassId, setPreselectedClassId] = useState('');
   const [classes, setClasses] = useState<PredictionClass[]>([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [scope, setScope] = useState<'CLASS' | 'SELECTED'>('CLASS');
@@ -204,6 +208,17 @@ export function PredictionsMainData() {
   const [metricsRefreshKey, setMetricsRefreshKey] = useState(0);
   const [autoOpenPredictionId, setAutoOpenPredictionId] = useState('');
   const [cardsTransitioning, setCardsTransitioning] = useState(false);
+
+  // Open the Create Prediction modal with a class pre-selected when
+  // navigated here via "Send to Predictor" (?classId=...)
+  useEffect(() => {
+    const classId = searchParams.get('classId');
+    if (!classId) return;
+
+    setPreselectedClassId(classId);
+    setShowPredictionModal(true);
+    router.replace('/predictions');
+  }, [searchParams, router]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -654,6 +669,7 @@ export function PredictionsMainData() {
         isOpen={showPredictionModal}
         onClose={() => setShowPredictionModal(false)}
         onPredictionSaved={handlePredictionSaved}
+        initialClassId={preselectedClassId}
       />
     </>
   );

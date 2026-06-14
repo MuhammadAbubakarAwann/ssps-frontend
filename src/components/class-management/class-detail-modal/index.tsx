@@ -274,6 +274,7 @@ export function ClassDetailModal({ classItem, onClose, onDelete }: ClassDetailMo
             size='small'
             variant='outline'
             className='w-full max-w-[180px] text-[12px] h-9 gap-1.5 flex justify-center items-center font-normal rounded-[5px] border-white/10 text-fg-default bg-white/[0.03] hover:bg-white/[0.05]'
+            onClick={() => router.push(`/predictions?classId=${classItem.id}`)}
           >
             <Send className='w-3.5 h-3.5' />
             Send to Predictor
