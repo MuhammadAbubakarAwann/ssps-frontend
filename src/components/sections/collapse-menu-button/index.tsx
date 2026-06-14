@@ -101,6 +101,7 @@ export function CollapseMenuButton({
         {submenus.map(({ href, label, active }, index) => (
           <Button
             key={index}
+            variant='ghost'
             className={cn(
               'w-full justify-start h-10 mb-1 text-white hover:text-white',
               active && 'bg-[#4FA6F8]/15 text-[#7FD0FF] hover:bg-[#4FA6F8]/15 hover:text-[#7FD0FF]'
@@ -134,6 +135,7 @@ export function CollapseMenuButton({
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
               <Button
+                variant='ghost'
                 className={cn(
                   'w-full justify-start h-10 mb-1 text-white hover:text-white',
                   active && 'bg-[#4FA6F8]/15 text-[#7FD0FF] hover:bg-[#4FA6F8]/15 hover:text-[#7FD0FF]'
