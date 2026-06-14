@@ -1,50 +1,97 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth-service';
+import { getSession, refreshAccessToken } from '@/lib/auth-service';
 
 export const dynamic = 'force-dynamic';
+
+const API_BASE_URL = process.env.BACKEND_API_URL || '';
+
+function getEndpointCandidates(baseUrl: string, query: string): string[] {
+  const normalizedBase = baseUrl.replace(/\/+$/, '');
+  const endpoint = `/teacher/catalog/subjects?${query}`;
+  const teacherPath = endpoint.replace(/^\/teacher/, '');
+  const baseCandidates = [
+    normalizedBase.replace(/\/api\/v1\/teacher$/i, '/api/teacher'),
+    normalizedBase.replace(/\/api\/v1$/i, '/api'),
+    normalizedBase
+  ];
+
+  const candidates: string[] = [];
+  for (const base of baseCandidates)
+    if (/\/api\/teacher$/i.test(base))
+      candidates.push(`${base}${teacherPath}`);
+    else
+      candidates.push(`${base}${endpoint}`);
+
+  return [...new Set(candidates.filter(Boolean))];
+}
 
 export async function GET(request: Request) {
   try {
     const session = await getSession();
-    
-    if (!session?.accessToken) {
+
+    if (!session?.accessToken)
       return NextResponse.json(
         { success: false, message: 'Unauthorized - no access token' },
         { status: 401 }
       );
-    }
 
     const { searchParams } = new URL(request.url);
     const programCode = searchParams.get('programCode');
     const semesterNumber = searchParams.get('semesterNumber');
 
-    if (!programCode || !semesterNumber) {
+    if (!programCode || !semesterNumber)
       return NextResponse.json(
         { success: false, message: 'Missing required parameters: programCode and semesterNumber' },
         { status: 400 }
       );
-    }
 
-    const response = await fetch(
-      `http://localhost:5000/api/teacher/catalog/subjects?programCode=${programCode}&semesterNumber=${semesterNumber}`,
-      {
+    const query = `programCode=${programCode}&semesterNumber=${semesterNumber}`;
+    const endpoints = getEndpointCandidates(API_BASE_URL, query);
+    let lastStatus = 502;
+    let lastMessage = 'Failed to fetch subjects';
+    let activeToken = session.accessToken;
+    let didRefreshToken = false;
+
+    for (let i = 0; i < endpoints.length; i += 1) {
+      const endpoint = endpoints[i];
+      const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.accessToken}`
+          'Authorization': `Bearer ${activeToken}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return NextResponse.json(data);
+      }
+
+      lastStatus = response.status;
+      lastMessage = `External API error: ${response.statusText}`;
+
+      if ((response.status === 401 || response.status === 403) && !didRefreshToken) {
+        const refreshedToken = await refreshAccessToken();
+
+        if (refreshedToken) {
+          activeToken = refreshedToken;
+          didRefreshToken = true;
+          i -= 1;
+          continue;
         }
       }
-    );
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { success: false, message: `External API error: ${response.statusText}` },
-        { status: response.status }
-      );
+      if (response.status !== 404 && response.status !== 405)
+        return NextResponse.json(
+          { success: false, message: lastMessage },
+          { status: response.status }
+        );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json(
+      { success: false, message: lastMessage },
+      { status: lastStatus >= 400 ? lastStatus : 502 }
+    );
   } catch (error) {
     console.error('Error fetching subjects:', error);
     return NextResponse.json(
