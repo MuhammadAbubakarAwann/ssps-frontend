@@ -148,7 +148,10 @@ export function PredictionHistoryCard({ prediction, shouldAutoOpen = false, onAu
     setShowResults(true);
 
     if (prediction.preloadedResults && prediction.preloadedResults.length > 0) {
-      setResults(prediction.preloadedResults);
+      const sorted = [...prediction.preloadedResults].sort((a, b) =>
+        a.regNo.localeCompare(b.regNo, undefined, { numeric: true, sensitivity: 'base' })
+      );
+      setResults(sorted);
       setResultsDate(prediction.date);
       setResultsClassTitle(prediction.className);
       setIsLoadingResults(false);
@@ -168,7 +171,9 @@ export function PredictionHistoryCard({ prediction, shouldAutoOpen = false, onAu
       if (!response.ok || !payload.success)
         throw new Error(payload.message || 'Failed to fetch prediction results');
 
-      const mappedResults: StudentResult[] = mapPredictionResults(payload);
+      const mappedResults: StudentResult[] = mapPredictionResults(payload).sort((a, b) =>
+        a.regNo.localeCompare(b.regNo, undefined, { numeric: true, sensitivity: 'base' })
+      );
 
       setResults(mappedResults);
       setResultsClassTitle(String(payload.data?.class?.name || prediction.className));

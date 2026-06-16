@@ -16,8 +16,13 @@ interface StudentDetailsResponse {
       semester: string;
       overallRiskLevel: string;
       expectedCgpa?: number | string;
+      expectedGpa?: number | string;
       classRank?: number | string;
+      rank?: number | string;
       averageScore?: number | string;
+      avgScore?: number | string;
+      attendance?: number | string;
+      attendancePercentage?: number | string;
     };
     class?: {
       id?: string;
@@ -30,13 +35,27 @@ interface StudentDetailsResponse {
     metrics?: {
       riskLevel?: string;
       riskLevelAverage?: number;
+      // GPA variants
       expectedGpa?: number;
+      expectedCgpa?: number;
+      cgpa?: number;
+      gpa?: number;
+      // Attendance variants
       attendanceAverage?: number;
+      attendance?: number;
+      avgAttendance?: number;
+      attendancePercentage?: number;
+      // Class rank variants
       classRankAverage?: number;
+      classRank?: number;
+      rank?: number;
+      // Score variants
       averageScore?: number;
+      avgScore?: number;
+      score?: number;
       enrollmentsCount?: number;
     };
-    attendanceBySubject: Array<{
+    attendanceBySubject?: Array<{
       classId: string;
       className: string;
       subject: string;
@@ -85,29 +104,41 @@ export function StudentHeader({ studentId, role = 'TEACHER', semester }: Student
         if (!payload.success)
           throw new Error(payload.data ? 'Failed to fetch student details' : 'Invalid response format');
 
+        const m = payload.data.metrics;
+        const s = payload.data.student;
+
+        const resolvedGpa =
+          m?.expectedGpa ?? m?.expectedCgpa ?? m?.cgpa ?? m?.gpa
+          ?? Number(s.expectedCgpa ?? s.expectedGpa ?? 0);
+
+        const resolvedRank =
+          m?.classRankAverage ?? m?.classRank ?? m?.rank
+          ?? Number(s.classRank ?? s.rank ?? 0);
+
+        const resolvedScore =
+          m?.averageScore ?? m?.avgScore ?? m?.score
+          ?? Number(s.averageScore ?? s.avgScore ?? 0);
+
         const normalizedStudent = {
-          ...payload.data.student,
-          overallRiskLevel:
-            payload.data.metrics?.riskLevel
-            || payload.data.student.overallRiskLevel
-            || 'MID',
-          expectedCgpa:
-            payload.data.metrics?.expectedGpa
-            ?? payload.data.student.expectedCgpa,
-          classRank:
-            payload.data.metrics?.classRankAverage
-            ?? payload.data.student.classRank,
-          averageScore:
-            payload.data.metrics?.averageScore
-            ?? payload.data.student.averageScore
+          ...s,
+          overallRiskLevel: m?.riskLevel || s.overallRiskLevel || 'MID',
+          expectedCgpa: resolvedGpa,
+          classRank: resolvedRank,
+          averageScore: resolvedScore
         };
 
         setStudentData(normalizedStudent);
 
-        if (typeof payload.data.metrics?.attendanceAverage === 'number') {
-          setAttendance(Math.round(payload.data.metrics.attendanceAverage));
-        } else if (payload.data.attendanceBySubject && payload.data.attendanceBySubject.length > 0) {
-          // Backward compatibility for legacy details endpoint shape.
+        const resolvedAttendance =
+          m?.attendanceAverage ?? m?.attendance ?? m?.avgAttendance ?? m?.attendancePercentage;
+
+        if (typeof resolvedAttendance === 'number')
+          setAttendance(Math.round(resolvedAttendance));
+        else if (typeof s.attendance === 'number')
+          setAttendance(Math.round(s.attendance));
+        else if (typeof s.attendancePercentage === 'number')
+          setAttendance(Math.round(s.attendancePercentage));
+        else if (payload.data.attendanceBySubject && payload.data.attendanceBySubject.length > 0) {
           const avgAttendance =
             payload.data.attendanceBySubject.reduce((sum, item) => sum + item.attendancePercentage, 0) /
             payload.data.attendanceBySubject.length;

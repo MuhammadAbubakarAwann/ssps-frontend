@@ -352,7 +352,9 @@ export default async function DashboardPage() {
     ? await loadDashboardMetrics(user.role, accessToken)
     : null;
 
-  const classesOverview = user && accessToken && normalizeRole(user.role) !== 'STUDENT'
+  const isStudent = normalizeRole(user?.role) === 'STUDENT';
+
+  const classesOverview = user && accessToken && !isStudent
     ? await loadTeacherClassesOverview(accessToken)
     : { classes: [], recentActivity: [] };
 
@@ -373,20 +375,24 @@ export default async function DashboardPage() {
         {/* Stats Grid */}
         <OverviewStats metrics={metrics?.classMetrics} />
 
-        {/* Performance Trend Chart */}
-        <div className='w-full'>
-          <PerformanceTrendChart />
-        </div>
+        {/* Performance Trend Chart - teacher/admin only */}
+        {!isStudent && (
+          <div className='w-full'>
+            <PerformanceTrendChart />
+          </div>
+        )}
 
-        {/* Main Content Grid */}
-        <div className='grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-stretch'>
-          <div className='h-full'>
-            <ClassOverview classes={classesOverview.classes} />
+        {/* Class Overview + Recent Activity - teacher/admin only */}
+        {!isStudent && (
+          <div className='grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-stretch'>
+            <div className='h-full'>
+              <ClassOverview classes={classesOverview.classes} />
+            </div>
+            <div className='h-full'>
+              <RecentActivity activities={classesOverview.recentActivity} />
+            </div>
           </div>
-          <div className='h-full'>
-            <RecentActivity activities={classesOverview.recentActivity} />
-          </div>
-        </div>
+        )}
       </div>
     </ContentLayout>
   );

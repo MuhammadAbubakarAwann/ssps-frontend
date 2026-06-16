@@ -85,7 +85,7 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
                                   variant={active ? 'selected' : 'ghost'}
                                   className={cn(
                                     'w-full justify-start h-10 mb-1 text-white hover:text-white',
-                                    active 
+                                    active
                                       ? 'bg-[#4FA6F8]/15 text-[#7FD0FF] rounded-[7px] w-[230px] h-[44px] px-[17px] py-[12px] gap-1 hover:bg-[#4FA6F8]/15'
                                       : ''
                                   )}
@@ -132,13 +132,15 @@ export function Menu({ isOpen, activeRole }: MenuProps) {
 
                   ) : (
                     <div className='w-full' key={index}>
-                      <CollapseMenuButton
-                        icon={Icon}
-                        label={label}
-                        active={active}
-                        submenus={submenus}
-                        isOpen={isOpen}
-                      />
+                      {role.includes(activeRole) && (
+                        <CollapseMenuButton
+                          icon={Icon}
+                          label={label}
+                          active={active}
+                          submenus={submenus}
+                          isOpen={isOpen}
+                        />
+                      )}
                     </div>
                   )
               )}

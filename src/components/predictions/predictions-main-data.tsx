@@ -241,9 +241,6 @@ export function PredictionsMainData() {
         }));
 
         setClasses(classList);
-
-        if (classList.length > 0)
-          setSelectedClass((prev) => prev || classList[0].id);
       } catch (error) {
         console.error('Error fetching classes:', error);
         showToast.error(

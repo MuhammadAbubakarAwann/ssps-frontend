@@ -14,6 +14,11 @@ import { Search, ChevronDown } from 'lucide-react';
 type ClassOption = {
   id: string;
   name: string;
+  programCode?: string;
+  semesterNumber?: number;
+  section?: string;
+  courseName?: string;
+  courseCode?: string;
 };
 
 type ReportTableItem = {
@@ -67,19 +72,21 @@ type PredictionDetailsResponse = {
       passProbability?: number;
       modelConfidence?: number;
       riskLevel?: string;
-      suggestions?: string[] | string;
+      suggestions?: Record<string, unknown> | string[] | string;
     }>;
     students?: Array<{
-      id: number | string;
+      id?: number | string;
       studentId?: number | string;
-      name: string;
-      registrationNum: string;
-      predictedScore: number;
-      performanceCategory: string;
-      passProbability: number;
-      modelConfidence: number;
-      riskLevel: 'LOW' | 'MID' | 'HIGH';
-      suggestions: string[] | string;
+      name?: string;
+      regNo?: string;
+      registrationNum?: string;
+      predictedScore?: number;
+      performance?: string;
+      performanceCategory?: string;
+      passProbability?: number;
+      modelConfidence?: number;
+      riskLevel?: string;
+      suggestions?: Record<string, unknown> | string[] | string;
     }>;
   };
 };
@@ -99,9 +106,36 @@ type ClassesApiResponse = {
     classes?: Array<{
       id: string | number;
       name: string;
+      programCode?: string;
+      program_code?: string;
+      code?: string;
+      program?: { code?: string; name?: string };
+      programName?: string;
+      semesterNumber?: string | number;
+      semester?: string | number;
+      section?: string;
+      courseName?: string;
+      courseCode?: string;
+      subject?: string;
     }>;
   };
 };
+
+function extractSuggestions(raw: unknown): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return (raw as unknown[]).map(String).filter(Boolean);
+  if (typeof raw === 'string') return raw.split('\n').map((s) => s.trim()).filter(Boolean);
+  if (typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    for (const key of ['suggestions', 'nextSteps', 'areasForImprovement', 'strengths']) {
+      const val = obj[key];
+      if (Array.isArray(val) && val.length > 0)
+        return (val as unknown[]).map(String).filter(Boolean);
+    }
+    if (typeof obj.aiSummary === 'string' && obj.aiSummary) return [obj.aiSummary];
+  }
+  return [];
+}
 
 function toStringSafe(value: unknown, fallback = ''): string {
   if (value == null)
@@ -198,32 +232,42 @@ function derivePredictionId(report: Record<string, unknown>): string {
   const directCandidates = [
     report.predictionId,
     report.prediction_id,
-    report.id
+    report.predictionID,
+    report.id,
+    report.reportId,
+    report.report_id
   ];
 
-  for (const candidate of directCandidates) {
+  for (const candidate of directCandidates)
     if (candidate != null && !isRecord(candidate) && !Array.isArray(candidate)) {
       const normalized = String(candidate).trim();
       if (normalized)
         return normalized;
     }
-  }
 
-  const predictionNode = report.prediction;
-  if (isRecord(predictionNode)) {
-    const nestedCandidates = [
-      predictionNode.id,
-      predictionNode.predictionId,
-      predictionNode.prediction_id
+  const nestedNodes = [
+    report.prediction,
+    report.predictionResult,
+    report.prediction_result,
+    report.result
+  ];
+
+  for (const node of nestedNodes) {
+    if (!isRecord(node)) continue;
+    const nodeCandidates = [
+      node.id,
+      node.predictionId,
+      node.prediction_id,
+      node.predictionID,
+      node.reportId
     ];
 
-    for (const candidate of nestedCandidates) {
+    for (const candidate of nodeCandidates)
       if (candidate != null && !isRecord(candidate) && !Array.isArray(candidate)) {
         const normalized = String(candidate).trim();
         if (normalized)
           return normalized;
       }
-    }
   }
 
   return '';
@@ -240,7 +284,7 @@ const normalizeRiskLevel = (risk: 'LOW' | 'MID' | 'HIGH'): 'Low' | 'Mid' | 'High
 };
 
 const mapPredictionResults = (payload: PredictionDetailsResponse): StudentResult[] => {
-  if (Array.isArray(payload.data?.entries) && payload.data.entries.length > 0) {
+  if (Array.isArray(payload.data?.entries) && payload.data.entries.length > 0)
     return payload.data.entries.map((entry, index) => ({
       id: String(entry.studentId ?? entry.id ?? index),
       name: String(entry.name || ''),
@@ -250,24 +294,19 @@ const mapPredictionResults = (payload: PredictionDetailsResponse): StudentResult
       performanceCategory: String(entry.performanceCategory || entry.performance || 'N/A'),
       modelConfidence: Number(entry.modelConfidence || 0),
       riskLevel: normalizeRiskLevel(String(entry.riskLevel || 'LOW') as 'LOW' | 'MID' | 'HIGH'),
-      suggestions: Array.isArray(entry.suggestions)
-        ? entry.suggestions.map((suggestion) => String(suggestion)).filter(Boolean)
-        : String(entry.suggestions || '').split('\n').filter(Boolean)
+      suggestions: extractSuggestions(entry.suggestions)
     }));
-  }
 
-  return (payload.data?.students || []).map((student) => ({
-    id: String(student.studentId ?? student.id),
-    name: student.name,
-    regNo: student.registrationNum,
-    predictedScore: student.predictedScore,
-    passProbability: student.passProbability,
-    performanceCategory: student.performanceCategory,
-    modelConfidence: student.modelConfidence,
-    riskLevel: normalizeRiskLevel(student.riskLevel),
-    suggestions: Array.isArray(student.suggestions)
-      ? student.suggestions
-      : String(student.suggestions || '').split('\n').filter(Boolean)
+  return (payload.data?.students || []).map((student, index) => ({
+    id: String(student.studentId ?? student.id ?? index),
+    name: String(student.name || ''),
+    regNo: String(student.regNo || student.registrationNum || ''),
+    predictedScore: Number(student.predictedScore || 0),
+    passProbability: Number(student.passProbability || 0),
+    performanceCategory: String(student.performanceCategory || student.performance || 'N/A'),
+    modelConfidence: Number(student.modelConfidence || 0),
+    riskLevel: normalizeRiskLevel(String(student.riskLevel || 'LOW') as 'LOW' | 'MID' | 'HIGH'),
+    suggestions: extractSuggestions(student.suggestions)
   }));
 };
 
@@ -334,6 +373,19 @@ function toDateSafe(value: unknown): string {
   return parsed.toLocaleDateString('en-GB');
 }
 
+function buildClassLabel(cls: ClassOption): string {
+  const { courseName, courseCode, semesterNumber, section } = cls;
+  const programCode = cls.programCode || '';
+  const courseLabel = courseName || courseCode || '';
+  const semSection = [semesterNumber != null ? String(semesterNumber) : '', section || ''].join('');
+  const parts = [programCode, courseLabel, semSection].filter(Boolean);
+  // need at least programCode + one more piece to produce a useful structured label
+  if (programCode && parts.length >= 2) return parts.join('-');
+  // if no programCode but we have course + sem/section, show what we have
+  if (parts.length >= 2) return parts.join('-');
+  return cls.name;
+}
+
 function deriveRiskLevel(report: Record<string, unknown>): string {
   const explicit = report.riskLevel || report.risk_level || report.risk;
   if (explicit)
@@ -384,10 +436,29 @@ export function ReportHistoryMainData() {
         if (!response.ok || !payload.success)
           throw new Error(payload.message || 'Failed to fetch classes');
 
-        const classList = (payload.data?.classes || []).map((cls) => ({
-          id: String(cls.id),
-          name: cls.name
-        }));
+        const classList = (payload.data?.classes || []).map((cls) => {
+          const semRaw = cls.semesterNumber ?? cls.semester;
+          const semNum = semRaw != null ? Number(String(semRaw).match(/\d+/)?.[0] ?? '') : undefined;
+          const courseName = cls.courseName
+            ?? (cls.subject ? String(cls.subject).replace(/^\s*[A-Za-z]{2,}-\d+\s+/, '').trim() : undefined);
+          // try several field names the backend might use for the program code
+          const rawProgramCode =
+            cls.programCode ||
+            cls.program_code ||
+            cls.code ||
+            (isRecord(cls.program) ? String(cls.program.code || '') : '') ||
+            // fall back to cls.name if it looks like a short code (no spaces, short)
+            (/^[A-Z]{2,8}$/.test(String(cls.name).trim()) ? cls.name : '');
+          return {
+            id: String(cls.id),
+            name: cls.name,
+            programCode: rawProgramCode || undefined,
+            semesterNumber: Number.isFinite(semNum) ? semNum : undefined,
+            section: cls.section || undefined,
+            courseName: courseName || undefined,
+            courseCode: cls.courseCode || undefined
+          };
+        });
 
         setClasses(classList);
       } catch (fetchError) {
@@ -483,7 +554,12 @@ export function ReportHistoryMainData() {
     const query = searchQuery.trim().toLowerCase();
     const selectedClassLabel = classes.find((cls) => cls.id === selectedClass)?.name || '';
 
-    return reports.filter((report) => {
+    return reports
+      .map((report) => {
+        const matchedClass = classes.find((cls) => cls.id === report.classId);
+        return matchedClass ? { ...report, className: buildClassLabel(matchedClass) } : report;
+      })
+      .filter((report) => {
       const matchesSearch = !query || [
         report.reportCode,
         report.className,
@@ -532,11 +608,10 @@ export function ReportHistoryMainData() {
       setResults(mapPredictionResults(payload));
       setResultsClassTitle(String(payload.data?.class?.name || report.className));
 
-      if (payload.data?.prediction?.generatedAt || payload.data?.prediction?.date) {
+      if (payload.data?.prediction?.generatedAt || payload.data?.prediction?.date)
         setResultsDate(
           new Date(payload.data.prediction.generatedAt || payload.data.prediction.date || report.date).toLocaleDateString('en-GB')
         );
-      }
     } catch (fetchError) {
       console.error('Error fetching report details:', fetchError);
       showToast.error(fetchError instanceof Error ? fetchError.message : 'Failed to fetch prediction results');
